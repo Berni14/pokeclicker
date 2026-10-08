@@ -1,0 +1,202 @@
+# Control de calidad · Pokémon Clicker
+
+Guía para revisar el proyecto antes de cada commit, cada PR y cada despliegue.
+Stack: **React + Vite**, datos de la **PokeAPI**.
+
+---
+
+## 1. Herramientas
+
+| Herramienta | Para qué | Instalación |
+|---|---|---|
+| ESLint | Errores y malas prácticas en el código | Viene con la plantilla de Vite |
+| Prettier | Formato uniforme | `npm i -D prettier eslint-config-prettier` |
+| Vitest | Tests unitarios (lógica del juego) | `npm i -D vitest` |
+| React Testing Library | Tests de componentes | `npm i -D @testing-library/react @testing-library/jest-dom jsdom` |
+| Lighthouse | Rendimiento, accesibilidad, buenas prácticas | DevTools de Chrome |
+| React DevTools | Ver estado y re-renders | Extensión del navegador |
+
+Scripts recomendados en `package.json`:
+
+```json
+"scripts": {
+  "dev": "vite",
+  "build": "vite build",
+  "preview": "vite preview",
+  "lint": "eslint .",
+  "format": "prettier --write .",
+  "test": "vitest",
+  "check": "npm run lint && vitest run && npm run build"
+}
+```
+
+> Antes de hacer push: `npm run check`. Si falla, no se sube.
+
+---
+
+## 2. Convenciones del proyecto
+
+- [ ] Componentes en `PascalCase` (`PokemonCard.jsx`), funciones y hooks en `camelCase` (`usePokemonList.js`).
+- [ ] Cada componente en su carpeta, con su `.jsx` y su `.module.css`.
+- [ ] Los componentes **no** llaman a la PokeAPI: piden datos a través de `hooks/` → `services/`.
+- [ ] `game/` y `config/` son JS puro: **sin React, sin DOM, sin fetch**.
+- [ ] Ningún número mágico en componentes: costes, multiplicadores y tiempos van en `config/`.
+- [ ] Sin `console.log` olvidados.
+- [ ] Commits claros: `feat: …`, `fix: …`, `style: …`, `refactor: …`, `test: …`, `docs: …`.
+
+---
+
+## 3. Checklist por capa
+
+### `api/` y `services/`
+- [ ] Toda petición tiene `try/catch` y devuelve un error entendible.
+- [ ] Se comprueba `response.ok` antes de leer el JSON.
+- [ ] Los datos se transforman con `models/pokemon.js` antes de llegar al juego.
+- [ ] Hay caché: el mismo Pokémon no se pide dos veces.
+- [ ] En localStorage se guarda el **modelo reducido**, no la respuesta completa de la API.
+- [ ] Las cargas van por lotes (p. ej. de 20 en 20), nunca 151 peticiones de golpe sin control.
+
+### `models/`
+- [ ] Si falta el artwork oficial, se usa `sprites.front_default`; si falta también, una imagen de reserva.
+- [ ] Los nombres se muestran bien (`mr-mime` → `Mr. Mime`).
+- [ ] Los tipos se ordenan por `slot`.
+
+### `game/` y `config/`
+- [ ] Las monedas nunca bajan de 0.
+- [ ] No se puede comprar sin monedas suficientes.
+- [ ] El coste sube con cada nivel según la fórmula de `economy.js`.
+- [ ] La producción por segundo se calcula igual en el tick y en lo que muestra la interfaz.
+- [ ] No aparecen `NaN`, `Infinity` ni decimales raros (`0.30000000004`).
+
+### `store/`
+- [ ] El reducer es puro: no muta el estado, devuelve uno nuevo.
+- [ ] Toda acción tiene un `type` definido; acciones desconocidas devuelven el estado tal cual.
+- [ ] La partida guardada incluye un número de versión (`saveVersion`) por si cambia la estructura.
+- [ ] Si el guardado está corrupto o es antiguo, el juego arranca con el estado inicial sin romperse.
+
+### `hooks/`
+- [ ] Todo `setInterval` / `addEventListener` se limpia en el `return` del `useEffect`.
+- [ ] Las dependencias de `useEffect` están completas (ESLint avisa).
+- [ ] Los hooks de datos devuelven `{ data, loading, error }`.
+- [ ] Una petición que termina después de desmontar el componente no actualiza el estado (usar `AbortController`).
+
+### `components/`
+- [ ] Reciben datos por props, no los buscan ellos.
+- [ ] Las listas usan `key={pokemon.id}`, nunca el índice.
+- [ ] Hay estado de carga (Loader) y estado de error con opción de reintentar.
+- [ ] Las tarjetas se ven bien con nombres largos y con uno o dos tipos.
+
+---
+
+## 4. Pruebas manuales del juego
+
+### Flujo básico
+- [ ] Al hacer click en el botón principal, las monedas suben lo que deben.
+- [ ] Se puede capturar el primer Pokémon tras unos pocos clicks.
+- [ ] Al comprar, se restan las monedas y el nivel sube a 1.
+- [ ] Las tarjetas cambian de estado: bloqueada → se puede comprar → comprada.
+- [ ] La producción pasiva suma cada segundo.
+- [ ] "Cargar más" trae el siguiente lote sin duplicar Pokémon.
+
+### Guardado
+- [ ] Recargar la página mantiene monedas, Pokémon y niveles.
+- [ ] Cerrar y abrir el navegador mantiene la partida.
+- [ ] Botón de reiniciar partida (si lo hay) pide confirmación y deja todo a cero.
+- [ ] Funciona en ventana de incógnito (sin localStorage persistente) sin errores.
+
+### Casos límite
+- [ ] Hacer clicks muy rápidos no rompe el contador.
+- [ ] Dejar la pestaña en segundo plano y volver: el contador no se dispara ni se congela de forma rara.
+- [ ] Sin conexión (DevTools → Network → Offline): aparece un mensaje de error, no una pantalla en blanco.
+- [ ] Red lenta (Network → Slow 3G): se ven los loaders y las imágenes no saltan de tamaño.
+- [ ] Cifras muy grandes se formatean bien (`1,5 mil`, `2,3 M`).
+
+### Equilibrio del juego
+- [ ] El primer Pokémon cuesta poco; los legendarios, mucho.
+- [ ] Siempre hay algo que comprar "pronto" (el jugador no se queda 10 minutos esperando).
+- [ ] Ningún Pokémon barato produce más que uno caro.
+- [ ] Apuntar aquí los cambios de números en `economy.js` y por qué.
+
+---
+
+## 5. Tests automáticos mínimos
+
+Prioridad alta (lógica pura, fáciles de probar con Vitest):
+
+- [ ] `models/pokemon.test.js` → `toPokemon()` con una respuesta real de ejemplo y con sprites vacíos.
+- [ ] `game/shop.test.js` → comprar con y sin monedas suficientes; coste del nivel siguiente.
+- [ ] `game/production.test.js` → producción total con varios Pokémon.
+- [ ] `store/gameReducer.test.js` → `CLICK`, `BUY_POKEMON`, `TICK`, `LOAD`, acción desconocida.
+- [ ] `utils/format.test.js` → 0, 999, 1500, 2 300 000.
+
+Prioridad media (React Testing Library):
+
+- [ ] `PokemonCard` muestra nombre, número, tipos e imagen.
+- [ ] El botón de compra está deshabilitado si no hay monedas.
+- [ ] `CardGrid` muestra el Loader mientras carga y el error si falla la API (con `fetch` simulado).
+
+> Los tests nunca llaman a la PokeAPI real: se simula `fetch` con datos de ejemplo guardados en `src/__mocks__/`.
+
+---
+
+## 6. Accesibilidad
+
+- [ ] El botón principal es un `<button>`, no un `<div>` con `onClick`.
+- [ ] Todas las imágenes tienen `alt` (`alt="Pikachu"`).
+- [ ] Se puede jugar entero con teclado (Tab, Enter, Espacio) y se ve el foco.
+- [ ] El contraste de texto sobre los colores de tipo es suficiente (mínimo 4.5:1).
+- [ ] El estado de la tarjeta no se indica **solo** con color (añadir texto o icono).
+- [ ] El contador de monedas no se anuncia en cada tick al lector de pantalla (evitar `aria-live` en él).
+- [ ] Se respeta `prefers-reduced-motion` en las animaciones.
+- [ ] Lighthouse → Accesibilidad ≥ 90.
+
+---
+
+## 7. Rendimiento
+
+- [ ] Imágenes con `loading="lazy"` y `width`/`height` fijados.
+- [ ] Las tarjetas no se re-renderizan todas en cada tick (comprobar con React DevTools → Profiler; usar `React.memo` si hace falta).
+- [ ] El tick del juego es uno solo para toda la app, no uno por tarjeta.
+- [ ] El guardado automático no se hace en cada tick, sino cada X segundos.
+- [ ] Lighthouse → Rendimiento ≥ 90 en `npm run preview` (no en `dev`).
+
+---
+
+## 8. Diseño y responsive
+
+- [ ] Se ve bien a 360 px, 768 px y 1440 px de ancho.
+- [ ] Sin scroll horizontal en móvil.
+- [ ] Los colores salen de `styles/tokens.css`, no escritos a mano en cada componente.
+- [ ] Los colores de tipo salen de `config/types.js`.
+- [ ] Coincide con el diseño de Figma (si lo hay).
+- [ ] Probado en Chrome, Firefox y un móvil real.
+
+---
+
+## 9. Antes de cada Pull Request
+
+- [ ] `npm run check` pasa sin errores.
+- [ ] He probado a mano lo que he cambiado.
+- [ ] No he dejado código comentado ni `console.log`.
+- [ ] Si he cambiado la estructura del guardado, he subido `saveVersion`.
+- [ ] Si he cambiado la economía, lo he apuntado en la sección de equilibrio.
+- [ ] El título del PR explica qué hace, no cómo.
+
+---
+
+## 10. Antes de desplegar
+
+- [ ] `npm run build` y `npm run preview` funcionan.
+- [ ] `base` configurado en `vite.config.js` si se sube a GitHub Pages (`base: '/pokeclicker/'`).
+- [ ] Favicon y `<title>` correctos.
+- [ ] README con captura, enlace a la demo y tecnologías usadas.
+- [ ] Mención a la PokeAPI y aviso de que Pokémon es marca de Nintendo / Game Freak y el proyecto no es oficial.
+- [ ] Lighthouse pasado sobre la versión desplegada.
+
+---
+
+## 11. Registro de bugs
+
+| Fecha | Descripción | Cómo reproducirlo | Estado |
+|---|---|---|---|
+| | | | |

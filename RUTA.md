@@ -9,11 +9,14 @@ Sigue las fases en orden: cada una termina con algo que funciona y un commit, as
 1. **Fase 0 · Preparación y diseño.** Entender la PokeAPI, decidir el MVP y bocetar en Figma. Unas 3–4 h.
 2. **Fase 1 · Proyecto base.** Vite, Git, GitHub, ESLint, Prettier y carpetas. Unas 2 h.
 3. **Fase 2 · Datos.** Pedir Pokémon a la API, transformarlos y cachearlos. Unas 4–5 h.
-4. **Fase 3 · Lógica y estado.** Economía, compras, producción y el store global. Unas 5–6 h.
-5. **Fase 4 · Interfaz.** Tarjetas, rejilla, botón y contador. Unas 8–10 h.
-6. **Fase 5 · Juego completo.** Bucle, guardado, animaciones y equilibrio. Unas 5–6 h.
-7. **Fase 6 · Calidad y despliegue.** Tests, Lighthouse, GitHub Pages y README. Unas 4–5 h.
-8. **Fase 7 · Ampliaciones.** Pokédex, evoluciones, logros… cuando quieras.
+4. **Fase 3 · Lógica y estado.** Tabla de rarezas, números del juego, reglas (click, gacha, equipo, tienda, entrenador, combate) y el store global. Unas 8–10 h.
+5. **Fase 4 · Interfaz.** Navegación, pantalla principal, gacha, caja y tienda. Unas 12–14 h.
+6. **Fase 5 · Gimnasios.** Lista de líderes y combate a clicks con temporizador. Unas 6–8 h.
+7. **Fase 6 · Juego completo.** Bucle, guardado, animaciones y equilibrio. Unas 6–8 h.
+8. **Fase 7 · Calidad y despliegue.** Tests, Lighthouse, GitHub Pages y README. Unas 4–5 h. Aquí sale la **v1.0**.
+9. **Fase 8 · Ampliaciones.** Cambio de generación (v1.1), logros, sonidos… cuando quieras.
+
+Qué hace el juego está en `FUNCIONAMIENTO_DEL_JUEGO.md`; esta ruta explica cómo construirlo.
 
 Las horas son orientativas para alguien que está aprendiendo React; no pasa nada si te lleva el doble.
 
@@ -44,19 +47,20 @@ Antes de escribir código, sabes qué datos te da la API, qué incluye la primer
 
 ### 0.2 Definir el MVP
 
-Escribe en el README qué entra en la versión 1 y qué no. Propuesta:
-
-- **Entra:** click que da monedas; los 151 Pokémon de la primera generación cargados por lotes; comprar un Pokémon y subirlo de nivel; cada uno produce monedas por segundo; guardado automático.
-- **No entra (de momento):** evoluciones, logros, mejoras del click, sonidos, Pokédex, varias generaciones.
+- [x] Decidido en `FUNCIONAMIENTO_DEL_JUEGO.md`: la **v1.0** es la primera generación completa (click, tienda, gacha, equipo, caja y los 8 gimnasios); el cambio de generación es la **v1.1**.
+- [ ] Resúmelo en el README en dos listas: qué entra en la v1.0 y qué queda para después (cambio de generación, logros, sonidos, evoluciones).
 
 ### 0.3 Diseño en Figma
 
-- [ ] Wireframe de escritorio y de móvil (360 px): cabecera con contador de monedas y producción por segundo, botón grande para clicar y rejilla de tarjetas.
-- [ ] La tarjeta en sus tres estados: **bloqueada** (no te llega), **disponible** (puedes comprar) y **comprada** (con nivel).
-- [ ] Tokens: 5–6 colores base, una tipografía para títulos y otra para texto, escala de espaciados (4, 8, 12, 16, 24, 32 px) y radios.
-- [ ] Colores por tipo (fuego, agua, planta…): busca una paleta ya hecha y ajústala para que el texto blanco tenga contraste.
+- [ ] Wireframes de escritorio y de móvil (360 px) de las pantallas del apartado 10 de `FUNCIONAMIENTO_DEL_JUEGO.md`: juego principal, gacha, caja, tienda, gimnasios y combate.
+- [ ] Barra de navegación entre pantallas (abajo en móvil).
+- [ ] La tarjeta de Pokémon con rareza y estrellas, en la caja, en el equipo y como resultado del gacha.
+- [ ] La mejora de la tienda en sus estados: **disponible** (te llega / no te llega), **máximo** y **bloqueada**.
+- [ ] El líder de gimnasio en sus estados: **vencido**, **actual** y **bloqueado**.
+- [ ] Tokens: 5–6 colores base, una tipografía para títulos y otra para texto, escala de espaciados (4, 8, 12, 16, 24, 32 px) y radios. Cuando estén, cambia los valores provisionales de `styles/tokens.css`.
+- [ ] Colores por tipo (fuego, agua, planta…) y por rareza: busca una paleta ya hecha y ajústala para que el texto blanco tenga contraste.
 
-**Al terminar:** tienes los campos apuntados, el MVP escrito y un diseño de pantalla y tarjeta.
+**Al terminar:** tienes los campos apuntados, el MVP en el README y el diseño de las pantallas.
 
 ## Fase 1 · Proyecto base ✅
 
@@ -163,7 +167,7 @@ Como la lista de la API no trae imágenes, no la necesitas: los IDs de la primer
 
 ### 2.3 `config/rarities.js` y `models/pokemon.js`: tu formato
 
-La rareza se decide con los datos de la especie (legendario o singular) y, para el resto, con la suma de stats:
+La rareza se decide con los datos de la especie (legendario o singular) y, para el resto, con la suma de stats. Los umbrales (400 y 500) salen de los datos reales: dejan en la primera generación 69 comunes, 49 raras, 28 épicas (las evoluciones finales fuertes: Charizard, Gengar, Dragonite…), 4 legendarias y 1 singular.
 
 ```js
 // config/rarities.js
@@ -175,11 +179,15 @@ export const RARITIES = {
   mythical: { label: 'Singular', multiplier: 3 },
 };
 
+// Suma de stats a partir de la cual un Pokémon normal sube de rareza.
+const RARE_MIN_STATS = 400;
+const EPIC_MIN_STATS = 500;
+
 export function getRarity({ statTotal, isLegendary, isMythical }) {
   if (isMythical) return 'mythical';
   if (isLegendary) return 'legendary';
-  if (statTotal >= 450) return 'epic';
-  if (statTotal >= 300) return 'rare';
+  if (statTotal >= EPIC_MIN_STATS) return 'epic';
+  if (statTotal >= RARE_MIN_STATS) return 'rare';
   return 'common';
 }
 ```
@@ -272,8 +280,8 @@ export function getPokemonBatch(fromId, count) {
 }
 ```
 
-- [x] Las peticiones compartidas no se cancelan con `signal` (si una la cancelara, la otra se quedaría sin datos). La cancelación se gestiona en el hook (4.1).
-- [x] `getPokemonByIds` servirá también para cargar al arrancar los Pokémon que ya tienes, aunque estén en lotes que todavía no se han mostrado (5.2).
+- [x] Las peticiones compartidas no se cancelan con `signal` (si una la cancelara, la otra se quedaría sin datos). La cancelación se gestiona en el hook (4.2).
+- [x] `getPokemonByIds` es la que usa `useOwnedPokemon` (4.2) para cargar los Pokémon de tu colección.
 
 ### 2.6 Probarlo
 
@@ -282,7 +290,7 @@ En vez de un `console.log` temporal en `App.jsx`, lo comprueban los tests (`npm 
 - [x] `services/pokemonService.test.js`: un lote son 40 peticiones (pokemon + especie); pedirlo otra vez no hace ninguna; dos peticiones simultáneas del mismo lote (lo que hace `StrictMode`) siguen siendo 40, no 80; nunca hay más de 20 Pokémon pidiéndose a la vez; si falla uno, el reintento solo pide ese.
 - [x] `services/cache.test.js`: sobrevive a una recarga (localStorage), a datos corruptos y a un localStorage bloqueado.
 - [x] `api/client.test.js`: respuesta no ok, fallo de red y cancelación.
-- [x] `models/pokemon.test.js` y `config/rarities.test.js`: imagen de reserva, orden de tipos, Mewtwo legendario y Chansey no.
+- [x] `models/pokemon.test.js` y `config/rarities.test.js`: imagen de reserva, orden de tipos, Mewtwo legendario y Chansey (rara) no.
 - [x] Prueba única contra la API real (no se guarda: los tests nunca llaman a la API real): el primer lote tarda ~1 s, desde caché 0 ms; el último lote va del 141 al 151; cada Pokémon ocupa ~0,3 KB en localStorage (unos 44 KB los 151).
 
 Si quieres verlo tú en el navegador: en `App.jsx`, dentro de un `useEffect`, llama a `getPokemonBatch(1, 20)` y mira la pestaña Network. La primera vez salen 40 peticiones; al recargar, ninguna. Quita el código al terminar.
@@ -291,164 +299,387 @@ Si quieres verlo tú en el navegador: en `App.jsx`, dentro de un `useEffect`, ll
 
 ## Fase 3 · Lógica y estado
 
-Al final tienes las reglas del juego en funciones puras, con tests, y un store global al que cualquier componente puede acceder. Es la fase más importante: si aquí está bien hecho, la interfaz es solo pintar.
+Al final tienes todas las reglas del juego en funciones puras, con tests, y un store global al que cualquier componente puede acceder. Es la fase más importante: si aquí está bien hecho, la interfaz es solo pintar.
 
-### 3.1 `config/economy.js`: los números
+La idea clave: **los números del juego no dependen de la API**. La producción, el daño y el sorteo del gacha salen de una tabla pequeña generada una vez (3.1). La API se usa para lo que se ve: nombre, imagen, tipos y estadísticas en las tarjetas. Así el juego funciona desde el primer segundo, aunque la API tarde o falle.
 
-La idea: primero se calcula lo que **produce** cada Pokémon (según stats y rareza) y el precio sale de ahí. Cuanto más produce, más tarda en devolver lo que cuesta. Así, por construcción, un Pokémon más caro siempre produce más que uno más barato.
+### 3.1 Tabla de la Pokédex: `scripts/build-pokedex.js`
+
+Para sortear el gacha por rareza hay que saber la rareza de los 151 Pokémon antes de la primera tirada. Pedirlos al empezar a jugar serían 302 peticiones y unos 100 MB. En vez de eso, un script lo hace **una sola vez** y guarda el resultado en el repositorio.
+
+- [ ] `scripts/build-pokedex.js` (Node, fuera de `src/`): recibe la generación (`node scripts/build-pokedex.js 1`), pide `/pokemon/{id}` y `/pokemon-species/{id}` de 20 en 20 y calcula la rareza con `getRarity` de `src/config/rarities.js` (es JS puro, se puede importar desde Node).
+- [ ] Escribe `src/config/pokedex-gen1.json` con lo mínimo que necesita la lógica del juego:
+
+  ```json
+  [{ "id": 1, "rarity": "rare", "statTotal": 318, "attack": 49, "types": ["grass", "poison"] }, …]
+  ```
+
+  Son unos 10 KB. Nombre e imágenes **no** van aquí: vienen de la API.
+
+- [ ] Script en `package.json`: `"pokedex": "node scripts/build-pokedex.js"`.
+- [ ] Ejecútalo y sube el JSON. Solo se vuelve a ejecutar si cambian los umbrales de rareza o al añadir una generación.
+- [ ] `config/pokedex.js` exporta `POKEDEX = { 1: [...] }` (por generación) y `pokedexEntry(id)`.
+- [ ] Test `config/pokedex.test.js`: 151 entradas, ids del 1 al 151 sin huecos, y el reparto esperado (69 comunes, 49 raras, 28 épicas, 4 legendarias, 1 singular). Si alguien cambia los umbrales sin regenerar la tabla, el test lo avisa.
+
+### 3.2 `config/`: los números del juego
+
+Todo número que afecte al juego vive aquí. Estos valores se han probado con una simulación de partidas completas (jugando a 1 click/s fuera de combate y 6 clicks/s en combate, comprando siempre lo más barato):
+
+| Momento               | Tiempo de juego |
+| --------------------- | --------------- |
+| Primera tirada        | ~25 s           |
+| Gimnasio 1 (Brock)    | ~3 min          |
+| Gimnasio 4 (Erika)    | ~35 min         |
+| Gimnasio 6 (Sabrina)  | ~1,5 h          |
+| Gimnasio 8 (Giovanni) | ~2–2,5 h        |
+
+Al final de la región el jugador suele tener nivel 7 de entrenador, ~110 tiradas y ~75 Pokémon distintos. Con todas las mejoras al máximo, tus clicks hacen como mucho ~9.600 de daño en un combate; por eso el gimnasio 8 no puede pasar de ~19.000 de vida (la mitad tiene que salir de los clicks).
 
 ```js
+// config/economy.js
 import { RARITIES } from './rarities';
 
-export const CLICK_VALUE = 1;
-export const COST_GROWTH = 1.15; // cada nivel cuesta un 15 % más
+export const CLICK_BASE = 1;
+export const STAR_BONUS = 0.5; // cada estrella por encima de 1: +50 % de producción y daño
+export const TRAINING_BONUS = 0.15; // por nivel de la mejora Entrenamiento
 export const TICK_MS = 1000;
 export const AUTOSAVE_MS = 10_000;
 export const MAX_OFFLINE_SECONDS = 8 * 60 * 60;
 
 const round1 = (n) => Math.round(n * 10) / 10;
 
-// Monedas por segundo que da cada nivel.
-export const productionPerLevel = (p) =>
-  round1((p.statTotal / 100) ** 2 * 0.1 * RARITIES[p.rarity].multiplier);
+export const starMultiplier = (stars) => 1 + STAR_BONUS * (stars - 1);
 
-// Segundos que tarda en recuperarse lo que cuesta: más producción, más espera.
-const paybackSeconds = (production) => 20 + 10 * production;
-
-export const baseCost = (p) => {
-  const production = productionPerLevel(p);
-  return Math.max(5, Math.round(production * paybackSeconds(production)));
-};
-
-export const costAt = (p, level) =>
-  Math.round(baseCost(p) * COST_GROWTH ** level);
+// Monedas por segundo de un Pokémon equipado (entrada de la Pokédex + estrellas).
+export const productionOf = (entry, stars) =>
+  round1(
+    (entry.statTotal / 100) ** 2 * 0.1 * RARITIES[entry.rarity].multiplier,
+  ) * starMultiplier(stars);
 ```
 
-Con estos números (aproximados):
+```js
+// config/gacha.js
+export const PULL_BASE_PRICE = 25;
+export const PULL_PRICE_GROWTH = 1.07; // cada tirada cuesta un 7 % más
+export const PULL_DISCOUNT_PER_LEVEL = 0.05;
+export const MAX_STARS = 5;
+export const MAX_STARS_REFUND = 2; // repetido con 5★: 2 × precio actual de la tirada
 
-| Pokémon         | Stats | Rareza     | Producción | Coste inicial |
-| --------------- | ----- | ---------- | ---------- | ------------- |
-| Caterpie (#10)  | 195   | Común      | 0,4/s      | 10            |
-| Bulbasaur (#1)  | 318   | Rara       | 1,2/s      | 38            |
-| Chansey (#113)  | 450   | Épica      | 3/s        | 150           |
-| Charizard (#6)  | 534   | Épica      | 4,3/s      | 271           |
-| Articuno (#144) | 580   | Legendaria | 10,1/s     | 1222          |
-| Mew (#151)      | 600   | Singular   | 10,8/s     | 1382          |
-| Mewtwo (#150)   | 680   | Legendaria | 13,9/s     | 2210          |
+// Probabilidad de cada rareza (en %). Primero se sortea la rareza y luego un Pokémon de esa rareza.
+export const RARITY_WEIGHTS = {
+  common: 55,
+  rare: 30,
+  epic: 12,
+  legendary: 2.5,
+  mythical: 0.5,
+};
+```
 
-El primer Pokémon cuesta unos 10 clicks y los legendarios son los más caros y los que más producen. Son un punto de partida: en 5.4 los ajustarás jugando.
+```js
+// config/trainer.js
+export const XP_PER_PULL = 5;
+export const XP_PER_GYM = 50; // × número del gimnasio (el 8 da 400)
+export const XP_PER_MAX_DUPLICATE = 20;
+export const MONEY_BONUS_PER_LEVEL = 0.05; // +5 % de dinero por nivel
 
-- [ ] `config/types.js` con un color por tipo.
-- [ ] `config/generations.js`: `export const GENERATIONS = { 1: { from: 1, to: 151 } };` y `export const BATCH_SIZE = 20;`. Para añadir la segunda generación más adelante, solo añades una línea.
+export const xpToNextLevel = (level) => 100 * level;
+```
 
-### 3.2 `game/`: las reglas, sin React
+```js
+// config/upgrades.js
+export const UPGRADES = {
+  clickPower: {
+    label: 'Poder de click',
+    effect: '+1 por click',
+    baseCost: 160,
+    growth: 1.5,
+    maxLevel: 15,
+    minTrainerLevel: 1,
+  },
+  training: {
+    label: 'Entrenamiento',
+    effect: '+15 % de producción',
+    baseCost: 1200,
+    growth: 1.6,
+    maxLevel: 10,
+    minTrainerLevel: 2,
+  },
+  battleDamage: {
+    label: 'Ataque en combate',
+    effect: '+20 % de daño por click',
+    baseCost: 2400,
+    growth: 1.7,
+    maxLevel: 5,
+    minTrainerLevel: 3,
+  },
+  battleTime: {
+    label: 'Cronómetro',
+    effect: '+5 s de combate',
+    baseCost: 4000,
+    growth: 2,
+    maxLevel: 4,
+    minTrainerLevel: 4,
+  },
+  pullDiscount: {
+    label: 'Descuento en tiradas',
+    effect: '−5 % en el precio',
+    baseCost: 3200,
+    growth: 1.8,
+    maxLevel: 5,
+    minTrainerLevel: 5,
+  },
+};
+```
 
-Los datos de los Pokémon cargados viven en el estado, en `pokemonById` (ver 3.4). Así las reglas los tienen siempre a mano.
+```js
+// config/gyms.js
+export const BATTLE_SECONDS = 30;
+export const BATTLE_SECONDS_PER_LEVEL = 5; // mejora Cronómetro
+export const BATTLE_DAMAGE_PER_LEVEL = 0.2; // mejora Ataque en combate
+export const ATTACK_DIVISOR = 5; // daño por segundo de un Pokémon = ataque / 5 × estrellas
+export const TYPE_ADVANTAGE = 1.5;
+export const TEAM_DAMAGE_CAP = 0.5; // el equipo hace como mucho la mitad de la vida
+export const GYM_MONEY_REWARD = 0.5; // × vida del líder
 
-- [ ] `clicker.js` → `click(state)` devuelve el estado con `CLICK_VALUE` sumado a las monedas.
-- [ ] `shop.js` → `canBuy(state, id)` y `buy(state, id)`: buscan el Pokémon en `state.pokemonById`, restan `costAt(pokemon, nivelActual)` y suben el nivel. Si no llega (o el Pokémon no está cargado), devuelve el estado sin cambios.
-- [ ] `production.js` → `totalProduction(state)` suma `productionPerLevel(pokemon) * nivel` de cada Pokémon de `owned`. Si alguno aún no está en `pokemonById`, cuenta 0 (solo pasa un instante al arrancar).
-- [ ] `production.js` → `tick(state, seconds)` suma `totalProduction(state) * seconds` a las monedas.
-- [ ] La interfaz muestra la producción con la misma `totalProduction(state)` que usa el tick: nunca la recalcules por tu cuenta en un componente.
-- [ ] Ninguna función modifica el estado que recibe: siempre devuelven uno nuevo con `{ ...state }`.
+// `ace` es el Pokémon que representa al líder en la pantalla (su imagen viene de la API).
+export const GYMS = {
+  1: [
+    { number: 1, leader: 'Brock', type: 'rock', hp: 700, ace: 95 },
+    { number: 2, leader: 'Misty', type: 'water', hp: 2000, ace: 121 },
+    { number: 3, leader: 'Lt. Surge', type: 'electric', hp: 3650, ace: 26 },
+    { number: 4, leader: 'Erika', type: 'grass', hp: 5650, ace: 45 },
+    { number: 5, leader: 'Koga', type: 'poison', hp: 7900, ace: 110 },
+    { number: 6, leader: 'Sabrina', type: 'psychic', hp: 10400, ace: 65 },
+    { number: 7, leader: 'Blaine', type: 'fire', hp: 13100, ace: 59 },
+    { number: 8, leader: 'Giovanni', type: 'ground', hp: 16000, ace: 112 },
+  ],
+};
+```
 
-### 3.3 Tests de la lógica (ahora, no al final)
+```js
+// config/typeChart.js
+// Tipos de ataque que son fuertes contra cada tipo de líder.
+// Solo los 8 de la primera generación; se amplía al añadir regiones.
+export const STRONG_AGAINST = {
+  rock: ['water', 'grass', 'fighting', 'ground', 'steel'],
+  water: ['electric', 'grass'],
+  electric: ['ground'],
+  grass: ['fire', 'ice', 'poison', 'flying', 'bug'],
+  poison: ['ground', 'psychic'],
+  psychic: ['bug', 'ghost', 'dark'],
+  fire: ['water', 'ground', 'rock'],
+  ground: ['water', 'grass', 'ice'],
+};
+```
 
-- [ ] `shop.test.js`: comprar con monedas suficientes, sin monedas, y que el segundo nivel cuesta más que el primero.
-- [ ] `production.test.js`: sin Pokémon da 0; con dos Pokémon suma bien; un Pokémon en `owned` que no está en `pokemonById` no rompe nada.
-- [ ] `economy.test.js`: ordenando los 7 Pokémon de la tabla por coste, la producción también queda ordenada.
+- [ ] `config/types.js` con un color por tipo (para `TypeBadge` y las tarjetas).
+- [ ] El `effect` de cada mejora es el texto que se ve en la tienda: si cambias un número, cambia también el texto.
+
+### 3.3 `utils/random.js`
+
+- [ ] `pickWeighted(weights, rng = Math.random)`: recibe `{ common: 55, rare: 30, … }` y devuelve una clave.
+- [ ] `pickOne(list, rng = Math.random)`: un elemento al azar.
+- [ ] El `rng` se puede pasar desde fuera: en los tests se usa uno fijo (`() => 0.99`) y el resultado es siempre el mismo.
+
+### 3.4 `game/`: las reglas, sin React
+
+Todas reciben el estado y devuelven uno nuevo (`{ ...state }`), sin modificar el que reciben. **Ninguna usa `Math.random`** salvo `rollPokemon`, que recibe el `rng`.
+
+- [ ] `trainer.js`
+  - `moneyMultiplier(state)` → `1 + MONEY_BONUS_PER_LEVEL × (nivel − 1)`.
+  - `addXp(state, xp)` → suma experiencia y sube de nivel las veces que haga falta (un gimnasio puede dar para dos niveles).
+- [ ] `clicker.js`
+  - `clickPower(state)` → `CLICK_BASE + nivel de Poder de click`.
+  - `click(state)` → suma `clickPower × moneyMultiplier` a las monedas.
+- [ ] `production.js`
+  - `teamProduction(state)` → suma `productionOf` de los 6 equipados × `(1 + TRAINING_BONUS × nivel de Entrenamiento)` × `moneyMultiplier`.
+  - `tick(state, seconds)` → suma `teamProduction × seconds`.
+  - La interfaz muestra la producción con esta misma función: nunca la recalcules en un componente.
+- [ ] `gacha.js`
+  - `pullPrice(state)` → `round(PULL_BASE_PRICE × PULL_PRICE_GROWTH^tiradas × (1 − descuento))`.
+  - `rollPokemon(generation, rng)` → sortea la rareza con `pickWeighted` y luego un Pokémon de esa rareza. Devuelve un id. Es la única función con azar.
+  - `applyPull(state, id)` → si no llega el dinero, devuelve el estado sin cambios. Si llega: cobra, suma una tirada y `XP_PER_PULL`, y:
+    - Pokémon nuevo → entra en la colección con 1★ y, si hay hueco, en el equipo.
+    - Repetido con menos de 5★ → +1★.
+    - Repetido con 5★ → `MAX_STARS_REFUND × precio` en monedas y `XP_PER_MAX_DUPLICATE`.
+  - `pullOutcome(state, id)` → `'new' | 'star' | 'refund'`, para que la interfaz sepa qué mensaje enseñar.
+- [ ] `team.js`
+  - `equip(state, id, replaceId?)` → equipa un Pokémon de la colección; si el equipo está lleno, necesita `replaceId`.
+  - `unequip(state, id)`.
+  - Nunca más de 6, nunca repetidos, nunca un Pokémon que no tienes.
+- [ ] `shop.js`
+  - `upgradeCost(key, level)` → `round(baseCost × growth^level)`.
+  - `upgradeStatus(state, key)` → `'locked' | 'max' | 'available'` (y `canAfford` aparte).
+  - `buyUpgrade(state, key)` → solo si está disponible y llega el dinero.
+- [ ] `battle.js`
+  - `battleDuration(state)` → `BATTLE_SECONDS + BATTLE_SECONDS_PER_LEVEL × nivel de Cronómetro`.
+  - `clickDamage(state)` → `clickPower × (1 + BATTLE_DAMAGE_PER_LEVEL × nivel de Ataque)`.
+  - `hasTypeAdvantage(entry, gym)` → si alguno de sus tipos está en `STRONG_AGAINST[gym.type]`.
+  - `teamDps(state, gym)` → suma de `ataque / ATTACK_DIVISOR × estrellas × ventaja` de los equipados.
+  - `maxTeamDamage(gym)` → `gym.hp × TEAM_DAMAGE_CAP`.
+  - `currentGym(state)` → el primero sin medalla; `gymStatus(state, number)` → `'won' | 'current' | 'locked'`.
+  - `applyGymWin(state, number)` → medalla, `XP_PER_GYM × número` y `GYM_MONEY_REWARD × vida` en monedas. Solo si es el gimnasio actual (no se puede ganar dos veces el mismo).
+
+### 3.5 Tests de la lógica (ahora, no al final)
+
+Un archivo de test al lado de cada uno de `game/`, con estados pequeños escritos a mano:
+
+- [ ] `trainer.test.js`: subir varios niveles de golpe; el bonus de dinero.
+- [ ] `clicker.test.js`: el click con y sin mejora y con bonus de nivel.
+- [ ] `production.test.js`: equipo vacío da 0; las estrellas y el Entrenamiento multiplican; los de la caja no producen.
+- [ ] `gacha.test.js`: el precio sube y el descuento lo baja; sin dinero no pasa nada; nuevo, +1★, tope de 5★ con devolución; se equipa solo si hay hueco; con un `rng` fijo sale siempre el mismo Pokémon; en 10.000 tiradas con `Math.random`, las rarezas salen con proporciones cercanas a `RARITY_WEIGHTS`.
+- [ ] `team.test.js`: límite de 6, sin repetidos, cambiar uno por otro.
+- [ ] `shop.test.js`: bloqueada por nivel, máximo, coste creciente, sin dinero.
+- [ ] `battle.test.js`: duración y daño con mejoras; ventaja de tipo (agua contra Blaine sí, contra Misty no); el tope del equipo; solo se gana el gimnasio actual.
+- [ ] `economy.test.js`: con las mismas estrellas, un Pokémon con más stats o más rareza nunca produce menos.
 - [ ] `npm test` en verde antes de seguir.
 
-### 3.4 `store/`: el estado global
+### 3.6 `store/`: el estado global
 
-- [ ] `initialState.js` → `{ saveVersion: 1, coins: 0, owned: {}, pokemonById: {} }`.
-  - En `owned` guardas `{ [id]: nivel }`.
-  - En `pokemonById` van los Pokémon ya cargados. **No se guarda en la partida**: se rellena desde la caché al arrancar.
-- [ ] `gameReducer.js` → acciones:
+- [ ] `initialState.js`:
+
+  ```js
+  export const initialState = {
+    saveVersion: 1,
+    generation: 1,
+    coins: 0,
+    trainer: { level: 1, xp: 0 },
+    upgrades: {
+      clickPower: 0,
+      training: 0,
+      battleDamage: 0,
+      battleTime: 0,
+      pullDiscount: 0,
+    },
+    pulls: 0,
+    collection: {}, // { [id]: estrellas }
+    team: [], // hasta 6 ids
+    medals: {}, // { [generación]: [1, 2, …] }
+    pokemonById: {}, // datos de la API para pintar; no se guarda
+  };
+  ```
+
+- [ ] `gameReducer.js` → acciones, cada una llama a su función de `game/`:
   - `CLICK`
-  - `BUY_POKEMON` con `{ id }`
   - `TICK` con `{ seconds }`
-  - `POKEMON_LOADED` con `{ pokemon: [...] }`: añade el lote a `pokemonById`
-  - `RESET`: vuelve a monedas y Pokémon a cero, pero conserva `pokemonById`
-  - Cada una llama a la función de `game/` correspondiente. Las acciones desconocidas devuelven el estado tal cual.
+  - `PULL` con `{ id }`: el sorteo se hace **fuera** del reducer (`rollPokemon(generation, Math.random)`) y el reducer solo aplica el resultado. Así el reducer sigue siendo puro y se puede testear.
+  - `BUY_UPGRADE` con `{ key }`
+  - `EQUIP` con `{ id, replaceId }` y `UNEQUIP` con `{ id }`
+  - `GYM_WON` con `{ number }`
+  - `POKEMON_LOADED` con `{ pokemon: [...] }`: añade datos a `pokemonById`
+  - `RESET`: vuelve a `initialState` pero conserva `pokemonById`
+  - Las acciones desconocidas devuelven el estado tal cual.
+- [ ] El combate **no** va en el store: su vida y su tiempo son estado local de la pantalla de combate (fase 5). Al store solo llega el resultado (`GYM_WON`).
 - [ ] `GameContext.jsx` → `GameProvider` con `useReducer`, y un hook `useGame()` que devuelve `{ state, dispatch }` y lanza un error si se usa fuera del provider.
-- [ ] El `GameProvider` va en `App.jsx` (es donde están los providers en la estructura), envolviendo el layout.
+- [ ] El `GameProvider` va en `App.jsx`, envolviendo el layout.
 - [ ] `gameReducer.test.js`: una prueba por acción y una con una acción desconocida.
 
 **Al terminar:** tests en verde y commit `feat: lógica del juego y store`.
 
 ## Fase 4 · Interfaz
 
-Al final se puede jugar: clicas, ganas monedas y compras Pokémon desde sus tarjetas. Haz los componentes de los más simples a los más complejos, y un commit por componente.
+Al final se puede jugar: clicas, tiras del gacha, equipas Pokémon, compras mejoras y ves cómo sube el dinero. Haz los componentes de los más simples a los más complejos, y un commit por pantalla.
 
-### 4.1 `hooks/usePokemonList.js`
+### 4.1 Navegación y limpieza de la estructura
 
-- [ ] Devuelve `{ pokemon, loading, error, hasMore, loadMore, retry }`.
-- [ ] Al montar carga el primer lote; `loadMore` carga el siguiente hasta llegar al 151.
-- [ ] El último lote es más corto (del 141 al 151 son 11): `count = Math.min(BATCH_SIZE, to - nextId + 1)`. Nunca pidas el 152.
-- [ ] Cada lote recibido, además de guardarlo en su estado, lo envía al store con `dispatch({ type: 'POKEMON_LOADED', pokemon: lote })`.
-- [ ] Crea un `AbortController` en el `useEffect` y aborta en la limpieza. Antes de cualquier `setState` (datos o error), comprueba `if (controller.signal.aborted) return;`. Así un componente desmontado no se actualiza y una cancelación nunca aparece como error.
-- [ ] Al añadir un lote, descarta los IDs que ya estén en la lista: si se llama dos veces seguidas (en desarrollo, `StrictMode` monta los efectos dos veces), no se duplican Pokémon.
+- [ ] Barra de pestañas (`components/NavTabs/`): Juego, Gacha, Caja, Tienda y Gimnasios. Con el estado de la pestaña en `App` (`useState`), sin React Router de momento.
+- [ ] Cada pestaña es un `<button>` con `aria-current="page"` en la activa. En móvil, la barra va abajo y fija.
+- [ ] `pages/`: `GamePage`, `GachaPage`, `BoxPage`, `ShopPage`, `GymsPage`, `BattlePage` y `SettingsPage` (reiniciar partida; más adelante, sonido).
+- [ ] Borra `pages/PokedexPage.jsx` (la Pokédex es una pestaña de la caja) y `hooks/usePokemonList.js` (ya no se navega por lotes).
 
-### 4.2 Componentes pequeños
+### 4.2 `hooks/usePokemon.js`: datos para pintar
 
-1. **`CoinCounter`**: monedas y producción por segundo. Lee de `useGame()`; la producción sale de `totalProduction(state)`.
+- [ ] `useOwnedPokemon()`: mira qué ids de `collection` (y de los líderes de gimnasio) no están en `pokemonById`, los pide con `getPokemonByIds` y hace `POKEMON_LOADED`. Devuelve `{ loading, error, retry }`.
+- [ ] Se llama una vez, en `App`. Al recargar la partida, los datos salen de la caché al instante.
+- [ ] `AbortController` en el `useEffect`: antes de cualquier `setState`, `if (controller.signal.aborted) return;`.
+- [ ] Mientras no hay datos de un Pokémon, su tarjeta enseña el `Loader`. La producción no espera: sale de la tabla de la Pokédex.
+
+### 4.3 Componentes
+
+1. **`CoinCounter`**: monedas, producción por segundo, nivel de entrenador y una barra de experiencia (`<progress>`).
 2. **`ClickButton`**: un `<button>` grande (una Poké Ball dibujada con CSS, por ejemplo) que hace `dispatch({ type: 'CLICK' })`.
 3. **`TypeBadge`**: recibe `type` y pinta la etiqueta con su color de `config/types.js`.
-4. **`Loader`**: esqueletos con la forma de la tarjeta, mejor que un spinner.
+4. **`StarRating`**: de 1 a 5 estrellas, con texto para lectores de pantalla («3 de 5 estrellas»).
+5. **`Loader`**: esqueletos con la forma de la tarjeta, mejor que un spinner.
+6. **`PokemonCard`**: número, imagen, nombre (`formatName`) como `<h3>`, tipos en `<ul>`, rareza, estrellas y producción. Recibe todo por props (no calcula nada) y un hueco para acciones (`children`: equipar, quitar…). Imagen con `alt`, `loading="lazy"`, `width` y `height` fijos. Envuelta en `React.memo`.
+7. **`CardGrid`**: rejilla con `grid-template-columns: repeat(auto-fill, minmax(160px, 1fr))` y `key={id}`.
+8. **`Modal`**: `<dialog>` con `showModal()`, que ya gestiona el foco y la tecla Escape.
+9. **`UpgradeCard`**: nombre, efecto, `Nv 3/10`, coste y botón. Estado con `data-state="locked|available|max"` y, además del color, con texto («Se desbloquea en el nivel 4», «Máximo»).
 
-### 4.3 `PokemonCard`
+Las funciones que se pasan a tarjetas memorizadas van con `useCallback` y reciben el id (`onEquip(id)`), nunca `onEquip={() => equip(p)}`.
 
-- [ ] Props: `pokemon`, `level`, `cost`, `canAfford`, `onBuy`. La tarjeta **no** calcula nada: recibe todo hecho.
-- [ ] Al pulsar comprar llama a `onBuy(pokemon.id)`: así `CardGrid` puede pasar la misma función a todas las tarjetas.
-- [ ] Estructura semántica: `<article>` con número, imagen, nombre como `<h3>`, tipos en `<ul>`, nivel y producción en `<dl>`, y un `<button>` de compra.
-- [ ] Texto del botón: «Capturar» si nivel 0 y «Subir nivel» si ya es tuyo, siempre con el coste.
-- [ ] Estados con atributos: `data-state="locked|available|owned"` y estilos en el CSS Module. Además del color, muestra el estado con texto o icono.
-- [ ] Color de fondo según el primer tipo con una variable: `style={{ '--type-color': TYPE_COLORS[pokemon.types[0]] }}`.
-- [ ] Imagen con `alt={nombre}`, `loading="lazy"`, `width` y `height` fijos.
-- [ ] Envuélvela en `React.memo`: así solo se repinta la tarjeta que cambia.
+### 4.4 `GamePage`
 
-### 4.4 `CardGrid`
+- [ ] Cabecera con `CoinCounter`, `ClickButton` en el centro y debajo el equipo: 6 huecos, vacíos con un «+» que lleva a la caja.
+- [ ] En escritorio, botón a la izquierda y equipo a la derecha; en móvil, todo en columna.
 
-- [ ] Recibe por props `pokemon`, `loading`, `error`, `hasMore`, `onLoadMore` y `onRetry` (los datos los pide `GamePage` con `usePokemonList`, no la rejilla).
-- [ ] Para cada Pokémon calcula `level`, `cost` y `canAfford` con las funciones de `game/` y `config/`.
-- [ ] `key={pokemon.id}`.
-- [ ] CSS Grid: `grid-template-columns: repeat(auto-fill, minmax(180px, 1fr))`.
-- [ ] Debajo, `Loader` si `loading`; botón «Cargar más» si `hasMore`; mensaje de error con «Reintentar» si `error`.
-- [ ] Una sola función de compra para todas las tarjetas, con `useCallback`:
+### 4.5 `GachaPage`
 
-  ```js
-  const handleBuy = useCallback(
-    (id) => dispatch({ type: 'BUY_POKEMON', id }),
-    [dispatch],
-  );
-  // <PokemonCard … onBuy={handleBuy} />
-  ```
+- [ ] Precio de la siguiente tirada y botón «Tirar» (deshabilitado si no llega).
+- [ ] Al tirar: `const id = rollPokemon(state.generation)` → `dispatch({ type: 'PULL', id })` → abre el `Modal` con el resultado.
+- [ ] El resultado según `pullOutcome` (calculado **antes** del `dispatch`): «¡Nuevo!», «★ +1 (3/5)» o «Ya tenía 5★: +X monedas».
+- [ ] El color del fondo del resultado según la rareza, y el nombre de la rareza escrito.
+- [ ] Si los datos del Pokémon aún no han llegado de la API, el `Loader` en el modal; si fallan, mensaje y «Reintentar». La tirada ya está hecha y guardada: lo que falla es solo la imagen.
+- [ ] Tabla con las probabilidades de cada rareza (es buena práctica enseñarlas en cualquier gacha).
 
-  Nunca `onBuy={() => buy(p)}`: crea una función nueva en cada render y `React.memo` deja de servir.
+### 4.6 `BoxPage`
 
-### 4.5 `pages/GamePage.jsx`
+- [ ] Dos pestañas: **Mis Pokémon** y **Pokédex**.
+- [ ] Mis Pokémon: `CardGrid` con tu colección; filtros por tipo y rareza (`<select>`) y orden por producción, rareza o número. Botón «Equipar» o «Quitar» en cada tarjeta.
+- [ ] Equipar con el equipo lleno: abre el `Modal` para elegir a quién sustituir.
+- [ ] Pokédex: los 151 en orden; los que tienes con su imagen, los que no en silueta (`filter: brightness(0)`) y con «???». La imagen de los que no tienes se construye con la URL fija de los sprites (`…/sprites/pokemon/{id}.png`): no hace falta pedirlos a la API. Contador «45 / 151».
 
-- [ ] Junta todo: llama a `usePokemonList`, y pinta la cabecera con `CoinCounter`, la zona del `ClickButton` y `CardGrid`.
-- [ ] En escritorio, botón a la izquierda y tarjetas a la derecha; en móvil, todo en columna con el contador fijo arriba.
-- [ ] Compáralo con tu diseño de Figma.
+### 4.7 `ShopPage`
 
-**Al terminar:** puedes clicar, comprar y subir de nivel. Commit `feat: interfaz jugable`.
+- [ ] Una `UpgradeCard` por mejora, en el orden de `UPGRADES`.
+- [ ] Comprar hace `dispatch({ type: 'BUY_UPGRADE', key })`.
 
-## Fase 5 · Juego completo
+**Al terminar:** puedes clicar, tirar, equipar y comprar mejoras, y el dinero sube solo cuando tienes equipo (lo hará de verdad con el bucle de la fase 6; para probar ahora, un botón temporal que haga `TICK`). Commit `feat: interfaz jugable`.
+
+## Fase 5 · Gimnasios
+
+Al final puedes retar a los 8 líderes en orden y ganar medallas.
+
+### 5.1 `GymsPage`
+
+- [ ] Los 8 líderes con el Pokémon que los representa (`ace`), su tipo y su vida.
+- [ ] Estado con `gymStatus`: vencido (medalla), actual (botón «Retar») y bloqueado (con texto, no solo gris).
+- [ ] Junto al actual, una pista: «Tu equipo hace X de daño por segundo» y qué Pokémon de tu equipo tienen ventaja de tipo.
+
+### 5.2 `BattlePage`
+
+El estado del combate es local: `useReducer` dentro de la página con `{ hp, timeLeft, teamDamage, status }`, donde `status` es `'ready' | 'fighting' | 'won' | 'lost'`.
+
+- [ ] Pantalla de inicio: líder, vida, tiempo y botón «¡Empezar!». El tiempo no corre hasta pulsarlo.
+- [ ] `hooks/useBattleTimer.js`: un `setInterval` de 100 ms que calcula el tiempo real pasado con `Date.now()` (igual que el bucle del juego) y se limpia al terminar o al salir de la pantalla.
+- [ ] Cada tick resta a la vida el daño del equipo (`teamDps × segundos`), sin pasar del tope `maxTeamDamage`.
+- [ ] Cada click resta `clickDamage(state)`. El botón de ataque es un `<button>`.
+- [ ] **Teclado:** con Enter o Espacio se puede atacar, pero ignora las pulsaciones repetidas de mantener la tecla (`event.repeat`): si no, dejar Enter pulsado sería un autoclicker.
+- [ ] Barra de vida (`<progress>` o `role="progressbar"`) y temporizador grande.
+- [ ] Vida a 0 → `won`: `dispatch({ type: 'GYM_WON', number })`, pantalla de victoria con la recompensa. Tiempo a 0 → `lost`: «Reintentar» al momento.
+- [ ] El resultado se anuncia con una región `aria-live` (solo el resultado, no la vida en cada tick).
+
+### 5.3 Tests del combate
+
+- [ ] `BattlePage.test.jsx` con `vi.useFakeTimers()`: el tiempo no corre antes de empezar; clicks hasta ganar → se envía `GYM_WON`; sin clicks se pierde al acabar el tiempo; mantener Enter (`repeat: true`) no hace daño.
+
+**Al terminar:** commit `feat: gimnasios y combate`.
+
+## Fase 6 · Juego completo
 
 Al final el juego produce solo, guarda la partida y se siente bien al jugarlo. Es tu MVP terminado.
 
-### 5.1 `hooks/useGameLoop.js`
+### 6.1 `hooks/useGameLoop.js`
 
-- [ ] Un único `setInterval` de `TICK_MS` en `App`, no uno por tarjeta.
+- [ ] Un único `setInterval` de `TICK_MS` en `App`, no uno por componente.
 - [ ] Calcula los segundos reales pasados con `Date.now()` y envía `dispatch({ type: 'TICK', seconds })`. Así, si el navegador ralentiza la pestaña en segundo plano, no pierdes producción.
 - [ ] Limpia el intervalo en el `return` del `useEffect`.
+- [ ] Durante un combate el juego sigue produciendo (el bucle está en `App`, no en la página).
 
-### 5.2 Guardado (`store/persistence.js` y `hooks/useAutosave.js`)
+### 6.2 Guardado (`store/persistence.js` y `hooks/useAutosave.js`)
 
 - [ ] `saveGame(state)` y `loadGame()` con `try/catch`, en la clave `pkc:save`.
-- [ ] Se guarda solo `{ saveVersion, coins, owned, savedAt }`. Nunca `pokemonById`: ya está en la caché.
+- [ ] Se guarda todo menos `pokemonById`, más `savedAt`.
 - [ ] La partida se carga **antes** del primer render, con el inicializador perezoso de `useReducer`:
 
   ```js
@@ -461,49 +692,49 @@ Al final el juego produce solo, guarda la partida y se siente bien al jugarlo. E
 
   `createInitialState()` llama a `loadGame()`. Si la partida existe y su `saveVersion` coincide, la mezcla con `initialState`; si no coincide o está corrupta, devuelve `initialState`. Así el autoguardado nunca puede pisar la partida con un estado vacío.
 
-- [ ] Al arrancar, en un `useEffect` del `GameProvider`:
-  1. Pide los Pokémon que ya tienes, aunque no estén en el primer lote: `getPokemonByIds(Object.keys(owned).map(Number))` y `POKEMON_LOADED`. Normalmente salen de la caché al instante.
-  2. Después, si hay `savedAt`, da las monedas del tiempo fuera: `TICK` con `Math.min((Date.now() - savedAt) / 1000, MAX_OFFLINE_SECONDS)` segundos. Tiene que ir después del paso 1 o la producción saldría 0.
-- [ ] Autoguardado cada `AUTOSAVE_MS` y también en `visibilitychange` (cuando el usuario cambia de pestaña).
-- [ ] Botón «Reiniciar partida» con confirmación (`RESET`).
+- [ ] Ganancias mientras no estabas: al cargar, `tick(state, min((ahora − savedAt) / 1000, MAX_OFFLINE_SECONDS))`. Como la producción sale de la tabla de la Pokédex, no hay que esperar a la API. Enséñalo al volver: «Mientras no estabas, tu equipo ganó X monedas».
+- [ ] Autoguardado cada `AUTOSAVE_MS` y también en `visibilitychange`.
+- [ ] `SettingsPage`: «Reiniciar partida» con confirmación en el `Modal` (`RESET`).
 
-### 5.3 Formato y sensación de juego
+### 6.3 Formato y sensación de juego
 
 - [ ] `utils/format.js` → `formatNumber` con `Intl.NumberFormat('es-ES', { notation: 'compact', maximumFractionDigits: 1 })`: 1500 → «1,5 mil».
-- [ ] Las monedas se guardan con decimales (la producción los tiene), pero se muestran con `formatNumber(Math.floor(coins))`. Nunca enseñes el número en bruto.
-- [ ] Animación de «+1» flotando al clicar y un pequeño rebote del botón.
-- [ ] Animación al capturar un Pokémon por primera vez.
+- [ ] Las monedas se guardan con decimales, pero se muestran con `formatNumber(Math.floor(coins))`.
+- [ ] Animación de «+X» flotando al clicar y un pequeño rebote del botón.
+- [ ] Animación de la tirada (la Poké Ball se agita y se abre) y destello del color de la rareza.
+- [ ] Sacudida del líder al recibir daño.
 - [ ] Todas las animaciones dentro de `@media (prefers-reduced-motion: no-preference)`.
 
-### 5.4 Equilibrar
+### 6.4 Equilibrar
 
-- [ ] Juega 15 minutos seguidos y apunta: cuánto tardas en el primer Pokémon, cuándo te aburres esperando y qué Pokémon nadie compraría.
-- [ ] Ajusta **solo** los números de `config/economy.js` y `config/rarities.js`. `economy.test.js` te avisa si rompes el orden coste–producción.
+- [ ] `scripts/simulate.js` (`npm run simulate`): juega una región entera usando **las funciones reales** de `game/` y `config/`, con varias semillas de azar, y saca la tabla de tiempos de 3.2. Si cambias un número, vuelve a ejecutarlo.
+- [ ] Juega tú 20 minutos seguidos y apunta: cuánto tardas en la primera tirada y en Brock, cuándo te aburres esperando y qué mejora nadie compraría.
+- [ ] Ajusta **solo** los números de `config/`.
 - [ ] Apunta los cambios en la sección de equilibrio de `CONTROL_DE_CALIDAD.md`.
 
-**Al terminar:** pasa el apartado 4 del control de calidad (pruebas manuales) y commit `feat: bucle de juego y guardado`. Fusiona en `main`.
+**Al terminar:** pasa el apartado 4 del control de calidad (pruebas manuales) y commit `feat: bucle de juego y guardado`.
 
-## Fase 6 · Calidad, despliegue y portfolio
+## Fase 7 · Calidad, despliegue y portfolio
 
 Al final el juego está publicado con un enlace que puedes enseñar, y el repositorio da buena impresión a quien lo abra.
 
-### 6.1 Completar los tests
+### 7.1 Completar los tests
 
-- [ ] `models/pokemon.test.js` con JSON de ejemplo en `src/__mocks__/`: `pikachu.json` y `pikachu-species.json`, y otro Pokémon con sprites vacíos que debe acabar con la imagen de reserva. Comprueba también que Mewtwo sale legendario y Chansey no.
-- [ ] `utils/format.test.js`.
-- [ ] `PokemonCard.test.jsx`: muestra nombre, tipos e imagen; el botón está deshabilitado sin monedas; llama a `onBuy` con el ID al hacer click.
-- [ ] `CardGrid.test.jsx`: con `loading` muestra el `Loader`; con `error` muestra el mensaje y «Reintentar» llama a `onRetry`. Solo props, sin `fetch`.
-- [ ] `usePokemonList.test.js` con `renderHook`: simulando `fetch` con `vi.fn()`, primero `loading` y luego los datos; si `fetch` falla, `error`.
+- [ ] `utils/format.test.js` con `formatNumber`: 0, 999, 1500, 2 300 000.
+- [ ] `PokemonCard.test.jsx`: nombre, número, tipos, rareza, estrellas e imagen.
+- [ ] `UpgradeCard.test.jsx`: los tres estados y el botón deshabilitado sin dinero.
+- [ ] `GachaPage.test.jsx`: tirar con un `rng` fijo y `fetch` simulado → resultado en el modal; sin dinero, botón deshabilitado.
+- [ ] `useOwnedPokemon.test.js` con `renderHook`: carga los que faltan; si `fetch` falla, `error`.
 
-### 6.2 Revisión de calidad
+### 7.2 Revisión de calidad
 
 - [ ] Recorre entero `CONTROL_DE_CALIDAD.md`.
 - [ ] Lighthouse sobre `npm run build && npm run preview`: rendimiento y accesibilidad por encima de 90.
-- [ ] Juega solo con teclado.
+- [ ] Juega solo con teclado, combate incluido.
 - [ ] Prueba en Chrome, Firefox y tu móvil.
-- [ ] React DevTools → Profiler: al pasar un tick, solo se repintan el contador y las tarjetas que cambian de estado.
+- [ ] React DevTools → Profiler: al pasar un tick, solo se repintan el contador y lo que cambia.
 
-### 6.3 Desplegar en GitHub Pages
+### 7.3 Desplegar en GitHub Pages
 
 - [ ] En `vite.config.js`: `base: '/pokeclicker/'` (el nombre exacto del repositorio).
 - [ ] `npm i -D gh-pages` y añade el script `"deploy": "npm run build && gh-pages -d dist"`.
@@ -511,40 +742,51 @@ Al final el juego está publicado con un enlace que puedes enseñar, y el reposi
 - [ ] Abre `https://berni14.github.io/pokeclicker/` en el móvil y comprueba que carga todo (imágenes, imagen de reserva, guardado).
 - [ ] Más adelante puedes cambiarlo por un GitHub Action que despliegue en cada push a `main`.
 
-### 6.4 README
+### 7.4 README
 
 - [ ] Título, una frase de qué es, GIF o captura y enlace a la demo.
+- [ ] Cómo se juega, en cuatro líneas (click, gacha, equipo, gimnasios).
 - [ ] Tecnologías: React, Vite, CSS Modules, Vitest, PokeAPI.
-- [ ] Estructura de carpetas y por qué está organizada así (es lo que más se fija un técnico).
+- [ ] Estructura de carpetas y por qué está organizada así (es lo que más se fija un técnico), y por qué la tabla de la Pokédex se genera con un script.
 - [ ] Cómo ejecutarlo en local.
 - [ ] Aviso: proyecto no oficial; Pokémon es marca de Nintendo, Game Freak y The Pokémon Company; datos de la PokeAPI.
 - [ ] En inglés, o en los dos idiomas, si piensas usarlo fuera de España.
 
-### 6.5 Darlo a conocer
+### 7.5 Darlo a conocer
 
 - [ ] Fija el repositorio en tu perfil de GitHub.
 - [ ] Añádelo a tu portfolio.
-- [ ] Publicación en LinkedIn con el GIF: qué has hecho, qué has aprendido (cachear una API, estado con `useReducer`, tests) y el enlace.
+- [ ] Publicación en LinkedIn con el GIF: qué has hecho, qué has aprendido (cachear una API, estado con `useReducer`, lógica pura con tests, equilibrar con una simulación) y el enlace.
 
 **Al terminar:** versión `v1.0.0` publicada. Crea la _release_ en GitHub con ese tag.
 
-## Fase 7 · Ampliaciones
+## Fase 8 · Ampliaciones
 
-Con el MVP publicado, cada ampliación es una rama, una versión nueva (`v1.1.0`, `v1.2.0`…) y algo nuevo que contar. Están ordenadas de más fácil a más difícil, y cada una dice qué carpeta toca, para que veas que la estructura aguanta.
+Con la v1.0 publicada, cada ampliación es una rama, una versión nueva y algo nuevo que contar. La primera es la que completa el diseño del juego.
 
-| Ampliación                               | Qué aprendes                                    | Dónde va                                    |
-| ---------------------------------------- | ----------------------------------------------- | ------------------------------------------- |
-| Mejoras del click (×2, ×5…)              | Nuevas acciones en el reducer                   | `config/upgrades.js`, `game/`, `store/`     |
-| Segunda generación (152–251)             | Que tu estructura escala                        | Una línea en `config/generations.js`        |
-| Pokémon _shiny_ aleatorios al clicar     | Probabilidades y animaciones                    | `utils/random.js`, `game/clicker.js`        |
-| Logros                                   | Comprobar condiciones tras cada acción          | `game/achievements.js`, componente `Toast`  |
-| Sonidos con opción de silenciar          | Audio en el navegador y ajustes guardados       | `public/sounds/`, `pages/SettingsPage.jsx`  |
-| Pokédex con React Router                 | Rutas y páginas de detalle (`/pokedex/25`)      | `pages/PokedexPage.jsx`, `api/species.js`   |
-| Evoluciones (subir a nivel X evoluciona) | Datos encadenados de la API (`evolution-chain`) | `api/species.js`, `models/`, `game/shop.js` |
-| Pasar el estado a Zustand                | Otra forma de estado global                     | Solo `store/`                               |
-| Pasar el proyecto a TypeScript           | Tipos para el modelo, el estado y las props     | Todo, archivo a archivo                     |
-| PWA instalable y jugable sin conexión    | Service workers y caché de imágenes             | `vite-plugin-pwa`                           |
+### 8.1 Cambio de generación (v1.1)
+
+- [ ] `node scripts/build-pokedex.js 2` → `config/pokedex-gen2.json` y la generación 2 en `config/generations.js` (152–251).
+- [ ] Líderes de Johto en `config/gyms.js`: Pegaso (volador), Antón (bicho), Blanca (normal), Morti (fantasma), Aníbal (lucha), Yasmina (acero), Fredo (hielo) y Débora (dragón). Sus tipos en `config/typeChart.js`.
+- [ ] `game/prestige.js` → `changeGeneration(state, keepId)`: aplica la tabla del apartado 9 de `FUNCIONAMIENTO_DEL_JUEGO.md` (dinero, mejoras y tiradas a 0; nivel y medallas se quedan; solo el Pokémon elegido, con sus estrellas).
+- [ ] Acción `CHANGE_GENERATION` con `{ keepId }` y su test.
+- [ ] Pantalla de cambio de generación: resumen de la región y elección del Pokémon.
+- [ ] `saveVersion` a 2, con una función que convierta las partidas de la versión 1 en vez de borrarlas.
+- [ ] `npm run simulate` para la región 2 empezando con el nivel y el Pokémon típicos del final de la 1.
+
+### 8.2 Otras ideas
+
+| Ampliación                            | Qué aprendes                                    | Dónde va                                   |
+| ------------------------------------- | ----------------------------------------------- | ------------------------------------------ |
+| Logros                                | Comprobar condiciones tras cada acción          | `game/achievements.js`, componente `Toast` |
+| Sonidos con opción de silenciar       | Audio en el navegador y ajustes guardados       | `public/sounds/`, `pages/SettingsPage.jsx` |
+| Pokémon _shiny_ en el gacha           | Probabilidades y animaciones                    | `config/gacha.js`, `game/gacha.js`         |
+| Ficha de cada Pokémon                 | Rutas y páginas de detalle (`/pokemon/25`)      | React Router, `api/species.js`             |
+| Evoluciones (con X estrellas)         | Datos encadenados de la API (`evolution-chain`) | `api/species.js`, `game/`                  |
+| Pasar el estado a Zustand             | Otra forma de estado global                     | Solo `store/`                              |
+| Pasar el proyecto a TypeScript        | Tipos para el modelo, el estado y las props     | Todo, archivo a archivo                    |
+| PWA instalable y jugable sin conexión | Service workers y caché de imágenes             | `vite-plugin-pwa`                          |
 
 Si alguna ampliación te obliga a tocar muchas carpetas que no son las de la tabla, es una señal de que algo de las fases anteriores está mezclado: es buen momento para refactorizar.
 
-> Con React Router en GitHub Pages, usa `HashRouter` o el `basename="/pokeclicker"`: si no, al recargar una ruta como `/pokedex/25` sale un 404.
+> Con React Router en GitHub Pages, usa `HashRouter` o el `basename="/pokeclicker"`: si no, al recargar una ruta como `/pokemon/25` sale un 404.

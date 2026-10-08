@@ -42,7 +42,7 @@ Scripts recomendados en `package.json`:
 - [ ] `game/` y `config/` son JS puro: **sin React, sin DOM, sin fetch**.
 - [ ] Ningún número mágico en componentes: costes, multiplicadores y tiempos van en `config/`.
 - [ ] Sin `console.log` olvidados.
-- [ ] Commits claros: `feat: …`, `fix: …`, `style: …`, `refactor: …`, `test: …`, `docs: …`.
+- [ ] Commits claros: `feat: …`, `fix: …`, `style: …`, `refactor: …`, `test: …`, `docs: …`, `chore: …`.
 
 ---
 
@@ -60,6 +60,7 @@ Scripts recomendados en `package.json`:
 - [ ] Si falta el artwork oficial, se usa `sprites.front_default`; si falta también, una imagen de reserva.
 - [ ] Los nombres se muestran bien (`mr-mime` → `Mr. Mime`).
 - [ ] Los tipos se ordenan por `slot`.
+- [ ] La rareza legendaria/singular sale de `is_legendary` / `is_mythical` de la especie, no de la experiencia base.
 
 ### `game/` y `config/`
 - [ ] Las monedas nunca bajan de 0.
@@ -72,6 +73,8 @@ Scripts recomendados en `package.json`:
 - [ ] El reducer es puro: no muta el estado, devuelve uno nuevo.
 - [ ] Toda acción tiene un `type` definido; acciones desconocidas devuelven el estado tal cual.
 - [ ] La partida guardada incluye un número de versión (`saveVersion`) por si cambia la estructura.
+- [ ] La partida guardada no incluye los datos de los Pokémon (`pokemonById`): esos salen de la caché.
+- [ ] Al recargar, los Pokémon comprados producen desde el primer momento, aunque no estén en el primer lote.
 - [ ] Si el guardado está corrupto o es antiguo, el juego arranca con el estado inicial sin romperse.
 
 ### `hooks/`
@@ -126,14 +129,16 @@ Prioridad alta (lógica pura, fáciles de probar con Vitest):
 - [ ] `models/pokemon.test.js` → `toPokemon()` con una respuesta real de ejemplo y con sprites vacíos.
 - [ ] `game/shop.test.js` → comprar con y sin monedas suficientes; coste del nivel siguiente.
 - [ ] `game/production.test.js` → producción total con varios Pokémon.
-- [ ] `store/gameReducer.test.js` → `CLICK`, `BUY_POKEMON`, `TICK`, `LOAD`, acción desconocida.
+- [ ] `store/gameReducer.test.js` → `CLICK`, `BUY_POKEMON`, `TICK`, `POKEMON_LOADED`, `RESET`, acción desconocida.
+- [ ] `config/economy.test.js` → un Pokémon más caro nunca produce menos que uno más barato.
 - [ ] `utils/format.test.js` → 0, 999, 1500, 2 300 000.
 
 Prioridad media (React Testing Library):
 
 - [ ] `PokemonCard` muestra nombre, número, tipos e imagen.
 - [ ] El botón de compra está deshabilitado si no hay monedas.
-- [ ] `CardGrid` muestra el Loader mientras carga y el error si falla la API (con `fetch` simulado).
+- [ ] `CardGrid` muestra el Loader con `loading` y el error con «Reintentar» con `error` (solo props).
+- [ ] `usePokemonList` pasa de `loading` a datos, y a `error` si falla la API (con `fetch` simulado).
 
 > Los tests nunca llaman a la PokeAPI real: se simula `fetch` con datos de ejemplo guardados en `src/__mocks__/`.
 

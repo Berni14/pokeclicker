@@ -72,3 +72,80 @@ export function applyGymWin(state, number) {
   };
   return addXp(next, XP_PER_GYM * number);
 }
+
+// Clicks por segundo que harían falta para ganar, contando con el equipo.
+// Infinity si no hay daño de click (no debería pasar: el click base es 1).
+export function clicksPerSecondNeeded(state, gym) {
+  const seconds = battleDuration(state);
+  const fromTeam = Math.min(teamDps(state, gym) * seconds, maxTeamDamage(gym));
+  return (gym.hp - fromTeam) / (clickDamage(state) * seconds);
+}
+
+// --- Combate ---------------------------------------------------------------
+// El estado de un combate es local de la pantalla (no va al store). Al empezar
+// se guardan los números del jugador: cambiar el equipo o comprar mejoras a
+// mitad de combate no lo altera.
+
+export function createBattle(state, gym) {
+  const duration = battleDuration(state);
+  return {
+    gym,
+    duration,
+    clickDamage: clickDamage(state),
+    teamDps: teamDps(state, gym),
+    teamCap: maxTeamDamage(gym),
+    hp: gym.hp,
+    timeLeft: duration,
+    teamDamage: 0,
+    status: 'ready', // 'ready' | 'fighting' | 'won' | 'lost'
+  };
+}
+
+export function battleReducer(battle, action) {
+  switch (action.type) {
+    case 'START':
+      return battle.status === 'ready'
+        ? { ...battle, status: 'fighting' }
+        : battle;
+
+    case 'ATTACK': {
+      if (battle.status !== 'fighting') return battle;
+      const hp = Math.max(0, battle.hp - battle.clickDamage);
+      return { ...battle, hp, status: hp === 0 ? 'won' : 'fighting' };
+    }
+
+    case 'TICK': {
+      if (battle.status !== 'fighting') return battle;
+      const seconds = Math.min(action.seconds, battle.timeLeft);
+      if (!(seconds > 0)) return battle;
+      const teamHit = Math.min(
+        battle.teamDps * seconds,
+        battle.teamCap - battle.teamDamage,
+      );
+      const hp = Math.max(0, battle.hp - teamHit);
+      const timeLeft = battle.timeLeft - seconds;
+      let status = 'fighting';
+      if (hp === 0) status = 'won';
+      else if (timeLeft <= 0) status = 'lost';
+      return {
+        ...battle,
+        hp,
+        timeLeft,
+        teamDamage: battle.teamDamage + teamHit,
+        status,
+      };
+    }
+
+    case 'RETRY':
+      return {
+        ...battle,
+        hp: battle.gym.hp,
+        timeLeft: battle.duration,
+        teamDamage: 0,
+        status: 'ready',
+      };
+
+    default:
+      return battle;
+  }
+}

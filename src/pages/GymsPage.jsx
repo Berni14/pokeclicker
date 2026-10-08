@@ -1,7 +1,20 @@
-import { gymsOf, gymStatus } from '../game/battle';
-import { useGame } from '../store/GameContext';
+import { useState } from 'react';
 import { TYPE_NAMES } from '../config/types';
-import { formatNumber } from '../utils/format';
+import { pokedexEntry } from '../config/pokedex';
+import { EXPECTED_CLICKS_PER_SECOND } from '../config/gyms';
+import {
+  battleDuration,
+  clicksPerSecondNeeded,
+  currentGym,
+  gymsOf,
+  gymStatus,
+  hasTypeAdvantage,
+  teamDps,
+} from '../game/battle';
+import { pixelSpriteUrl } from '../models/pokemon';
+import { useGame } from '../store/GameContext';
+import { formatName, formatNumber } from '../utils/format';
+import { BattlePage } from './BattlePage';
 import styles from './GymsPage.module.css';
 
 const STATUS_TEXT = {
@@ -10,31 +23,111 @@ const STATUS_TEXT = {
   locked: 'Bloqueado',
 };
 
-// Lista de líderes. El combate llega en la fase 5.
 export function GymsPage() {
   const { state } = useGame();
+  const [fighting, setFighting] = useState(null); // gimnasio en combate
+
+  // Salir de esta pestaña desmonta el combate y su temporizador.
+  if (fighting) {
+    return <BattlePage gym={fighting} onExit={() => setFighting(null)} />;
+  }
+
+  const gyms = gymsOf(state);
+  const medals = gyms.filter(
+    (g) => gymStatus(state, g.number) === 'won',
+  ).length;
 
   return (
-    <div>
+    <div className={styles.page}>
       <h2 tabIndex={-1}>Gimnasios</h2>
+      <p className={styles.medals}>
+        Medallas: {medals} / {gyms.length}
+      </p>
+
       <ol className={styles.list}>
-        {gymsOf(state).map((gym) => {
+        {gyms.map((gym) => {
           const status = gymStatus(state, gym.number);
           return (
             <li key={gym.number} className={styles.gym} data-state={status}>
-              <span className={styles.number}>{gym.number}</span>
+              <img
+                className={styles.ace}
+                src={pixelSpriteUrl(gym.ace)}
+                alt=""
+                width="64"
+                height="64"
+                loading="lazy"
+              />
               <span className={styles.leader}>
-                <strong>{gym.leader}</strong>
+                <strong>
+                  {gym.number}. {gym.leader}
+                </strong>
                 <span>
                   {TYPE_NAMES[gym.type]} · {formatNumber(gym.hp)} de vida
                 </span>
               </span>
-              <span className={styles.status}>{STATUS_TEXT[status]}</span>
+              {status === 'current' ? (
+                <button
+                  type="button"
+                  className="button"
+                  onClick={() => setFighting(gym)}
+                >
+                  Retar
+                </button>
+              ) : (
+                <span className={styles.status}>
+                  {status === 'won' && <span aria-hidden="true">🏅 </span>}
+                  {STATUS_TEXT[status]}
+                </span>
+              )}
             </li>
           );
         })}
       </ol>
-      <p className={styles.soon}>Los combates llegan pronto.</p>
+
+      {currentGym(state) ? (
+        <Hint gym={currentGym(state)} />
+      ) : (
+        <p className={styles.hint}>
+          ¡Has vencido a todos los líderes de la región!
+        </p>
+      )}
     </div>
+  );
+}
+
+// Pista para el gimnasio actual: cuánto ayuda el equipo y cuánto hay que clicar.
+function Hint({ gym }) {
+  const { state } = useGame();
+  const needed = clicksPerSecondNeeded(state, gym);
+  const strong = state.team.filter((id) =>
+    hasTypeAdvantage(pokedexEntry(id), gym),
+  );
+  const nameOf = (id) =>
+    state.pokemonById[id] ? formatName(state.pokemonById[id].name) : `#${id}`;
+
+  return (
+    <section className={styles.hint} aria-labelledby="hint-title">
+      <h3 id="hint-title">Contra {gym.leader}</h3>
+      <ul>
+        <li>
+          Tu equipo hace {formatNumber(teamDps(state, gym))} de daño por segundo
+          (como mucho {formatNumber(gym.hp / 2)} en total).
+        </li>
+        <li>
+          {strong.length > 0
+            ? `Con ventaja de tipo: ${strong.map(nameOf).join(', ')}.`
+            : `Ningún Pokémon de tu equipo tiene ventaja contra el tipo ${TYPE_NAMES[gym.type]}.`}
+        </li>
+        <li>
+          Necesitas unos{' '}
+          <strong>
+            {formatNumber(Math.max(0, needed))} clicks por segundo
+          </strong>{' '}
+          durante {battleDuration(state)} s.
+          {needed > EXPECTED_CLICKS_PER_SECOND &&
+            ' Es mucho: mejora tu click en la tienda primero.'}
+        </li>
+      </ul>
+    </section>
   );
 }

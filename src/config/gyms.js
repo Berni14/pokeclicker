@@ -5,6 +5,8 @@ export const ATTACK_DIVISOR = 5; // daño por segundo de un Pokémon = ataque / 
 export const TYPE_ADVANTAGE = 1.5;
 export const TEAM_DAMAGE_CAP = 0.5; // el equipo hace como mucho la mitad de la vida
 export const GYM_MONEY_REWARD = 0.5; // × vida del líder
+export const BATTLE_TICK_MS = 100; // cada cuánto se actualiza el combate
+export const EXPECTED_CLICKS_PER_SECOND = 6; // para la pista de la pantalla de gimnasios
 
 // `ace` es el Pokémon que representa al líder en pantalla (su imagen viene de la API).
 export const GYMS = {

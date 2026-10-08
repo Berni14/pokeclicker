@@ -1,0 +1,60 @@
+.app {
+  min-height: 100vh;
+}
+
+.header {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.headerInner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  max-width: var(--content-max-width);
+  padding: var(--space-3) var(--space-4);
+  margin: 0 auto;
+}
+
+.title {
+  font-size: var(--font-size-lg);
+  color: var(--color-primary-dark);
+}
+
+.headerInner > :last-child {
+  flex: 1;
+  min-width: 240px;
+}
+
+.main {
+  max-width: var(--content-max-width);
+  padding: var(--space-4);
+  /* Hueco para la barra de navegación fija de móvil. */
+  padding-bottom: calc(var(--nav-height) + var(--space-5));
+  margin: 0 auto;
+}
+
+.main h2:focus {
+  outline: none;
+}
+
+.error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+  background: #fdecea;
+  border: 2px solid var(--color-primary-dark);
+  border-radius: var(--radius-md);
+}
+
+@media (min-width: 768px) {
+  .main {
+    padding-bottom: var(--space-6);
+  }
+}

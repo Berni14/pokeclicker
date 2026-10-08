@@ -1,0 +1,58 @@
+.button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: none;
+  border: none;
+  border-radius: var(--radius-lg);
+  touch-action: manipulation; /* sin zoom por doble toque en móvil */
+}
+
+/* Poké Ball dibujada con CSS: mitad roja, mitad blanca, franja y botón. */
+.ball {
+  position: relative;
+  width: clamp(160px, 45vw, 220px);
+  aspect-ratio: 1;
+  background: linear-gradient(
+    to bottom,
+    var(--color-primary) 0 46%,
+    var(--color-text) 46% 54%,
+    var(--color-surface) 54% 100%
+  );
+  border: 6px solid var(--color-text);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-raised);
+}
+
+.ball::after {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 28%;
+  aspect-ratio: 1;
+  content: '';
+  background: var(--color-surface);
+  border: 6px solid var(--color-text);
+  border-radius: var(--radius-full);
+  translate: -50% -50%;
+}
+
+.label {
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ball {
+    transition: transform 80ms ease-out;
+  }
+
+  .button:hover .ball {
+    transform: scale(1.03);
+  }
+
+  .button:active .ball {
+    transform: scale(0.95);
+  }
+}

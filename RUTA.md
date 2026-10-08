@@ -297,18 +297,28 @@ Si quieres verlo tú en el navegador: en `App.jsx`, dentro de un `useEffect`, ll
 
 **Al terminar:** commit `feat: capa de datos con caché`.
 
-## Fase 3 · Lógica y estado
+## Fase 3 · Lógica y estado ✅
 
 Al final tienes todas las reglas del juego en funciones puras, con tests, y un store global al que cualquier componente puede acceder. Es la fase más importante: si aquí está bien hecho, la interfaz es solo pintar.
 
 La idea clave: **los números del juego no dependen de la API**. La producción, el daño y el sorteo del gacha salen de una tabla pequeña generada una vez (3.1). La API se usa para lo que se ve: nombre, imagen, tipos y estadísticas en las tarjetas. Así el juego funciona desde el primer segundo, aunque la API tarde o falle.
 
+> **Fase terminada** (8 oct 2026). 123 tests en verde. Además se jugó una región entera con las funciones reales de `game/` y el reducer (3 semillas, juego óptimo): Brock a los ~2 min y Giovanni entre 1 h 50 min y 2 h 10 min, lo previsto. Un jugador real irá algo más lento.
+>
+> Detalles de cómo quedó:
+>
+> - El script tarda ~3 s. El JSON generado está en `.prettierignore`: lo escribe el script con una entrada por línea y Prettier no debe reformatearlo.
+> - `config/types.js` tiene también `TYPE_NAMES` (nombres en español) y su test comprueba que cada color tiene un contraste de al menos 4,5:1 con texto blanco.
+> - `TEAM_SIZE` (6) está en `config/economy.js`.
+> - `useGame()` vive en `GameContext.jsx` junto a su provider, con un comentario que desactiva el aviso de React Refresh para esa línea.
+> - Los tests usan `makeState()` de `src/__mocks__/gameState.js`, que devuelve estados **congelados**: si una función de `game/` modificara el estado que recibe, el test fallaría. Y `seededRng(semilla)` para que el azar sea repetible.
+
 ### 3.1 Tabla de la Pokédex: `scripts/build-pokedex.js`
 
 Para sortear el gacha por rareza hay que saber la rareza de los 151 Pokémon antes de la primera tirada. Pedirlos al empezar a jugar serían 302 peticiones y unos 100 MB. En vez de eso, un script lo hace **una sola vez** y guarda el resultado en el repositorio.
 
-- [ ] `scripts/build-pokedex.js` (Node, fuera de `src/`): recibe la generación (`node scripts/build-pokedex.js 1`), pide `/pokemon/{id}` y `/pokemon-species/{id}` de 20 en 20 y calcula la rareza con `getRarity` de `src/config/rarities.js` (es JS puro, se puede importar desde Node).
-- [ ] Escribe `src/config/pokedex-gen1.json` con lo mínimo que necesita la lógica del juego:
+- [x] `scripts/build-pokedex.js` (Node, fuera de `src/`): recibe la generación (`node scripts/build-pokedex.js 1`), pide `/pokemon/{id}` y `/pokemon-species/{id}` de 20 en 20 y calcula la rareza con `getRarity` de `src/config/rarities.js` (es JS puro, se puede importar desde Node).
+- [x] Escribe `src/config/pokedex-gen1.json` con lo mínimo que necesita la lógica del juego:
 
   ```json
   [{ "id": 1, "rarity": "rare", "statTotal": 318, "attack": 49, "types": ["grass", "poison"] }, …]
@@ -316,10 +326,10 @@ Para sortear el gacha por rareza hay que saber la rareza de los 151 Pokémon ant
 
   Son unos 10 KB. Nombre e imágenes **no** van aquí: vienen de la API.
 
-- [ ] Script en `package.json`: `"pokedex": "node scripts/build-pokedex.js"`.
-- [ ] Ejecútalo y sube el JSON. Solo se vuelve a ejecutar si cambian los umbrales de rareza o al añadir una generación.
-- [ ] `config/pokedex.js` exporta `POKEDEX = { 1: [...] }` (por generación) y `pokedexEntry(id)`.
-- [ ] Test `config/pokedex.test.js`: 151 entradas, ids del 1 al 151 sin huecos, y el reparto esperado (69 comunes, 49 raras, 28 épicas, 4 legendarias, 1 singular). Si alguien cambia los umbrales sin regenerar la tabla, el test lo avisa.
+- [x] Script en `package.json`: `"pokedex": "node scripts/build-pokedex.js"`.
+- [x] Ejecútalo y sube el JSON. Solo se vuelve a ejecutar si cambian los umbrales de rareza o al añadir una generación.
+- [x] `config/pokedex.js` exporta `POKEDEX = { 1: [...] }` (por generación) y `pokedexEntry(id)`.
+- [x] Test `config/pokedex.test.js`: 151 entradas, ids del 1 al 151 sin huecos, y el reparto esperado (69 comunes, 49 raras, 28 épicas, 4 legendarias, 1 singular). Si alguien cambia los umbrales sin regenerar la tabla, el test lo avisa.
 
 ### 3.2 `config/`: los números del juego
 
@@ -340,6 +350,7 @@ Al final de la región el jugador suele tener nivel 7 de entrenador, ~110 tirada
 import { RARITIES } from './rarities';
 
 export const CLICK_BASE = 1;
+export const TEAM_SIZE = 6;
 export const STAR_BONUS = 0.5; // cada estrella por encima de 1: +50 % de producción y daño
 export const TRAINING_BONUS = 0.15; // por nivel de la mejora Entrenamiento
 export const TICK_MS = 1000;
@@ -347,14 +358,19 @@ export const AUTOSAVE_MS = 10_000;
 export const MAX_OFFLINE_SECONDS = 8 * 60 * 60;
 
 const round1 = (n) => Math.round(n * 10) / 10;
+const round2 = (n) => Math.round(n * 100) / 100;
 
 export const starMultiplier = (stars) => 1 + STAR_BONUS * (stars - 1);
 
-// Monedas por segundo de un Pokémon equipado (entrada de la Pokédex + estrellas).
-export const productionOf = (entry, stars) =>
+// Monedas por segundo de un Pokémon con 1★: crece con sus stats y su rareza.
+export const baseProduction = (entry) =>
   round1(
     (entry.statTotal / 100) ** 2 * 0.1 * RARITIES[entry.rarity].multiplier,
-  ) * starMultiplier(stars);
+  );
+
+// Monedas por segundo de un Pokémon equipado, con sus estrellas.
+export const productionOf = (entry, stars) =>
+  round2(baseProduction(entry) * starMultiplier(stars));
 ```
 
 ```js
@@ -472,30 +488,30 @@ export const STRONG_AGAINST = {
 };
 ```
 
-- [ ] `config/types.js` con un color por tipo (para `TypeBadge` y las tarjetas).
-- [ ] El `effect` de cada mejora es el texto que se ve en la tienda: si cambias un número, cambia también el texto.
+- [x] `config/types.js` con un color por tipo (para `TypeBadge` y las tarjetas).
+- [x] El `effect` de cada mejora es el texto que se ve en la tienda: si cambias un número, cambia también el texto.
 
 ### 3.3 `utils/random.js`
 
-- [ ] `pickWeighted(weights, rng = Math.random)`: recibe `{ common: 55, rare: 30, … }` y devuelve una clave.
-- [ ] `pickOne(list, rng = Math.random)`: un elemento al azar.
-- [ ] El `rng` se puede pasar desde fuera: en los tests se usa uno fijo (`() => 0.99`) y el resultado es siempre el mismo.
+- [x] `pickWeighted(weights, rng = Math.random)`: recibe `{ common: 55, rare: 30, … }` y devuelve una clave.
+- [x] `pickOne(list, rng = Math.random)`: un elemento al azar.
+- [x] El `rng` se puede pasar desde fuera: en los tests se usa uno fijo (`() => 0.99`) y el resultado es siempre el mismo.
 
 ### 3.4 `game/`: las reglas, sin React
 
 Todas reciben el estado y devuelven uno nuevo (`{ ...state }`), sin modificar el que reciben. **Ninguna usa `Math.random`** salvo `rollPokemon`, que recibe el `rng`.
 
-- [ ] `trainer.js`
+- [x] `trainer.js`
   - `moneyMultiplier(state)` → `1 + MONEY_BONUS_PER_LEVEL × (nivel − 1)`.
   - `addXp(state, xp)` → suma experiencia y sube de nivel las veces que haga falta (un gimnasio puede dar para dos niveles).
-- [ ] `clicker.js`
+- [x] `clicker.js`
   - `clickPower(state)` → `CLICK_BASE + nivel de Poder de click`.
   - `click(state)` → suma `clickPower × moneyMultiplier` a las monedas.
-- [ ] `production.js`
+- [x] `production.js`
   - `teamProduction(state)` → suma `productionOf` de los 6 equipados × `(1 + TRAINING_BONUS × nivel de Entrenamiento)` × `moneyMultiplier`.
   - `tick(state, seconds)` → suma `teamProduction × seconds`.
   - La interfaz muestra la producción con esta misma función: nunca la recalcules en un componente.
-- [ ] `gacha.js`
+- [x] `gacha.js`
   - `pullPrice(state)` → `round(PULL_BASE_PRICE × PULL_PRICE_GROWTH^tiradas × (1 − descuento))`.
   - `rollPokemon(generation, rng)` → sortea la rareza con `pickWeighted` y luego un Pokémon de esa rareza. Devuelve un id. Es la única función con azar.
   - `applyPull(state, id)` → si no llega el dinero, devuelve el estado sin cambios. Si llega: cobra, suma una tirada y `XP_PER_PULL`, y:
@@ -503,15 +519,15 @@ Todas reciben el estado y devuelven uno nuevo (`{ ...state }`), sin modificar el
     - Repetido con menos de 5★ → +1★.
     - Repetido con 5★ → `MAX_STARS_REFUND × precio` en monedas y `XP_PER_MAX_DUPLICATE`.
   - `pullOutcome(state, id)` → `'new' | 'star' | 'refund'`, para que la interfaz sepa qué mensaje enseñar.
-- [ ] `team.js`
+- [x] `team.js`
   - `equip(state, id, replaceId?)` → equipa un Pokémon de la colección; si el equipo está lleno, necesita `replaceId`.
   - `unequip(state, id)`.
   - Nunca más de 6, nunca repetidos, nunca un Pokémon que no tienes.
-- [ ] `shop.js`
+- [x] `shop.js`
   - `upgradeCost(key, level)` → `round(baseCost × growth^level)`.
   - `upgradeStatus(state, key)` → `'locked' | 'max' | 'available'` (y `canAfford` aparte).
   - `buyUpgrade(state, key)` → solo si está disponible y llega el dinero.
-- [ ] `battle.js`
+- [x] `battle.js`
   - `battleDuration(state)` → `BATTLE_SECONDS + BATTLE_SECONDS_PER_LEVEL × nivel de Cronómetro`.
   - `clickDamage(state)` → `clickPower × (1 + BATTLE_DAMAGE_PER_LEVEL × nivel de Ataque)`.
   - `hasTypeAdvantage(entry, gym)` → si alguno de sus tipos está en `STRONG_AGAINST[gym.type]`.
@@ -524,19 +540,19 @@ Todas reciben el estado y devuelven uno nuevo (`{ ...state }`), sin modificar el
 
 Un archivo de test al lado de cada uno de `game/`, con estados pequeños escritos a mano:
 
-- [ ] `trainer.test.js`: subir varios niveles de golpe; el bonus de dinero.
-- [ ] `clicker.test.js`: el click con y sin mejora y con bonus de nivel.
-- [ ] `production.test.js`: equipo vacío da 0; las estrellas y el Entrenamiento multiplican; los de la caja no producen.
-- [ ] `gacha.test.js`: el precio sube y el descuento lo baja; sin dinero no pasa nada; nuevo, +1★, tope de 5★ con devolución; se equipa solo si hay hueco; con un `rng` fijo sale siempre el mismo Pokémon; en 10.000 tiradas con `Math.random`, las rarezas salen con proporciones cercanas a `RARITY_WEIGHTS`.
-- [ ] `team.test.js`: límite de 6, sin repetidos, cambiar uno por otro.
-- [ ] `shop.test.js`: bloqueada por nivel, máximo, coste creciente, sin dinero.
-- [ ] `battle.test.js`: duración y daño con mejoras; ventaja de tipo (agua contra Blaine sí, contra Misty no); el tope del equipo; solo se gana el gimnasio actual.
-- [ ] `economy.test.js`: con las mismas estrellas, un Pokémon con más stats o más rareza nunca produce menos.
-- [ ] `npm test` en verde antes de seguir.
+- [x] `trainer.test.js`: subir varios niveles de golpe; el bonus de dinero.
+- [x] `clicker.test.js`: el click con y sin mejora y con bonus de nivel.
+- [x] `production.test.js`: equipo vacío da 0; las estrellas y el Entrenamiento multiplican; los de la caja no producen.
+- [x] `gacha.test.js`: el precio sube y el descuento lo baja; sin dinero no pasa nada; nuevo, +1★, tope de 5★ con devolución; se equipa solo si hay hueco; con un `rng` fijo sale siempre el mismo Pokémon; en 10.000 tiradas con `Math.random`, las rarezas salen con proporciones cercanas a `RARITY_WEIGHTS`.
+- [x] `team.test.js`: límite de 6, sin repetidos, cambiar uno por otro.
+- [x] `shop.test.js`: bloqueada por nivel, máximo, coste creciente, sin dinero.
+- [x] `battle.test.js`: duración y daño con mejoras; ventaja de tipo (agua contra Blaine sí, contra Misty no); el tope del equipo; solo se gana el gimnasio actual.
+- [x] `economy.test.js`: con las mismas estrellas, un Pokémon con más stats o más rareza nunca produce menos.
+- [x] `npm test` en verde antes de seguir.
 
 ### 3.6 `store/`: el estado global
 
-- [ ] `initialState.js`:
+- [x] `initialState.js`:
 
   ```js
   export const initialState = {
@@ -559,7 +575,7 @@ Un archivo de test al lado de cada uno de `game/`, con estados pequeños escrito
   };
   ```
 
-- [ ] `gameReducer.js` → acciones, cada una llama a su función de `game/`:
+- [x] `gameReducer.js` → acciones, cada una llama a su función de `game/`:
   - `CLICK`
   - `TICK` con `{ seconds }`
   - `PULL` con `{ id }`: el sorteo se hace **fuera** del reducer (`rollPokemon(generation, Math.random)`) y el reducer solo aplica el resultado. Así el reducer sigue siendo puro y se puede testear.
@@ -569,10 +585,10 @@ Un archivo de test al lado de cada uno de `game/`, con estados pequeños escrito
   - `POKEMON_LOADED` con `{ pokemon: [...] }`: añade datos a `pokemonById`
   - `RESET`: vuelve a `initialState` pero conserva `pokemonById`
   - Las acciones desconocidas devuelven el estado tal cual.
-- [ ] El combate **no** va en el store: su vida y su tiempo son estado local de la pantalla de combate (fase 5). Al store solo llega el resultado (`GYM_WON`).
-- [ ] `GameContext.jsx` → `GameProvider` con `useReducer`, y un hook `useGame()` que devuelve `{ state, dispatch }` y lanza un error si se usa fuera del provider.
-- [ ] El `GameProvider` va en `App.jsx`, envolviendo el layout.
-- [ ] `gameReducer.test.js`: una prueba por acción y una con una acción desconocida.
+- [x] El combate **no** va en el store: su vida y su tiempo son estado local de la pantalla de combate (fase 5). Al store solo llega el resultado (`GYM_WON`).
+- [x] `GameContext.jsx` → `GameProvider` con `useReducer`, y un hook `useGame()` que devuelve `{ state, dispatch }` y lanza un error si se usa fuera del provider.
+- [x] El `GameProvider` va en `App.jsx`, envolviendo el layout.
+- [x] `gameReducer.test.js`: una prueba por acción y una con una acción desconocida.
 
 **Al terminar:** tests en verde y commit `feat: lógica del juego y store`.
 
@@ -680,6 +696,7 @@ Al final el juego produce solo, guarda la partida y se siente bien al jugarlo. E
 
 - [ ] `saveGame(state)` y `loadGame()` con `try/catch`, en la clave `pkc:save`.
 - [ ] Se guarda todo menos `pokemonById`, más `savedAt`.
+- [ ] Al cargar, limpia la partida: fuera del equipo los ids que no estén en `collection`, estrellas entre 1 y 5, y números (`coins`, niveles) que sean finitos y no negativos. Un guardado manipulado o corrupto no puede producir `NaN`.
 - [ ] La partida se carga **antes** del primer render, con el inicializador perezoso de `useReducer`:
 
   ```js

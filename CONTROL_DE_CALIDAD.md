@@ -7,28 +7,31 @@ Stack: **React + Vite**, datos de la **PokeAPI**.
 
 ## 1. Herramientas
 
-| Herramienta | Para qué | Instalación |
-|---|---|---|
-| ESLint | Errores y malas prácticas en el código | Viene con la plantilla de Vite |
-| Prettier | Formato uniforme | `npm i -D prettier eslint-config-prettier` |
-| Vitest | Tests unitarios (lógica del juego) | `npm i -D vitest` |
-| React Testing Library | Tests de componentes | `npm i -D @testing-library/react @testing-library/jest-dom jsdom` |
-| Lighthouse | Rendimiento, accesibilidad, buenas prácticas | DevTools de Chrome |
-| React DevTools | Ver estado y re-renders | Extensión del navegador |
+| Herramienta           | Para qué                                     | Instalación                                                                                                                     |
+| --------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| ESLint                | Errores y malas prácticas en el código       | `npm i -D eslint @eslint/js globals eslint-plugin-react-hooks eslint-plugin-react-refresh` (la plantilla de Vite ya no lo trae) |
+| Prettier              | Formato uniforme                             | `npm i -D prettier eslint-config-prettier`                                                                                      |
+| Vitest                | Tests unitarios (lógica del juego)           | `npm i -D vitest`                                                                                                               |
+| React Testing Library | Tests de componentes                         | `npm i -D @testing-library/react @testing-library/jest-dom jsdom`                                                               |
+| Lighthouse            | Rendimiento, accesibilidad, buenas prácticas | DevTools de Chrome                                                                                                              |
+| React DevTools        | Ver estado y re-renders                      | Extensión del navegador                                                                                                         |
 
-Scripts recomendados en `package.json`:
+Scripts en `package.json`:
 
 ```json
 "scripts": {
   "dev": "vite",
   "build": "vite build",
   "preview": "vite preview",
-  "lint": "eslint .",
+  "lint": "eslint . --max-warnings 0",
   "format": "prettier --write .",
+  "format:check": "prettier --check .",
   "test": "vitest",
-  "check": "npm run lint && vitest run && npm run build"
+  "check": "npm run lint && npm run format:check && vitest run && npm run build"
 }
 ```
+
+`--max-warnings 0` hace que un aviso (un `console.log`, una dependencia que falta en un `useEffect`) también bloquee el `check`. Si `format:check` falla, ejecuta `npm run format` y vuelve a probar.
 
 > Antes de hacer push: `npm run check`. Si falla, no se sube.
 
@@ -49,6 +52,7 @@ Scripts recomendados en `package.json`:
 ## 3. Checklist por capa
 
 ### `api/` y `services/`
+
 - [ ] Toda petición tiene `try/catch` y devuelve un error entendible.
 - [ ] Se comprueba `response.ok` antes de leer el JSON.
 - [ ] Los datos se transforman con `models/pokemon.js` antes de llegar al juego.
@@ -57,12 +61,14 @@ Scripts recomendados en `package.json`:
 - [ ] Las cargas van por lotes (p. ej. de 20 en 20), nunca 151 peticiones de golpe sin control.
 
 ### `models/`
+
 - [ ] Si falta el artwork oficial, se usa `sprites.front_default`; si falta también, una imagen de reserva.
 - [ ] Los nombres se muestran bien (`mr-mime` → `Mr. Mime`).
 - [ ] Los tipos se ordenan por `slot`.
 - [ ] La rareza legendaria/singular sale de `is_legendary` / `is_mythical` de la especie, no de la experiencia base.
 
 ### `game/` y `config/`
+
 - [ ] Las monedas nunca bajan de 0.
 - [ ] No se puede comprar sin monedas suficientes.
 - [ ] El coste sube con cada nivel según la fórmula de `economy.js`.
@@ -70,6 +76,7 @@ Scripts recomendados en `package.json`:
 - [ ] No aparecen `NaN`, `Infinity` ni decimales raros (`0.30000000004`).
 
 ### `store/`
+
 - [ ] El reducer es puro: no muta el estado, devuelve uno nuevo.
 - [ ] Toda acción tiene un `type` definido; acciones desconocidas devuelven el estado tal cual.
 - [ ] La partida guardada incluye un número de versión (`saveVersion`) por si cambia la estructura.
@@ -78,12 +85,14 @@ Scripts recomendados en `package.json`:
 - [ ] Si el guardado está corrupto o es antiguo, el juego arranca con el estado inicial sin romperse.
 
 ### `hooks/`
+
 - [ ] Todo `setInterval` / `addEventListener` se limpia en el `return` del `useEffect`.
 - [ ] Las dependencias de `useEffect` están completas (ESLint avisa).
 - [ ] Los hooks de datos devuelven `{ data, loading, error }`.
 - [ ] Una petición que termina después de desmontar el componente no actualiza el estado (usar `AbortController`).
 
 ### `components/`
+
 - [ ] Reciben datos por props, no los buscan ellos.
 - [ ] Las listas usan `key={pokemon.id}`, nunca el índice.
 - [ ] Hay estado de carga (Loader) y estado de error con opción de reintentar.
@@ -94,6 +103,7 @@ Scripts recomendados en `package.json`:
 ## 4. Pruebas manuales del juego
 
 ### Flujo básico
+
 - [ ] Al hacer click en el botón principal, las monedas suben lo que deben.
 - [ ] Se puede capturar el primer Pokémon tras unos pocos clicks.
 - [ ] Al comprar, se restan las monedas y el nivel sube a 1.
@@ -102,12 +112,14 @@ Scripts recomendados en `package.json`:
 - [ ] "Cargar más" trae el siguiente lote sin duplicar Pokémon.
 
 ### Guardado
+
 - [ ] Recargar la página mantiene monedas, Pokémon y niveles.
 - [ ] Cerrar y abrir el navegador mantiene la partida.
 - [ ] Botón de reiniciar partida (si lo hay) pide confirmación y deja todo a cero.
 - [ ] Funciona en ventana de incógnito (sin localStorage persistente) sin errores.
 
 ### Casos límite
+
 - [ ] Hacer clicks muy rápidos no rompe el contador.
 - [ ] Dejar la pestaña en segundo plano y volver: el contador no se dispara ni se congela de forma rara.
 - [ ] Sin conexión (DevTools → Network → Offline): aparece un mensaje de error, no una pantalla en blanco.
@@ -115,6 +127,7 @@ Scripts recomendados en `package.json`:
 - [ ] Cifras muy grandes se formatean bien (`1,5 mil`, `2,3 M`).
 
 ### Equilibrio del juego
+
 - [ ] El primer Pokémon cuesta poco; los legendarios, mucho.
 - [ ] Siempre hay algo que comprar "pronto" (el jugador no se queda 10 minutos esperando).
 - [ ] Ningún Pokémon barato produce más que uno caro.
@@ -203,5 +216,5 @@ Prioridad media (React Testing Library):
 ## 11. Registro de bugs
 
 | Fecha | Descripción | Cómo reproducirlo | Estado |
-|---|---|---|---|
-| | | | |
+| ----- | ----------- | ----------------- | ------ |
+|       |             |                   |        |

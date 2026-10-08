@@ -40,7 +40,7 @@ Antes de escribir código, sabes qué datos te da la API, qué incluye la primer
     - `types[].type.name` y `types[].slot`
     - `stats[].stat.name` y `stats[].base_stat` (su suma marcará la producción y el precio)
   - De `/pokemon-species/{id}`: `is_legendary` e `is_mythical` (para la rareza).
-- [ ] Lee la sección de *fair use* de la documentación: no hace falta clave, pero hay que cachear para no saturar la API. Son dos peticiones por Pokémon (302 para la primera generación), así que la caché es obligatoria.
+- [ ] Lee la sección de _fair use_ de la documentación: no hace falta clave, pero hay que cachear para no saturar la API. Son dos peticiones por Pokémon (302 para la primera generación), así que la caché es obligatoria.
 
 ### 0.2 Definir el MVP
 
@@ -58,100 +58,65 @@ Escribe en el README qué entra en la versión 1 y qué no. Propuesta:
 
 **Al terminar:** tienes los campos apuntados, el MVP escrito y un diseño de pantalla y tarjeta.
 
-## Fase 1 · Proyecto base
+## Fase 1 · Proyecto base ✅
 
 Al final de esta fase tienes un React vacío y limpio, en GitHub, con las carpetas creadas y las herramientas de calidad funcionando.
 
-> Parte de esta fase ya está hecha: la carpeta `pokeclicker` con toda la estructura, el repositorio en GitHub y `CONTROL_DE_CALIDAD.md`. Lo hecho está marcado con `[x]`.
+> **Fase terminada** (8 oct 2026). Abajo queda lo que se hizo y por qué, como referencia.
 
 ### 1.1 Crear el proyecto con Vite dentro de `pokeclicker`
 
-Los archivos base (`package.json`, `index.html`, `vite.config.js`, `src/main.jsx`, `src/App.jsx`) existen pero están vacíos. Bórralos y deja que Vite los genere **en la carpeta actual** (el `.`), no en una nueva:
+- [x] Proyecto Vite + React (Vite 8, React 19) generado con la plantilla `react` y copiado dentro de `pokeclicker`, sin tocar la estructura de carpetas.
+- [x] `package.json` con `"name": "pokeclicker"`.
+- [x] `.gitignore` de la plantilla, más `.env` y `.env.*`.
 
-```bash
-cd pokeclicker
-rm package.json index.html vite.config.js src/main.jsx src/App.jsx
-npm create vite@latest . -- --template react
-npm install
-npm run dev
-```
-
-- [ ] Cuando pregunte qué hacer porque la carpeta no está vacía, elige **Ignore files and continue** (nunca «Remove existing files»: borraría tu estructura).
-- [ ] Revisa que el `.gitignore` sigue incluyendo `node_modules`, `dist` y `.env` (Vite puede haberlo sustituido por el suyo).
-- [ ] Abre `http://localhost:5173` y comprueba que sale la página de ejemplo de Vite.
+Si alguna vez tienes que repetirlo en una carpeta que ya tiene archivos: `npm create vite@latest . -- --template react` y, cuando pregunte, **Ignore files and continue** (nunca «Remove existing files»).
 
 ### 1.2 Git y GitHub
 
-- [x] `git init` y primer commit.
 - [x] Repositorio `pokeclicker` en GitHub: `https://github.com/Berni14/pokeclicker`, conectado como `origin` en la rama `main`.
-- [x] `.gitignore` con `node_modules` y `dist`.
-- [ ] Commit `chore: proyecto base con Vite + React` y `git push`.
+- [x] Fase hecha en la rama `fase-1-base` y fusionada en `main`.
 
 ### 1.3 Limpiar la plantilla
 
-- [ ] Borra `src/App.css`, `src/index.css`, `src/assets/react.svg` y `public/vite.svg`.
-- [ ] Deja `App.jsx` devolviendo solo `<h1>Pokémon Clicker</h1>`.
-- [ ] Cambia el `<title>` de `index.html` y apunta el favicon a `public/favicon.svg`.
+- [x] Fuera `App.css`, `index.css`, `src/assets/` y los iconos de Vite.
+- [x] `App.jsx` devuelve solo `<h1>Pokémon Clicker</h1>`.
+- [x] `index.html` con `lang="es"`, `<title>Pokémon Clicker</title>`, descripción y favicon propio (una Poké Ball en `public/favicon.svg`).
 
 ### 1.4 Herramientas de calidad
 
+> La plantilla actual de Vite ya no trae ESLint: trae **oxlint**, que usa un binario nativo. En los ordenadores con la política de control de aplicaciones de Windows activada (como los del aula) ese binario está bloqueado y `npm run lint` no arranca. Por eso se usa ESLint, que es JavaScript puro y funciona en cualquier equipo.
+
 ```bash
-npm i -D prettier eslint-config-prettier vitest @testing-library/react @testing-library/jest-dom jsdom
+npm i -D eslint @eslint/js globals eslint-plugin-react-hooks eslint-plugin-react-refresh eslint-config-prettier
+npm i -D prettier vitest @testing-library/react @testing-library/jest-dom jsdom
 ```
 
-- [ ] Crea `.prettierrc` con `{ "singleQuote": true, "semi": true }` (o lo que prefieras, pero siempre igual).
-- [ ] En `eslint.config.js` (la plantilla de Vite usa la configuración *flat*), importa la config de Prettier y ponla **la última** del array, para que desactive las reglas de formato:
-
-  ```js
-  import eslintConfigPrettier from 'eslint-config-prettier/flat';
-
-  export default defineConfig([
-    // ...lo que ya trae la plantilla
-    eslintConfigPrettier,
-  ]);
-  ```
-
-- [ ] Añade los scripts `lint`, `format`, `test` y `check` del documento de control de calidad.
-- [ ] En `vite.config.js` añade la configuración de tests:
-
-  ```js
-  test: {
-    environment: 'jsdom',
-    setupFiles: './src/setupTests.js',
-  },
-  ```
-
-- [ ] Crea `src/setupTests.js`, que activa los *matchers* de jest-dom (`toBeInTheDocument`…) y limpia el DOM entre tests:
-
-  ```js
-  import '@testing-library/jest-dom/vitest';
-  import { afterEach } from 'vitest';
-  import { cleanup } from '@testing-library/react';
-
-  afterEach(cleanup);
-  ```
-
-- [ ] En cada test importa lo que uses: `import { describe, it, expect, vi } from 'vitest';`. Así ESLint no se queja de variables no definidas y no hace falta `globals: true`.
-- [ ] Instala en VS Code las extensiones de ESLint y Prettier y activa *format on save*.
+- [x] `eslint.config.js` (configuración _flat_) con:
+  - las reglas recomendadas de JS, de los hooks de React (incluye `exhaustive-deps`) y de React Refresh;
+  - `no-console` como aviso;
+  - `eslintConfigPrettier` **la última** del array, para que desactive las reglas que chocan con Prettier.
+- [x] `.prettierrc` con `{ "singleQuote": true, "semi": true }` y `.prettierignore` (`dist`, `coverage`, `package-lock.json`).
+- [x] Scripts en `package.json`:
+  - `lint` → `eslint . --max-warnings 0`: un aviso (un `console.log` olvidado, una dependencia que falta en un `useEffect`) también hace fallar el `check`.
+  - `format` → `prettier --write .` y `format:check` → `prettier --check .`.
+  - `check` → `lint`, `format:check`, tests y `build`, por ese orden.
+- [x] `vite.config.js` con `test: { environment: 'jsdom', setupFiles: './src/setupTests.js' }`.
+- [x] `src/setupTests.js`: activa los _matchers_ de jest-dom (`toBeInTheDocument`…) y limpia el DOM entre tests.
+- [x] Los tests importan lo que usan: `import { describe, it, expect, vi } from 'vitest';`. Así no hace falta `globals: true`.
+- [x] `src/App.test.jsx`: primer test (el título se pinta). Comprueba que todo el montaje de tests funciona y evita que `vitest run` falle por no encontrar tests.
+- [x] `.vscode/extensions.json` recomienda las extensiones de ESLint y Prettier. Actívalas y pon _format on save_ en tu VS Code.
 
 ### 1.5 Carpetas y estilos base
 
-- [x] Estructura de carpetas creada. Como referencia, el comando equivalente en Git Bash es:
-
-  ```bash
-  mkdir -p public/sounds src/{api,services,models,config,game,store,hooks,pages,utils,styles}
-  mkdir -p src/components/{PokemonCard,CardGrid,ClickButton,CoinCounter,TypeBadge,Modal,Loader}
-  ```
-
-  (En PowerShell no funcionan las llaves; ahí se pasan las rutas separadas por comas: `mkdir src/api, src/services, …`.)
-
+- [x] Estructura de carpetas (incluidas `Modal` y `public/sounds`). Las carpetas vacías llevan un `.gitkeep` para que Git las guarde.
 - [x] `CONTROL_DE_CALIDAD.md` en la raíz.
-- [ ] Crea `styles/tokens.css` con los colores, fuentes y espaciados de Figma como variables CSS en `:root`.
-- [ ] Crea `styles/reset.css` (un reset moderno corto) y `styles/global.css` (body, fuente, fondo).
-- [ ] Impórtalos en `main.jsx`, en ese orden: tokens, reset, global.
-- [ ] Añade `public/pokeball.svg`: será la imagen de reserva cuando un Pokémon no tenga sprite.
+- [x] `styles/tokens.css` con colores, fuentes, espaciados y radios **provisionales**: cuando tengas el diseño de Figma (0.3), cambia solo los valores.
+- [x] `styles/reset.css` (reset corto, con `prefers-reduced-motion`) y `styles/global.css` (body, títulos y foco visible).
+- [x] Importados en `main.jsx` en orden: tokens, reset, global.
+- [x] `public/pokeball.svg`: imagen de reserva para Pokémon sin sprite.
 
-**Al terminar:** `npm run check` pasa, la página muestra el título con tus estilos y haces commit `chore: estructura de carpetas y herramientas`.
+**Resultado:** `npm run check` pasa (lint, formato, 1 test y build) y `npm run preview` sirve la página con el título, los estilos y el favicon.
 
 ## Fase 2 · Datos
 
@@ -226,7 +191,7 @@ const FALLBACK_SPRITE = `${import.meta.env.BASE_URL}pokeball.svg`;
 
 export function toPokemon(raw, species) {
   const stats = Object.fromEntries(
-    raw.stats.map((s) => [s.stat.name, s.base_stat])
+    raw.stats.map((s) => [s.stat.name, s.base_stat]),
   );
   const statTotal = Object.values(stats).reduce((a, b) => a + b, 0);
   return {
@@ -292,7 +257,7 @@ export async function getPokemonByIds(ids) {
   for (let i = 0; i < ids.length; i += BATCH_SIZE) {
     const chunk = ids.slice(i, i + BATCH_SIZE);
     const loaded = await Promise.all(
-      chunk.map((id) => getCached(id) ?? fetchOne(id))
+      chunk.map((id) => getCached(id) ?? fetchOne(id)),
     );
     result.push(...loaded);
   }
@@ -354,15 +319,15 @@ export const costAt = (p, level) =>
 
 Con estos números (aproximados):
 
-| Pokémon | Stats | Rareza | Producción | Coste inicial |
-| --- | --- | --- | --- | --- |
-| Caterpie (#10) | 195 | Común | 0,4/s | 10 |
-| Bulbasaur (#1) | 318 | Rara | 1,2/s | 38 |
-| Chansey (#113) | 450 | Épica | 3/s | 150 |
-| Charizard (#6) | 534 | Épica | 4,3/s | 271 |
-| Articuno (#144) | 580 | Legendaria | 10,1/s | 1222 |
-| Mew (#151) | 600 | Singular | 10,8/s | 1382 |
-| Mewtwo (#150) | 680 | Legendaria | 13,9/s | 2210 |
+| Pokémon         | Stats | Rareza     | Producción | Coste inicial |
+| --------------- | ----- | ---------- | ---------- | ------------- |
+| Caterpie (#10)  | 195   | Común      | 0,4/s      | 10            |
+| Bulbasaur (#1)  | 318   | Rara       | 1,2/s      | 38            |
+| Chansey (#113)  | 450   | Épica      | 3/s        | 150           |
+| Charizard (#6)  | 534   | Épica      | 4,3/s      | 271           |
+| Articuno (#144) | 580   | Legendaria | 10,1/s     | 1222          |
+| Mew (#151)      | 600   | Singular   | 10,8/s     | 1382          |
+| Mewtwo (#150)   | 680   | Legendaria | 13,9/s     | 2210          |
 
 El primer Pokémon cuesta unos 10 clicks y los legendarios son los más caros y los que más producen. Son un punto de partida: en 5.4 los ajustarás jugando.
 
@@ -448,7 +413,7 @@ Al final se puede jugar: clicas, ganas monedas y compras Pokémon desde sus tarj
   ```js
   const handleBuy = useCallback(
     (id) => dispatch({ type: 'BUY_POKEMON', id }),
-    [dispatch]
+    [dispatch],
   );
   // <PokemonCard … onBuy={handleBuy} />
   ```
@@ -480,7 +445,11 @@ Al final el juego produce solo, guarda la partida y se siente bien al jugarlo. E
 - [ ] La partida se carga **antes** del primer render, con el inicializador perezoso de `useReducer`:
 
   ```js
-  const [state, dispatch] = useReducer(gameReducer, undefined, createInitialState);
+  const [state, dispatch] = useReducer(
+    gameReducer,
+    undefined,
+    createInitialState,
+  );
   ```
 
   `createInitialState()` llama a `loadGame()`. Si la partida existe y su `saveVersion` coincide, la mezcla con `initialState`; si no coincide o está corrupta, devuelve `initialState`. Así el autoguardado nunca puede pisar la partida con un estado vacío.
@@ -550,24 +519,24 @@ Al final el juego está publicado con un enlace que puedes enseñar, y el reposi
 - [ ] Añádelo a tu portfolio.
 - [ ] Publicación en LinkedIn con el GIF: qué has hecho, qué has aprendido (cachear una API, estado con `useReducer`, tests) y el enlace.
 
-**Al terminar:** versión `v1.0.0` publicada. Crea la *release* en GitHub con ese tag.
+**Al terminar:** versión `v1.0.0` publicada. Crea la _release_ en GitHub con ese tag.
 
 ## Fase 7 · Ampliaciones
 
 Con el MVP publicado, cada ampliación es una rama, una versión nueva (`v1.1.0`, `v1.2.0`…) y algo nuevo que contar. Están ordenadas de más fácil a más difícil, y cada una dice qué carpeta toca, para que veas que la estructura aguanta.
 
-| Ampliación | Qué aprendes | Dónde va |
-| --- | --- | --- |
-| Mejoras del click (×2, ×5…) | Nuevas acciones en el reducer | `config/upgrades.js`, `game/`, `store/` |
-| Segunda generación (152–251) | Que tu estructura escala | Una línea en `config/generations.js` |
-| Pokémon *shiny* aleatorios al clicar | Probabilidades y animaciones | `utils/random.js`, `game/clicker.js` |
-| Logros | Comprobar condiciones tras cada acción | `game/achievements.js`, componente `Toast` |
-| Sonidos con opción de silenciar | Audio en el navegador y ajustes guardados | `public/sounds/`, `pages/SettingsPage.jsx` |
-| Pokédex con React Router | Rutas y páginas de detalle (`/pokedex/25`) | `pages/PokedexPage.jsx`, `api/species.js` |
+| Ampliación                               | Qué aprendes                                    | Dónde va                                    |
+| ---------------------------------------- | ----------------------------------------------- | ------------------------------------------- |
+| Mejoras del click (×2, ×5…)              | Nuevas acciones en el reducer                   | `config/upgrades.js`, `game/`, `store/`     |
+| Segunda generación (152–251)             | Que tu estructura escala                        | Una línea en `config/generations.js`        |
+| Pokémon _shiny_ aleatorios al clicar     | Probabilidades y animaciones                    | `utils/random.js`, `game/clicker.js`        |
+| Logros                                   | Comprobar condiciones tras cada acción          | `game/achievements.js`, componente `Toast`  |
+| Sonidos con opción de silenciar          | Audio en el navegador y ajustes guardados       | `public/sounds/`, `pages/SettingsPage.jsx`  |
+| Pokédex con React Router                 | Rutas y páginas de detalle (`/pokedex/25`)      | `pages/PokedexPage.jsx`, `api/species.js`   |
 | Evoluciones (subir a nivel X evoluciona) | Datos encadenados de la API (`evolution-chain`) | `api/species.js`, `models/`, `game/shop.js` |
-| Pasar el estado a Zustand | Otra forma de estado global | Solo `store/` |
-| Pasar el proyecto a TypeScript | Tipos para el modelo, el estado y las props | Todo, archivo a archivo |
-| PWA instalable y jugable sin conexión | Service workers y caché de imágenes | `vite-plugin-pwa` |
+| Pasar el estado a Zustand                | Otra forma de estado global                     | Solo `store/`                               |
+| Pasar el proyecto a TypeScript           | Tipos para el modelo, el estado y las props     | Todo, archivo a archivo                     |
+| PWA instalable y jugable sin conexión    | Service workers y caché de imágenes             | `vite-plugin-pwa`                           |
 
 Si alguna ampliación te obliga a tocar muchas carpetas que no son las de la tabla, es una señal de que algo de las fases anteriores está mezclado: es buen momento para refactorizar.
 

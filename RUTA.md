@@ -118,9 +118,11 @@ npm i -D prettier vitest @testing-library/react @testing-library/jest-dom jsdom
 
 **Resultado:** `npm run check` pasa (lint, formato, 1 test y build) y `npm run preview` sirve la página con el título, los estilos y el favicon.
 
-## Fase 2 · Datos
+## Fase 2 · Datos ✅
 
 Al final puedes pedir un lote de Pokémon y recibirlos ya transformados a tu formato, sin repetir peticiones. Todavía no hay interfaz: lo pruebas en la consola.
+
+> **Fase terminada** (8 oct 2026). Cada archivo tiene su test al lado (`*.test.js`), con respuestas reales de la PokeAPI recortadas en `src/__mocks__/` (Pikachu, Mewtwo y Chansey).
 
 ### 2.1 `api/client.js`: el fetch base
 
@@ -215,14 +217,14 @@ export function toPokemon(raw, species) {
 }
 ```
 
-- [ ] Añade una función `formatName(name)` en `utils/format.js` para casos como `mr-mime` o `nidoran-f`.
+- [x] Añade una función `formatName(name)` en `utils/format.js` para casos como `mr-mime` o `nidoran-f`.
 
 ### 2.4 `services/cache.js`
 
-- [ ] Un `Map` en memoria y, detrás, localStorage con una clave versionada (`pkc:pokemon:v1`). Guarda el **modelo reducido**, nunca la respuesta de la API.
-- [ ] Funciones `getCached(id)` y `setCached(pokemon)`.
-- [ ] Envuelve todo acceso a localStorage en `try/catch` (en incógnito o con el almacenamiento lleno puede fallar).
-- [ ] Usa siempre el prefijo `pkc:` en las claves: en GitHub Pages todos tus proyectos de `berni14.github.io` comparten el mismo localStorage.
+- [x] Un `Map` en memoria y, detrás, localStorage con una clave versionada (`pkc:pokemon:v1`). Guarda el **modelo reducido**, nunca la respuesta de la API.
+- [x] Funciones `getCached(id)` y `setCached(pokemon)`.
+- [x] Envuelve todo acceso a localStorage en `try/catch` (en incógnito o con el almacenamiento lleno puede fallar).
+- [x] Usa siempre el prefijo `pkc:` en las claves: en GitHub Pages todos tus proyectos de `berni14.github.io` comparten el mismo localStorage.
 
 ### 2.5 `services/pokemonService.js`
 
@@ -270,15 +272,20 @@ export function getPokemonBatch(fromId, count) {
 }
 ```
 
-- [ ] Las peticiones compartidas no se cancelan con `signal` (si una la cancelara, la otra se quedaría sin datos). La cancelación se gestiona en el hook (4.1).
-- [ ] `getPokemonByIds` servirá también para cargar al arrancar los Pokémon que ya tienes, aunque estén en lotes que todavía no se han mostrado (5.2).
+- [x] Las peticiones compartidas no se cancelan con `signal` (si una la cancelara, la otra se quedaría sin datos). La cancelación se gestiona en el hook (4.1).
+- [x] `getPokemonByIds` servirá también para cargar al arrancar los Pokémon que ya tienes, aunque estén en lotes que todavía no se han mostrado (5.2).
 
 ### 2.6 Probarlo
 
-- [ ] En `App.jsx`, dentro de un `useEffect`, llama a `getPokemonBatch(1, 20)` y haz `console.log` del resultado.
-- [ ] Recarga: en la pestaña Network de DevTools, la segunda vez no debería salir ninguna petición a la PokeAPI.
-- [ ] La primera vez deberían salir 40 peticiones (20 de `pokemon` y 20 de `pokemon-species`), no 80, aunque `StrictMode` ejecute el efecto dos veces.
-- [ ] Quita el `console.log` cuando funcione.
+En vez de un `console.log` temporal en `App.jsx`, lo comprueban los tests (`npm test`), que se quedan para siempre:
+
+- [x] `services/pokemonService.test.js`: un lote son 40 peticiones (pokemon + especie); pedirlo otra vez no hace ninguna; dos peticiones simultáneas del mismo lote (lo que hace `StrictMode`) siguen siendo 40, no 80; nunca hay más de 20 Pokémon pidiéndose a la vez; si falla uno, el reintento solo pide ese.
+- [x] `services/cache.test.js`: sobrevive a una recarga (localStorage), a datos corruptos y a un localStorage bloqueado.
+- [x] `api/client.test.js`: respuesta no ok, fallo de red y cancelación.
+- [x] `models/pokemon.test.js` y `config/rarities.test.js`: imagen de reserva, orden de tipos, Mewtwo legendario y Chansey no.
+- [x] Prueba única contra la API real (no se guarda: los tests nunca llaman a la API real): el primer lote tarda ~1 s, desde caché 0 ms; el último lote va del 141 al 151; cada Pokémon ocupa ~0,3 KB en localStorage (unos 44 KB los 151).
+
+Si quieres verlo tú en el navegador: en `App.jsx`, dentro de un `useEffect`, llama a `getPokemonBatch(1, 20)` y mira la pestaña Network. La primera vez salen 40 peticiones; al recargar, ninguna. Quita el código al terminar.
 
 **Al terminar:** commit `feat: capa de datos con caché`.
 

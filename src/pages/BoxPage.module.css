@@ -1,0 +1,103 @@
+.page {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.views {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.views button {
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  font-weight: 700;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-full);
+}
+
+.views button[aria-pressed='true'] {
+  color: #fff;
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.filters label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+.filters select {
+  min-height: 40px;
+  padding: 0 var(--space-2);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.empty {
+  padding: var(--space-5);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.replaceList {
+  display: grid;
+  gap: var(--space-2);
+  padding: 0;
+  margin-top: var(--space-3);
+  list-style: none;
+}
+
+.replaceList button {
+  width: 100%;
+}
+
+.dexCount {
+  font-weight: 700;
+}
+
+.dex {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.dex li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-2);
+  font-size: var(--font-size-xs);
+  text-align: center;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  overflow-wrap: anywhere;
+}
+
+.dexNumber {
+  color: var(--color-text-muted);
+}
+
+/* Los que faltan, en silueta. */
+.unknown img {
+  filter: brightness(0);
+  opacity: 0.35;
+}
+
+.unknown span:last-child {
+  color: var(--color-text-muted);
+}

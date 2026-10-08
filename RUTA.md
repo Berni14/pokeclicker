@@ -592,23 +592,35 @@ Un archivo de test al lado de cada uno de `game/`, con estados pequeños escrito
 
 **Al terminar:** tests en verde y commit `feat: lógica del juego y store`.
 
-## Fase 4 · Interfaz
+## Fase 4 · Interfaz ✅
 
 Al final se puede jugar: clicas, tiras del gacha, equipas Pokémon, compras mejoras y ves cómo sube el dinero. Haz los componentes de los más simples a los más complejos, y un commit por pantalla.
 
+> **Fase terminada** (8 oct 2026). 144 tests en verde, entre ellos pruebas de la app entera (clicar, tirar, equipar, comprar, fallo de la API y reintento). Además se jugó en Chrome sin ventana con capturas a 390 px y a 1280 px: sin errores en consola y sin scroll horizontal (ni a 360 px).
+>
+> Cambios respecto a lo planeado:
+>
+> - **Adelantado de la fase 6:** `useGameLoop` (en vez del botón temporal de `TICK`) y `formatNumber`. También la página de Ajustes con «Reiniciar partida».
+> - **`GymsPage`** de momento solo lista los líderes y su estado; el combate es la fase 5.
+> - **`PokemonCard`** recibe la acción como `actionLabel` + `onAction(id)` en vez de `children`: unos `children` serían JSX nuevo en cada render y `React.memo` no serviría.
+> - **Errores de la API:** un solo aviso con «Reintentar» en `App`, encima de la página, en vez de en cada pantalla.
+> - **`Modal`:** Escape se gestiona con el evento `cancel` y no se escucha `close`. El `close` del `<dialog>` llega tarde y, al cerrar y tirar otra vez muy rápido, cerraba también el resultado nuevo (lo descubrieron las capturas).
+> - **Foco:** al cambiar de pestaña, el foco va al título de la página nueva.
+> - **Colores:** el color del foco pasa de amarillo a azul (el amarillo apenas se veía sobre el fondo claro) y se añaden colores por rareza en `tokens.css`, todos con contraste ≥ 4,5:1 con texto blanco.
+
 ### 4.1 Navegación y limpieza de la estructura
 
-- [ ] Barra de pestañas (`components/NavTabs/`): Juego, Gacha, Caja, Tienda y Gimnasios. Con el estado de la pestaña en `App` (`useState`), sin React Router de momento.
-- [ ] Cada pestaña es un `<button>` con `aria-current="page"` en la activa. En móvil, la barra va abajo y fija.
-- [ ] `pages/`: `GamePage`, `GachaPage`, `BoxPage`, `ShopPage`, `GymsPage`, `BattlePage` y `SettingsPage` (reiniciar partida; más adelante, sonido).
-- [ ] Borra `pages/PokedexPage.jsx` (la Pokédex es una pestaña de la caja) y `hooks/usePokemonList.js` (ya no se navega por lotes).
+- [x] Barra de pestañas (`components/NavTabs/`): Juego, Gacha, Caja, Tienda y Gimnasios. Con el estado de la pestaña en `App` (`useState`), sin React Router de momento.
+- [x] Cada pestaña es un `<button>` con `aria-current="page"` en la activa. En móvil, la barra va abajo y fija.
+- [x] `pages/`: `GamePage`, `GachaPage`, `BoxPage`, `ShopPage`, `GymsPage`, `BattlePage` y `SettingsPage` (reiniciar partida; más adelante, sonido).
+- [x] Borra `pages/PokedexPage.jsx` (la Pokédex es una pestaña de la caja) y `hooks/usePokemonList.js` (ya no se navega por lotes).
 
 ### 4.2 `hooks/usePokemon.js`: datos para pintar
 
-- [ ] `useOwnedPokemon()`: mira qué ids de `collection` (y de los líderes de gimnasio) no están en `pokemonById`, los pide con `getPokemonByIds` y hace `POKEMON_LOADED`. Devuelve `{ loading, error, retry }`.
-- [ ] Se llama una vez, en `App`. Al recargar la partida, los datos salen de la caché al instante.
-- [ ] `AbortController` en el `useEffect`: antes de cualquier `setState`, `if (controller.signal.aborted) return;`.
-- [ ] Mientras no hay datos de un Pokémon, su tarjeta enseña el `Loader`. La producción no espera: sale de la tabla de la Pokédex.
+- [x] `useOwnedPokemon()`: mira qué ids de `collection` (y de los líderes de gimnasio) no están en `pokemonById`, los pide con `getPokemonByIds` y hace `POKEMON_LOADED`. Devuelve `{ loading, error, retry }`.
+- [x] Se llama una vez, en `App`. Al recargar la partida, los datos salen de la caché al instante.
+- [x] `AbortController` en el `useEffect`: antes de cualquier `setState`, `if (controller.signal.aborted) return;`.
+- [x] Mientras no hay datos de un Pokémon, su tarjeta enseña el `Loader`. La producción no espera: sale de la tabla de la Pokédex.
 
 ### 4.3 Componentes
 
@@ -626,29 +638,29 @@ Las funciones que se pasan a tarjetas memorizadas van con `useCallback` y recibe
 
 ### 4.4 `GamePage`
 
-- [ ] Cabecera con `CoinCounter`, `ClickButton` en el centro y debajo el equipo: 6 huecos, vacíos con un «+» que lleva a la caja.
-- [ ] En escritorio, botón a la izquierda y equipo a la derecha; en móvil, todo en columna.
+- [x] Cabecera con `CoinCounter`, `ClickButton` en el centro y debajo el equipo: 6 huecos, vacíos con un «+» que lleva a la caja.
+- [x] En escritorio, botón a la izquierda y equipo a la derecha; en móvil, todo en columna.
 
 ### 4.5 `GachaPage`
 
-- [ ] Precio de la siguiente tirada y botón «Tirar» (deshabilitado si no llega).
-- [ ] Al tirar: `const id = rollPokemon(state.generation)` → `dispatch({ type: 'PULL', id })` → abre el `Modal` con el resultado.
-- [ ] El resultado según `pullOutcome` (calculado **antes** del `dispatch`): «¡Nuevo!», «★ +1 (3/5)» o «Ya tenía 5★: +X monedas».
-- [ ] El color del fondo del resultado según la rareza, y el nombre de la rareza escrito.
-- [ ] Si los datos del Pokémon aún no han llegado de la API, el `Loader` en el modal; si fallan, mensaje y «Reintentar». La tirada ya está hecha y guardada: lo que falla es solo la imagen.
-- [ ] Tabla con las probabilidades de cada rareza (es buena práctica enseñarlas en cualquier gacha).
+- [x] Precio de la siguiente tirada y botón «Tirar» (deshabilitado si no llega).
+- [x] Al tirar: `const id = rollPokemon(state.generation)` → `dispatch({ type: 'PULL', id })` → abre el `Modal` con el resultado.
+- [x] El resultado según `pullOutcome` (calculado **antes** del `dispatch`): «¡Nuevo!», «★ +1 (3/5)» o «Ya tenía 5★: +X monedas».
+- [x] El color del fondo del resultado según la rareza, y el nombre de la rareza escrito.
+- [x] Si los datos del Pokémon aún no han llegado de la API, el `Loader` en el modal; si fallan, mensaje y «Reintentar». La tirada ya está hecha y guardada: lo que falla es solo la imagen.
+- [x] Tabla con las probabilidades de cada rareza (es buena práctica enseñarlas en cualquier gacha).
 
 ### 4.6 `BoxPage`
 
-- [ ] Dos pestañas: **Mis Pokémon** y **Pokédex**.
-- [ ] Mis Pokémon: `CardGrid` con tu colección; filtros por tipo y rareza (`<select>`) y orden por producción, rareza o número. Botón «Equipar» o «Quitar» en cada tarjeta.
-- [ ] Equipar con el equipo lleno: abre el `Modal` para elegir a quién sustituir.
-- [ ] Pokédex: los 151 en orden; los que tienes con su imagen, los que no en silueta (`filter: brightness(0)`) y con «???». La imagen de los que no tienes se construye con la URL fija de los sprites (`…/sprites/pokemon/{id}.png`): no hace falta pedirlos a la API. Contador «45 / 151».
+- [x] Dos pestañas: **Mis Pokémon** y **Pokédex**.
+- [x] Mis Pokémon: `CardGrid` con tu colección; filtros por tipo y rareza (`<select>`) y orden por producción, rareza o número. Botón «Equipar» o «Quitar» en cada tarjeta.
+- [x] Equipar con el equipo lleno: abre el `Modal` para elegir a quién sustituir.
+- [x] Pokédex: los 151 en orden; los que tienes con su imagen, los que no en silueta (`filter: brightness(0)`) y con «???». La imagen de los que no tienes se construye con la URL fija de los sprites (`…/sprites/pokemon/{id}.png`): no hace falta pedirlos a la API. Contador «45 / 151».
 
 ### 4.7 `ShopPage`
 
-- [ ] Una `UpgradeCard` por mejora, en el orden de `UPGRADES`.
-- [ ] Comprar hace `dispatch({ type: 'BUY_UPGRADE', key })`.
+- [x] Una `UpgradeCard` por mejora, en el orden de `UPGRADES`.
+- [x] Comprar hace `dispatch({ type: 'BUY_UPGRADE', key })`.
 
 **Al terminar:** puedes clicar, tirar, equipar y comprar mejoras, y el dinero sube solo cuando tienes equipo (lo hará de verdad con el bucle de la fase 6; para probar ahora, un botón temporal que haga `TICK`). Commit `feat: interfaz jugable`.
 
@@ -685,12 +697,12 @@ El estado del combate es local: `useReducer` dentro de la página con `{ hp, tim
 
 Al final el juego produce solo, guarda la partida y se siente bien al jugarlo. Es tu MVP terminado.
 
-### 6.1 `hooks/useGameLoop.js`
+### 6.1 `hooks/useGameLoop.js` (hecho en la fase 4)
 
-- [ ] Un único `setInterval` de `TICK_MS` en `App`, no uno por componente.
-- [ ] Calcula los segundos reales pasados con `Date.now()` y envía `dispatch({ type: 'TICK', seconds })`. Así, si el navegador ralentiza la pestaña en segundo plano, no pierdes producción.
-- [ ] Limpia el intervalo en el `return` del `useEffect`.
-- [ ] Durante un combate el juego sigue produciendo (el bucle está en `App`, no en la página).
+- [x] Un único `setInterval` de `TICK_MS` en `App`, no uno por componente.
+- [x] Calcula los segundos reales pasados con `Date.now()` y envía `dispatch({ type: 'TICK', seconds })`. Así, si el navegador ralentiza la pestaña en segundo plano, no pierdes producción.
+- [x] Limpia el intervalo en el `return` del `useEffect`.
+- [x] Durante un combate el juego sigue produciendo (el bucle está en `App`, no en la página).
 
 ### 6.2 Guardado (`store/persistence.js` y `hooks/useAutosave.js`)
 
@@ -711,12 +723,12 @@ Al final el juego produce solo, guarda la partida y se siente bien al jugarlo. E
 
 - [ ] Ganancias mientras no estabas: al cargar, `tick(state, min((ahora − savedAt) / 1000, MAX_OFFLINE_SECONDS))`. Como la producción sale de la tabla de la Pokédex, no hay que esperar a la API. Enséñalo al volver: «Mientras no estabas, tu equipo ganó X monedas».
 - [ ] Autoguardado cada `AUTOSAVE_MS` y también en `visibilitychange`.
-- [ ] `SettingsPage`: «Reiniciar partida» con confirmación en el `Modal` (`RESET`).
+- [x] `SettingsPage`: «Reiniciar partida» con confirmación en el `Modal` (`RESET`).
 
 ### 6.3 Formato y sensación de juego
 
-- [ ] `utils/format.js` → `formatNumber` con `Intl.NumberFormat('es-ES', { notation: 'compact', maximumFractionDigits: 1 })`: 1500 → «1,5 mil».
-- [ ] Las monedas se guardan con decimales, pero se muestran con `formatNumber(Math.floor(coins))`.
+- [x] `utils/format.js` → `formatNumber` con `Intl.NumberFormat('es-ES', { notation: 'compact', maximumFractionDigits: 1 })`: 1500 → «1,5 mil».
+- [x] Las monedas se guardan con decimales, pero se muestran con `formatNumber(Math.floor(coins))`.
 - [ ] Animación de «+X» flotando al clicar y un pequeño rebote del botón.
 - [ ] Animación de la tirada (la Poké Ball se agita y se abre) y destello del color de la rareza.
 - [ ] Sacudida del líder al recibir daño.

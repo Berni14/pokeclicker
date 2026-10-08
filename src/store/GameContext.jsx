@@ -4,8 +4,9 @@ import { initialState } from './initialState';
 
 const GameContext = createContext(null);
 
-export function GameProvider({ children }) {
-  const [state, dispatch] = useReducer(gameReducer, initialState);
+// `initial` permite empezar con otra partida (en los tests, por ejemplo).
+export function GameProvider({ children, initial = initialState }) {
+  const [state, dispatch] = useReducer(gameReducer, initial);
   const value = useMemo(() => ({ state, dispatch }), [state]);
   return <GameContext value={value}>{children}</GameContext>;
 }

@@ -15,3 +15,15 @@ const capitalize = (word) => word.charAt(0).toUpperCase() + word.slice(1);
 export function formatName(name) {
   return SPECIAL_NAMES[name] ?? name.split('-').map(capitalize).join(' ');
 }
+
+const compact = new Intl.NumberFormat('es-ES', {
+  notation: 'compact',
+  maximumFractionDigits: 1,
+});
+
+// 1500 → "1,5 mil", 2300000 → "2,3 M". Entre número y unidad va un espacio
+// que no se parte (U+00A0, el espacio de no separación).
+export const formatNumber = (n) => compact.format(n);
+
+// Número de la Pokédex con tres cifras: 25 → "#025".
+export const formatDexNumber = (id) => `#${String(id).padStart(3, '0')}`;

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal } from '../components/Modal/Modal';
 import { PokemonCard } from '../components/PokemonCard/PokemonCard';
 import { MAX_STARS, MAX_STARS_REFUND, RARITY_WEIGHTS } from '../config/gacha';
@@ -8,12 +8,13 @@ import { canPull, pullOutcome, pullPrice, rollPokemon } from '../game/gacha';
 import { pokemonProduction } from '../game/production';
 import { useGame } from '../store/GameContext';
 import { formatName, formatNumber } from '../utils/format';
+import { prefersReducedMotion } from '../utils/motion';
 import styles from './GachaPage.module.css';
 
 // `rng` se puede cambiar desde los tests para que la tirada sea siempre la misma.
 export function GachaPage({ rng = Math.random }) {
   const { state, dispatch } = useGame();
-  const [result, setResult] = useState(null); // { id, outcome, price }
+  const [result, setResult] = useState(null); // { id, outcome, price, pull }
   const price = pullPrice(state);
   const owned = Object.keys(state.collection).length;
   const total = POKEDEX[state.generation].length;
@@ -22,7 +23,12 @@ export function GachaPage({ rng = Math.random }) {
     if (!canPull(state)) return;
     const id = rollPokemon(state.generation, rng);
     // El resultado se calcula antes de aplicar la tirada.
-    setResult({ id, outcome: pullOutcome(state, id), price });
+    setResult({
+      id,
+      outcome: pullOutcome(state, id),
+      price,
+      pull: state.pulls,
+    });
     dispatch({ type: 'PULL', id });
   }
 
@@ -85,10 +91,11 @@ export function GachaPage({ rng = Math.random }) {
       <Modal
         open={result !== null}
         onClose={() => setResult(null)}
-        title={result && resultTitle(result.outcome)}
+        title="Tirada"
       >
         {result && (
           <PullResult
+            key={result.pull}
             result={result}
             state={state}
             onPullAgain={canPull(state) ? handlePull : null}
@@ -105,8 +112,28 @@ function resultTitle(outcome) {
   return 'Repetido con 5 estrellas';
 }
 
+const SHAKE_MS = 900; // lo que se agita la Poké Ball antes de abrirse
+
+// Cada tirada monta un PullResult nuevo (key): la animación empieza de cero.
 function PullResult({ result, state, onPullAgain }) {
   const { id, outcome, price } = result;
+  const [opened, setOpened] = useState(prefersReducedMotion);
+
+  useEffect(() => {
+    if (opened) return;
+    const timeout = setTimeout(() => setOpened(true), SHAKE_MS);
+    return () => clearTimeout(timeout);
+  }, [opened]);
+
+  if (!opened) {
+    return (
+      <div className={styles.opening} role="status">
+        <span className={styles.ball} aria-hidden="true" />
+        <span className="visually-hidden">Abriendo la Poké Ball…</span>
+      </div>
+    );
+  }
+
   const pokemon = state.pokemonById[id];
   const name = pokemon ? formatName(pokemon.name) : 'Tu Pokémon';
   const stars = state.collection[id];
@@ -125,7 +152,11 @@ function PullResult({ result, state, onPullAgain }) {
   }
 
   return (
-    <div className={styles.result}>
+    <div
+      className={styles.result}
+      style={{ '--rarity-color': `var(--rarity-${pokedexEntry(id).rarity})` }}
+    >
+      <h3 className={styles.outcome}>{resultTitle(outcome)}</h3>
       <PokemonCard
         entry={pokedexEntry(id)}
         pokemon={pokemon}

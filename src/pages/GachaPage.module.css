@@ -70,3 +70,60 @@
   gap: var(--space-4);
   text-align: center;
 }
+
+/* Poké Ball que se agita antes de abrirse (solo con animaciones activadas). */
+.opening {
+  display: grid;
+  place-items: center;
+  min-height: 280px;
+}
+
+.ball {
+  width: 120px;
+  aspect-ratio: 1;
+  background: linear-gradient(
+    to bottom,
+    var(--color-primary) 0 46%,
+    var(--color-text) 46% 54%,
+    var(--color-surface) 54% 100%
+  );
+  border: 5px solid var(--color-text);
+  border-radius: var(--radius-full);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ball {
+    animation: shake 300ms ease-in-out infinite;
+  }
+
+  /* Destello del color de la rareza al aparecer el Pokémon. */
+  .result article {
+    animation: reveal 600ms ease-out;
+  }
+}
+
+@keyframes shake {
+  25% {
+    transform: rotate(-14deg);
+  }
+  75% {
+    transform: rotate(14deg);
+  }
+}
+
+@keyframes reveal {
+  from {
+    box-shadow: 0 0 0 0 var(--rarity-color);
+    transform: scale(0.85);
+  }
+  50% {
+    box-shadow: 0 0 40px 12px var(--rarity-color);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.outcome {
+  font-size: var(--font-size-lg);
+}

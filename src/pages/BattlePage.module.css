@@ -101,3 +101,23 @@
     transform: scale(0.97);
   }
 }
+
+.leaderWrap {
+  display: block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hit {
+    animation: hit 200ms ease-out;
+  }
+}
+
+@keyframes hit {
+  25% {
+    transform: translateX(-6px);
+    filter: brightness(1.6);
+  }
+  75% {
+    transform: translateX(6px);
+  }
+}

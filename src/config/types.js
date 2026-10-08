@@ -1,0 +1,43 @@
+// Color de fondo de cada tipo. Todos tienen un contraste de al menos 4,5:1 con
+// texto blanco (lo comprueba types.test.js).
+export const TYPE_COLORS = {
+  normal: '#6d6d4e',
+  fire: '#c4400e',
+  water: '#2f5fc4',
+  electric: '#8a6d00',
+  grass: '#3d7a28',
+  ice: '#2e7d7d',
+  fighting: '#a3241e',
+  poison: '#7d2f7d',
+  ground: '#8a6420',
+  flying: '#5d4fb0',
+  psychic: '#c42a5c',
+  bug: '#5c6b10',
+  rock: '#7d6a24',
+  ghost: '#4f3f6d',
+  dragon: '#4d1fc4',
+  dark: '#4f3f33',
+  steel: '#5f5f7a',
+  fairy: '#b0306d',
+};
+
+export const TYPE_NAMES = {
+  normal: 'Normal',
+  fire: 'Fuego',
+  water: 'Agua',
+  electric: 'Eléctrico',
+  grass: 'Planta',
+  ice: 'Hielo',
+  fighting: 'Lucha',
+  poison: 'Veneno',
+  ground: 'Tierra',
+  flying: 'Volador',
+  psychic: 'Psíquico',
+  bug: 'Bicho',
+  rock: 'Roca',
+  ghost: 'Fantasma',
+  dragon: 'Dragón',
+  dark: 'Siniestro',
+  steel: 'Acero',
+  fairy: 'Hada',
+};

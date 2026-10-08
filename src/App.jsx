@@ -1,5 +1,11 @@
+import { GameProvider } from './store/GameContext';
+
 function App() {
-  return <h1>Pokémon Clicker</h1>;
+  return (
+    <GameProvider>
+      <h1>Pokémon Clicker</h1>
+    </GameProvider>
+  );
 }
 
 export default App;

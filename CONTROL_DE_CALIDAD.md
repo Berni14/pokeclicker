@@ -39,7 +39,7 @@ Scripts en `package.json`:
 
 ## 2. Convenciones del proyecto
 
-- [ ] Componentes en `PascalCase` (`PokemonCard.jsx`), funciones y hooks en `camelCase` (`usePokemonList.js`).
+- [ ] Componentes en `PascalCase` (`PokemonCard.jsx`), funciones y hooks en `camelCase` (`usePokemon.js`).
 - [ ] Cada componente en su carpeta, con su `.jsx` y su `.module.css`.
 - [ ] Los componentes **no** llaman a la PokeAPI: piden datos a través de `hooks/` → `services/`.
 - [ ] `game/` y `config/` son JS puro: **sin React, sin DOM, sin fetch**.
@@ -70,25 +70,29 @@ Scripts en `package.json`:
 ### `game/` y `config/`
 
 - [ ] Las monedas nunca bajan de 0.
-- [ ] No se puede comprar sin monedas suficientes.
-- [ ] El coste sube con cada nivel según la fórmula de `economy.js`.
+- [ ] No se puede tirar, comprar una mejora ni equipar sin cumplir las condiciones (dinero, nivel de entrenador, hueco en el equipo).
+- [ ] El precio de la tirada y el de cada mejora suben según las fórmulas de `config/`.
+- [ ] Ningún Pokémon pasa de 5 estrellas; el equipo nunca tiene más de 6 ni repetidos.
 - [ ] La producción por segundo se calcula igual en el tick y en lo que muestra la interfaz.
+- [ ] El azar solo está en `rollPokemon`, que recibe el `rng`; el resto de `game/` es determinista.
+- [ ] La tabla `config/pokedex-gen1.json` está generada con los umbrales de rareza actuales (su test lo comprueba).
 - [ ] No aparecen `NaN`, `Infinity` ni decimales raros (`0.30000000004`).
 
 ### `store/`
 
-- [ ] El reducer es puro: no muta el estado, devuelve uno nuevo.
+- [ ] El reducer es puro: no muta el estado, devuelve uno nuevo. El sorteo del gacha se hace fuera y llega en la acción `PULL`.
 - [ ] Toda acción tiene un `type` definido; acciones desconocidas devuelven el estado tal cual.
+- [ ] El estado del combate (vida, tiempo) es local de la pantalla; al store solo llega `GYM_WON`.
 - [ ] La partida guardada incluye un número de versión (`saveVersion`) por si cambia la estructura.
 - [ ] La partida guardada no incluye los datos de los Pokémon (`pokemonById`): esos salen de la caché.
-- [ ] Al recargar, los Pokémon comprados producen desde el primer momento, aunque no estén en el primer lote.
+- [ ] Al recargar, el equipo produce desde el primer momento (la producción sale de la tabla de la Pokédex, no de la API).
 - [ ] Si el guardado está corrupto o es antiguo, el juego arranca con el estado inicial sin romperse.
 
 ### `hooks/`
 
 - [ ] Todo `setInterval` / `addEventListener` se limpia en el `return` del `useEffect`.
 - [ ] Las dependencias de `useEffect` están completas (ESLint avisa).
-- [ ] Los hooks de datos devuelven `{ data, loading, error }`.
+- [ ] Los hooks de datos devuelven al menos `{ loading, error }` y, si pueden fallar, `retry`.
 - [ ] Una petición que termina después de desmontar el componente no actualiza el estado (usar `AbortController`).
 
 ### `components/`
@@ -105,33 +109,52 @@ Scripts en `package.json`:
 ### Flujo básico
 
 - [ ] Al hacer click en el botón principal, las monedas suben lo que deben.
-- [ ] Se puede capturar el primer Pokémon tras unos pocos clicks.
-- [ ] Al comprar, se restan las monedas y el nivel sube a 1.
-- [ ] Las tarjetas cambian de estado: bloqueada → se puede comprar → comprada.
-- [ ] La producción pasiva suma cada segundo.
-- [ ] "Cargar más" trae el siguiente lote sin duplicar Pokémon.
+- [ ] La primera tirada llega tras unos pocos clicks (~25).
+- [ ] Al tirar, se restan las monedas, el precio sube y sale el resultado con su rareza.
+- [ ] Un Pokémon nuevo se equipa solo si hay hueco; un repetido sube una estrella; con 5★ se convierte en monedas.
+- [ ] La producción pasiva suma cada segundo y solo cuentan los 6 equipados.
+- [ ] Equipar con el equipo lleno pide a quién sustituir.
+- [ ] La Pokédex muestra en silueta los que faltan y el contador cuadra con la caja.
+- [ ] Las mejoras pasan de bloqueada → disponible → máximo; el nivel de entrenador desbloquea las que tocan.
+- [ ] El nivel de entrenador sube con las tiradas y los gimnasios, no con los clicks.
+
+### Gimnasios
+
+- [ ] Solo se puede retar al gimnasio actual; los siguientes están bloqueados.
+- [ ] El tiempo no corre hasta pulsar «Empezar».
+- [ ] Sin clicks no se gana nunca, aunque el equipo sea muy fuerte (tope de la mitad de la vida).
+- [ ] Un Pokémon con ventaja de tipo hace más daño (y se indica).
+- [ ] Mantener pulsado Enter no ataca solo.
+- [ ] Al ganar: medalla, experiencia, monedas y se desbloquea el siguiente. Al perder: reintento inmediato.
+- [ ] Salir a mitad de combate no deja el temporizador corriendo.
 
 ### Guardado
 
-- [ ] Recargar la página mantiene monedas, Pokémon y niveles.
-- [ ] Cerrar y abrir el navegador mantiene la partida.
-- [ ] Botón de reiniciar partida (si lo hay) pide confirmación y deja todo a cero.
+- [ ] Recargar la página mantiene monedas, colección con estrellas, equipo, mejoras, nivel y medallas.
+- [ ] Cerrar y abrir el navegador mantiene la partida y da las monedas del tiempo fuera (máximo 8 h).
+- [ ] Recargar justo después de tirar no pierde la tirada.
+- [ ] Botón de reiniciar partida pide confirmación y deja todo a cero.
 - [ ] Funciona en ventana de incógnito (sin localStorage persistente) sin errores.
 
 ### Casos límite
 
 - [ ] Hacer clicks muy rápidos no rompe el contador.
 - [ ] Dejar la pestaña en segundo plano y volver: el contador no se dispara ni se congela de forma rara.
-- [ ] Sin conexión (DevTools → Network → Offline): aparece un mensaje de error, no una pantalla en blanco.
+- [ ] Sin conexión (DevTools → Network → Offline): aparece un mensaje de error, no una pantalla en blanco; se puede seguir clicando y tirando.
 - [ ] Red lenta (Network → Slow 3G): se ven los loaders y las imágenes no saltan de tamaño.
 - [ ] Cifras muy grandes se formatean bien (`1,5 mil`, `2,3 M`).
 
 ### Equilibrio del juego
 
-- [ ] El primer Pokémon cuesta poco; los legendarios, mucho.
-- [ ] Siempre hay algo que comprar "pronto" (el jugador no se queda 10 minutos esperando).
-- [ ] Ningún Pokémon barato produce más que uno caro.
-- [ ] Apuntar aquí los cambios de números en `economy.js` y por qué.
+- [ ] `npm run simulate` da tiempos parecidos a los objetivos: Brock ~3 min, Giovanni ~2–2,5 h.
+- [ ] Siempre hay algo que comprar «pronto» (el jugador no se queda 10 minutos esperando).
+- [ ] Con las mismas estrellas, un Pokémon más raro o con más stats nunca produce menos.
+- [ ] Las tres mejoras de combate se notan: sin ellas el gimnasio 8 no se puede ganar.
+- [ ] Apuntar aquí los cambios de números en `config/` y por qué.
+
+| Fecha | Qué número cambia | De → a | Por qué |
+| ----- | ----------------- | ------ | ------- |
+|       |                   |        |         |
 
 ---
 
@@ -140,18 +163,22 @@ Scripts en `package.json`:
 Prioridad alta (lógica pura, fáciles de probar con Vitest):
 
 - [ ] `models/pokemon.test.js` → `toPokemon()` con una respuesta real de ejemplo y con sprites vacíos.
-- [ ] `game/shop.test.js` → comprar con y sin monedas suficientes; coste del nivel siguiente.
-- [ ] `game/production.test.js` → producción total con varios Pokémon.
-- [ ] `store/gameReducer.test.js` → `CLICK`, `BUY_POKEMON`, `TICK`, `POKEMON_LOADED`, `RESET`, acción desconocida.
-- [ ] `config/economy.test.js` → un Pokémon más caro nunca produce menos que uno más barato.
-- [ ] `utils/format.test.js` → 0, 999, 1500, 2 300 000.
+- [ ] `config/pokedex.test.js` → 151 entradas sin huecos y el reparto de rarezas esperado.
+- [ ] `game/gacha.test.js` → precio, nuevo / estrella / devolución, auto-equipar, `rng` fijo y proporciones de rareza.
+- [ ] `game/team.test.js` → límite de 6, sin repetidos, sustituir.
+- [ ] `game/shop.test.js` → bloqueada, máximo, coste creciente, sin dinero.
+- [ ] `game/battle.test.js` → duración, daño, ventaja de tipo, tope del equipo, solo el gimnasio actual.
+- [ ] `game/production.test.js` y `game/trainer.test.js` → producción del equipo, estrellas, bonus y subida de nivel.
+- [ ] `store/gameReducer.test.js` → `CLICK`, `TICK`, `PULL`, `BUY_UPGRADE`, `EQUIP`, `UNEQUIP`, `GYM_WON`, `POKEMON_LOADED`, `RESET`, acción desconocida.
+- [ ] `utils/format.test.js` → `formatName` y `formatNumber` (0, 999, 1500, 2 300 000).
 
 Prioridad media (React Testing Library):
 
-- [ ] `PokemonCard` muestra nombre, número, tipos e imagen.
-- [ ] El botón de compra está deshabilitado si no hay monedas.
-- [ ] `CardGrid` muestra el Loader con `loading` y el error con «Reintentar» con `error` (solo props).
-- [ ] `usePokemonList` pasa de `loading` a datos, y a `error` si falla la API (con `fetch` simulado).
+- [ ] `PokemonCard` muestra nombre, número, tipos, rareza, estrellas e imagen.
+- [ ] `UpgradeCard`: los tres estados y el botón deshabilitado sin monedas.
+- [ ] `GachaPage`: tirar con `rng` fijo y `fetch` simulado muestra el resultado.
+- [ ] `BattlePage` con temporizadores falsos: ganar, perder y que mantener Enter no ataque.
+- [ ] `useOwnedPokemon` carga los que faltan, y da `error` si falla la API (con `fetch` simulado).
 
 > Los tests nunca llaman a la PokeAPI real: se simula `fetch` con datos de ejemplo guardados en `src/__mocks__/`.
 
@@ -163,7 +190,10 @@ Prioridad media (React Testing Library):
 - [ ] Todas las imágenes tienen `alt` (`alt="Pikachu"`).
 - [ ] Se puede jugar entero con teclado (Tab, Enter, Espacio) y se ve el foco.
 - [ ] El contraste de texto sobre los colores de tipo es suficiente (mínimo 4.5:1).
-- [ ] El estado de la tarjeta no se indica **solo** con color (añadir texto o icono).
+- [ ] El estado de una mejora o de un gimnasio y la rareza de un Pokémon no se indican **solo** con color (añadir texto o icono).
+- [ ] Las estrellas tienen texto para lectores de pantalla («3 de 5 estrellas»).
+- [ ] El combate se puede jugar con teclado, y su resultado se anuncia con `aria-live` (la vida en cada tick, no).
+- [ ] Los modales (`<dialog>`) se cierran con Escape y devuelven el foco al botón que los abrió.
 - [ ] El contador de monedas no se anuncia en cada tick al lector de pantalla (evitar `aria-live` en él).
 - [ ] Se respeta `prefers-reduced-motion` en las animaciones.
 - [ ] Lighthouse → Accesibilidad ≥ 90.
@@ -174,7 +204,7 @@ Prioridad media (React Testing Library):
 
 - [ ] Imágenes con `loading="lazy"` y `width`/`height` fijados.
 - [ ] Las tarjetas no se re-renderizan todas en cada tick (comprobar con React DevTools → Profiler; usar `React.memo` si hace falta).
-- [ ] El tick del juego es uno solo para toda la app, no uno por tarjeta.
+- [ ] El tick del juego es uno solo para toda la app, no uno por tarjeta. El temporizador del combate es aparte y se limpia al salir.
 - [ ] El guardado automático no se hace en cada tick, sino cada X segundos.
 - [ ] Lighthouse → Rendimiento ≥ 90 en `npm run preview` (no en `dev`).
 

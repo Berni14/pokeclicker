@@ -24,7 +24,7 @@ describe('toPokemon', () => {
         speed: 90,
       },
       statTotal: 320,
-      rarity: 'rare',
+      rarity: 'common',
     });
   });
 
@@ -60,7 +60,7 @@ describe('toPokemon', () => {
 
   it('no marca a Chansey como legendaria aunque tenga mucha experiencia', () => {
     expect(chansey.base_experience).toBeGreaterThan(mewtwo.base_experience);
-    expect(toPokemon(chansey, chanseySpecies).rarity).toBe('epic');
+    expect(toPokemon(chansey, chanseySpecies).rarity).toBe('rare');
   });
 
   it('no guarda campos de la API que no se usan', () => {

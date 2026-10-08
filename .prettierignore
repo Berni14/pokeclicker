@@ -1,3 +1,5 @@
 dist
 coverage
 package-lock.json
+# Archivos generados por scripts/build-pokedex.js
+src/config/pokedex-gen*.json

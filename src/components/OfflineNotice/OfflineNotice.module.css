@@ -1,0 +1,12 @@
+.notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+  background: #fff8db;
+  border: 2px solid #b07d00;
+  border-radius: var(--radius-md);
+}

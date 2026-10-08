@@ -128,3 +128,46 @@ describe('App', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 });
+
+describe('guardado', () => {
+  it('al recargar, la partida sigue ahí', () => {
+    const first = render(<App />);
+    clickBall(5);
+    first.unmount(); // cerrar la página guarda la partida
+
+    render(<App />);
+    expect(screen.getByText('Monedas:').parentElement).toHaveTextContent('5');
+  });
+
+  it('al ocultar la pestaña se guarda', () => {
+    render(<App />);
+    clickBall(3);
+    Object.defineProperty(document, 'visibilityState', {
+      value: 'hidden',
+      configurable: true,
+    });
+    fireEvent(document, new Event('visibilitychange'));
+    expect(JSON.parse(localStorage.getItem('pkc:save')).coins).toBe(3);
+    delete document.visibilityState;
+  });
+
+  it('al volver, avisa de lo que ganó el equipo mientras no estabas', () => {
+    localStorage.setItem(
+      'pkc:save',
+      JSON.stringify({
+        saveVersion: 1,
+        coins: 0,
+        trainer: { level: 1, xp: 0 },
+        collection: { 25: 1 },
+        team: [25],
+        savedAt: Date.now() - 2 * 3600 * 1000, // hace 2 horas
+      }),
+    );
+    render(<App />);
+    expect(screen.getByText(/Mientras no estabas/)).toHaveTextContent(
+      'Mientras no estabas (2 h), tu equipo ganó 7,2 mil monedas.',
+    );
+    fireEvent.click(screen.getByRole('button', { name: '¡Genial!' }));
+    expect(screen.queryByText(/Mientras no estabas/)).not.toBeInTheDocument();
+  });
+});

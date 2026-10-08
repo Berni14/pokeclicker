@@ -32,6 +32,8 @@ export function gameReducer(state, action) {
           ...Object.fromEntries(action.pokemon.map((p) => [p.id, p])),
         },
       };
+    case 'DISMISS_OFFLINE':
+      return { ...state, offlineEarnings: null };
     case 'RESET':
       return { ...initialState, pokemonById: state.pokemonById };
     default:

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { CoinCounter } from './components/CoinCounter/CoinCounter';
 import { NavTabs } from './components/NavTabs/NavTabs';
+import { OfflineNotice } from './components/OfflineNotice/OfflineNotice';
+import { useAutosave } from './hooks/useAutosave';
 import { useGameLoop } from './hooks/useGameLoop';
 import { useOwnedPokemon } from './hooks/usePokemon';
 import { BoxPage } from './pages/BoxPage';
@@ -16,6 +18,7 @@ function Game() {
   const [tab, setTab] = useState('game');
   const { error, retry } = useOwnedPokemon();
   useGameLoop();
+  useAutosave();
 
   // Al cambiar de pestaña, el foco va al título de la página nueva (para
   // teclado y lectores de pantalla). En la primera carga no se mueve.
@@ -50,6 +53,7 @@ function Game() {
       <NavTabs current={tab} onChange={setTab} />
 
       <main ref={mainRef} className={styles.main}>
+        <OfflineNotice />
         {error && (
           <div className={styles.error} role="alert">
             <p>No se han podido cargar los datos de algunos Pokémon. {error}</p>

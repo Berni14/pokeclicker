@@ -12,7 +12,8 @@
     "format:check": "prettier --check .",
     "test": "vitest",
     "check": "npm run lint && npm run format:check && vitest run && npm run build",
-    "pokedex": "node scripts/build-pokedex.js"
+    "pokedex": "node scripts/build-pokedex.js",
+    "simulate": "vitest run --config vitest.simulate.config.js --silent=false"
   },
   "dependencies": {
     "react": "^19.2.8",

@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { formatDexNumber, formatName, formatNumber } from './format';
+import {
+  formatDexNumber,
+  formatDuration,
+  formatName,
+  formatNumber,
+} from './format';
 
 describe('formatName', () => {
   it('pone la primera letra en mayúscula', () => {
@@ -43,5 +48,14 @@ describe('formatDexNumber', () => {
     expect(formatDexNumber(1)).toBe('#001');
     expect(formatDexNumber(25)).toBe('#025');
     expect(formatDexNumber(151)).toBe('#151');
+  });
+});
+
+describe('formatDuration', () => {
+  it('segundos, minutos y horas', () => {
+    expect(formatDuration(45.9)).toBe('45 s');
+    expect(formatDuration(300)).toBe('5 min');
+    expect(formatDuration(7200)).toBe('2 h');
+    expect(formatDuration(7500)).toBe('2 h 5 min');
   });
 });

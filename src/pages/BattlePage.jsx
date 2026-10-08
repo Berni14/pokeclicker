@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef } from 'react';
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { GYM_MONEY_REWARD } from '../config/gyms';
 import { XP_PER_GYM } from '../config/trainer';
 import { TYPE_NAMES } from '../config/types';
@@ -22,6 +22,10 @@ export function BattlePage({ gym, onExit }) {
   const [battle, battleDispatch] = useReducer(battleReducer, null, () =>
     createBattle(state, gym),
   );
+
+  // Cada golpe cambia la `key` de la imagen: se vuelve a montar y la sacudida
+  // empieza de nuevo.
+  const [hits, setHits] = useState(0);
 
   const handleTick = useCallback(
     (seconds) => battleDispatch({ type: 'TICK', seconds }),
@@ -75,13 +79,18 @@ export function BattlePage({ gym, onExit }) {
           <span aria-hidden="true"> s</span>
         </p>
 
-        <img
-          className={styles.leader}
-          src={pixelSpriteUrl(gym.ace)}
-          alt={`Pokémon de ${gym.leader}`}
-          width="160"
-          height="160"
-        />
+        <span
+          key={hits}
+          className={`${styles.leaderWrap} ${hits > 0 ? styles.hit : ''}`}
+        >
+          <img
+            className={styles.leader}
+            src={pixelSpriteUrl(gym.ace)}
+            alt={`Pokémon de ${gym.leader}`}
+            width="160"
+            height="160"
+          />
+        </span>
         <p className={styles.type}>Tipo {TYPE_NAMES[gym.type]}</p>
 
         <label className={styles.hp}>
@@ -103,11 +112,14 @@ export function BattlePage({ gym, onExit }) {
             ref={actionRef}
             type="button"
             className={`button ${styles.big} ${styles.attack}`}
-            onClick={() =>
-              battleDispatch({
-                type: battle.status === 'ready' ? 'START' : 'ATTACK',
-              })
-            }
+            onClick={() => {
+              if (battle.status === 'ready') {
+                battleDispatch({ type: 'START' });
+              } else {
+                battleDispatch({ type: 'ATTACK' });
+                setHits((n) => n + 1);
+              }
+            }}
             onKeyDown={handleKeyDown}
           >
             {battle.status === 'ready' ? '¡Empezar!' : '¡Atacar!'}

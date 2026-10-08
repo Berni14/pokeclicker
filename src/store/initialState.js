@@ -15,4 +15,5 @@ export const initialState = {
   team: [], // hasta 6 ids
   medals: {}, // { [generación]: [1, 2, …] }
   pokemonById: {}, // datos de la API para pintar; no se guarda en la partida
+  offlineEarnings: null, // { seconds, coins } al volver al juego; no se guarda
 };

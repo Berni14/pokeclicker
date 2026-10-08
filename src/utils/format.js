@@ -27,3 +27,13 @@ export const formatNumber = (n) => compact.format(n);
 
 // Número de la Pokédex con tres cifras: 25 → "#025".
 export const formatDexNumber = (id) => `#${String(id).padStart(3, '0')}`;
+
+// Duración legible: 45 → "45 s", 300 → "5 min", 7500 → "2 h 5 min".
+export function formatDuration(totalSeconds) {
+  const seconds = Math.floor(totalSeconds);
+  if (seconds < 60) return `${seconds} s`;
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  if (hours === 0) return `${minutes} min`;
+  return minutes === 0 ? `${hours} h` : `${hours} h ${minutes} min`;
+}

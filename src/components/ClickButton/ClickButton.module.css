@@ -1,4 +1,5 @@
 .button {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -43,7 +44,25 @@
   color: var(--color-text-muted);
 }
 
+/* «+X» que sube y se desvanece. Sin animación (menos movimiento) no se ve. */
+.float {
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  display: none;
+  font-size: var(--font-size-lg);
+  font-weight: 800;
+  color: var(--color-primary-dark);
+  pointer-events: none;
+  text-shadow: 0 1px 0 var(--color-surface);
+}
+
 @media (prefers-reduced-motion: no-preference) {
+  .float {
+    display: block;
+    animation: float-up 800ms ease-out forwards;
+  }
+
   .ball {
     transition: transform 80ms ease-out;
   }
@@ -54,5 +73,16 @@
 
   .button:active .ball {
     transform: scale(0.95);
+  }
+}
+
+@keyframes float-up {
+  from {
+    opacity: 1;
+    transform: translate(calc(-50% + var(--x)), 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--x)), -90px);
   }
 }

@@ -1,12 +1,17 @@
 import { createContext, useContext, useMemo, useReducer } from 'react';
 import { gameReducer } from './gameReducer';
-import { initialState } from './initialState';
+import { createInitialState } from './persistence';
 
 const GameContext = createContext(null);
 
-// `initial` permite empezar con otra partida (en los tests, por ejemplo).
-export function GameProvider({ children, initial = initialState }) {
-  const [state, dispatch] = useReducer(gameReducer, initial);
+// Sin `initial`, carga la partida guardada antes del primer render (así el
+// autoguardado nunca la pisa con una vacía). Los tests pasan su propio estado.
+export function GameProvider({ children, initial }) {
+  const [state, dispatch] = useReducer(
+    gameReducer,
+    initial,
+    (given) => given ?? createInitialState(),
+  );
   const value = useMemo(() => ({ state, dispatch }), [state]);
   return <GameContext value={value}>{children}</GameContext>;
 }

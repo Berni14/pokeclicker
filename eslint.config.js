@@ -26,8 +26,13 @@ export default defineConfig([
     },
   },
   {
-    files: ['*.config.js'],
+    files: ['*.config.js', 'scripts/**/*.js'],
     languageOptions: { globals: globals.node },
+  },
+  {
+    // Los scripts de línea de comandos informan por consola.
+    files: ['scripts/**/*.js'],
+    rules: { 'no-console': 'off' },
   },
   // Siempre la última: desactiva las reglas que chocan con Prettier.
   eslintConfigPrettier,

@@ -7,8 +7,8 @@ export const RARITIES = {
 };
 
 // Suma de stats a partir de la cual un Pokémon normal sube de rareza.
-const RARE_MIN_STATS = 300;
-const EPIC_MIN_STATS = 450;
+const RARE_MIN_STATS = 400;
+const EPIC_MIN_STATS = 500;
 
 export function getRarity({ statTotal, isLegendary, isMythical }) {
   if (isMythical) return 'mythical';

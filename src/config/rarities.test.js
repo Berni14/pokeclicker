@@ -8,10 +8,10 @@ describe('getRarity', () => {
   });
 
   it('clasifica al resto por la suma de stats', () => {
-    expect(getRarity({ statTotal: 299 })).toBe('common');
-    expect(getRarity({ statTotal: 300 })).toBe('rare');
-    expect(getRarity({ statTotal: 449 })).toBe('rare');
-    expect(getRarity({ statTotal: 450 })).toBe('epic');
+    expect(getRarity({ statTotal: 399 })).toBe('common');
+    expect(getRarity({ statTotal: 400 })).toBe('rare');
+    expect(getRarity({ statTotal: 499 })).toBe('rare');
+    expect(getRarity({ statTotal: 500 })).toBe('epic');
   });
 
   it('todas las rarezas devueltas existen en RARITIES', () => {

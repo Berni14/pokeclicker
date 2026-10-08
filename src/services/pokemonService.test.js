@@ -22,7 +22,7 @@ describe('getPokemonBatch', () => {
     expect(batch[0]).toMatchObject({
       id: 1,
       name: 'pokemon-1',
-      rarity: 'rare',
+      rarity: 'common',
     });
   });
 

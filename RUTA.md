@@ -704,9 +704,20 @@ El estado del combate es local: `useReducer` dentro de la página con `{ hp, tim
 
 **Al terminar:** commit `feat: gimnasios y combate`.
 
-## Fase 6 · Juego completo
+## Fase 6 · Juego completo ✅
 
 Al final el juego produce solo, guarda la partida y se siente bien al jugarlo. Es tu MVP terminado.
+
+> **Fase terminada** (8 oct 2026). 178 tests en verde. Probado también en Chrome sin ventana: recargar la página mantiene monedas, nivel y medallas, y al volver tras 2 horas sale el aviso con lo ganado.
+>
+> Cómo quedó:
+>
+> - **`store/persistence.js`** es el único sitio que toca el guardado (`saveGame`, `loadGame`, `clearSave`, `sanitizeSave`, `createInitialState`). Si algún día se guarda en la nube, solo cambia este archivo.
+> - **Se guarda** cada 10 s, al ocultar la pestaña (`visibilitychange`) y también al cerrar o recargar (`pagehide`), y al desmontar la app.
+> - **Las ganancias mientras no estabas** quedan en `state.offlineEarnings` (no se guarda) y las enseña `components/OfflineNotice`; la acción `DISMISS_OFFLINE` lo cierra.
+> - **Animaciones:** el «+X» al clicar se ve solo con animaciones activadas; la Poké Ball del gacha se agita 0,9 s antes de abrirse (`utils/motion.js` se la salta si el usuario prefiere menos movimiento); destello del color de la rareza; el líder se sacude con cada golpe. El título del modal del gacha ya no destripa el resultado mientras se abre la Poké Ball.
+> - **`npm run simulate`** se ejecuta con Vitest (`vitest.simulate.config.js`): el código del juego usa imports sin extensión y JSON, que Node no entiende solo.
+> - **Tests:** el localStorage se limpia **antes** de cada test, no después: al desmontar la app, el autoguardado vuelve a escribir la partida y contaminaba el test siguiente. `setupTests.js` simula `matchMedia` con «menos movimiento» para que los tests no esperen animaciones.
 
 ### 6.1 `hooks/useGameLoop.js` (hecho en la fase 4)
 
@@ -717,10 +728,10 @@ Al final el juego produce solo, guarda la partida y se siente bien al jugarlo. E
 
 ### 6.2 Guardado (`store/persistence.js` y `hooks/useAutosave.js`)
 
-- [ ] `saveGame(state)` y `loadGame()` con `try/catch`, en la clave `pkc:save`.
-- [ ] Se guarda todo menos `pokemonById`, más `savedAt`.
-- [ ] Al cargar, limpia la partida: fuera del equipo los ids que no estén en `collection`, estrellas entre 1 y 5, y números (`coins`, niveles) que sean finitos y no negativos. Un guardado manipulado o corrupto no puede producir `NaN`.
-- [ ] La partida se carga **antes** del primer render, con el inicializador perezoso de `useReducer`:
+- [x] `saveGame(state)` y `loadGame()` con `try/catch`, en la clave `pkc:save`.
+- [x] Se guarda todo menos `pokemonById`, más `savedAt`.
+- [x] Al cargar, limpia la partida: fuera del equipo los ids que no estén en `collection`, estrellas entre 1 y 5, y números (`coins`, niveles) que sean finitos y no negativos. Un guardado manipulado o corrupto no puede producir `NaN`.
+- [x] La partida se carga **antes** del primer render, con el inicializador perezoso de `useReducer`:
 
   ```js
   const [state, dispatch] = useReducer(
@@ -732,25 +743,25 @@ Al final el juego produce solo, guarda la partida y se siente bien al jugarlo. E
 
   `createInitialState()` llama a `loadGame()`. Si la partida existe y su `saveVersion` coincide, la mezcla con `initialState`; si no coincide o está corrupta, devuelve `initialState`. Así el autoguardado nunca puede pisar la partida con un estado vacío.
 
-- [ ] Ganancias mientras no estabas: al cargar, `tick(state, min((ahora − savedAt) / 1000, MAX_OFFLINE_SECONDS))`. Como la producción sale de la tabla de la Pokédex, no hay que esperar a la API. Enséñalo al volver: «Mientras no estabas, tu equipo ganó X monedas».
-- [ ] Autoguardado cada `AUTOSAVE_MS` y también en `visibilitychange`.
+- [x] Ganancias mientras no estabas: al cargar, `tick(state, min((ahora − savedAt) / 1000, MAX_OFFLINE_SECONDS))`. Como la producción sale de la tabla de la Pokédex, no hay que esperar a la API. Enséñalo al volver: «Mientras no estabas, tu equipo ganó X monedas».
+- [x] Autoguardado cada `AUTOSAVE_MS` y también en `visibilitychange`.
 - [x] `SettingsPage`: «Reiniciar partida» con confirmación en el `Modal` (`RESET`).
 
 ### 6.3 Formato y sensación de juego
 
 - [x] `utils/format.js` → `formatNumber` con `Intl.NumberFormat('es-ES', { notation: 'compact', maximumFractionDigits: 1 })`: 1500 → «1,5 mil».
 - [x] Las monedas se guardan con decimales, pero se muestran con `formatNumber(Math.floor(coins))`.
-- [ ] Animación de «+X» flotando al clicar y un pequeño rebote del botón.
-- [ ] Animación de la tirada (la Poké Ball se agita y se abre) y destello del color de la rareza.
-- [ ] Sacudida del líder al recibir daño.
-- [ ] Todas las animaciones dentro de `@media (prefers-reduced-motion: no-preference)`.
+- [x] Animación de «+X» flotando al clicar y un pequeño rebote del botón.
+- [x] Animación de la tirada (la Poké Ball se agita y se abre) y destello del color de la rareza.
+- [x] Sacudida del líder al recibir daño.
+- [x] Todas las animaciones dentro de `@media (prefers-reduced-motion: no-preference)`.
 
 ### 6.4 Equilibrar
 
-- [ ] `scripts/simulate.js` (`npm run simulate`): juega una región entera usando **las funciones reales** de `game/` y `config/`, con varias semillas de azar, y saca la tabla de tiempos de 3.2. Si cambias un número, vuelve a ejecutarlo.
+- [x] `scripts/simulate.js` (`npm run simulate`): juega una región entera usando **las funciones reales** de `game/` y `config/`, con varias semillas de azar, y saca la tabla de tiempos de 3.2. Si cambias un número, vuelve a ejecutarlo.
 - [ ] Juega tú 20 minutos seguidos y apunta: cuánto tardas en la primera tirada y en Brock, cuándo te aburres esperando y qué mejora nadie compraría.
-- [ ] Ajusta **solo** los números de `config/`.
-- [ ] Apunta los cambios en la sección de equilibrio de `CONTROL_DE_CALIDAD.md`.
+- [x] Ajusta **solo** los números de `config/`.
+- [x] Apunta los cambios en la sección de equilibrio de `CONTROL_DE_CALIDAD.md`.
 
 **Al terminar:** pasa el apartado 4 del control de calidad (pruebas manuales) y commit `feat: bucle de juego y guardado`.
 

@@ -152,9 +152,10 @@ Scripts en `package.json`:
 - [ ] Las tres mejoras de combate se notan: sin ellas el gimnasio 8 no se puede ganar.
 - [ ] Apuntar aquí los cambios de números en `config/` y por qué.
 
-| Fecha | Qué número cambia | De → a | Por qué |
-| ----- | ----------------- | ------ | ------- |
-|       |                   |        |         |
+| Fecha      | Qué número cambia                  | De → a            | Por qué                                                                                                                                                                                                                                                                 |
+| ---------- | ---------------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 08/10/2026 | Umbrales de rareza (`rarities.js`) | 300/450 → 400/500 | Con 300/450 salían 59 épicas y 19 comunes; con 400/500, 69 comunes, 49 raras y 28 épicas                                                                                                                                                                                |
+| 08/10/2026 | Ninguno (revisión de la fase 6)    | —                 | `npm run simulate` (5 semillas): Brock ~2 min, Giovanni ~2 h, 5/5 partidas completas. El equipo llega a su tope enseguida en los primeros gimnasios (2 s de 30 contra Brock) pero no en los últimos (43 s de 45 contra Giovanni): su ataque sí importa donde hace falta |
 
 ---
 

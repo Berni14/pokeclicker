@@ -664,32 +664,43 @@ Las funciones que se pasan a tarjetas memorizadas van con `useCallback` y recibe
 
 **Al terminar:** puedes clicar, tirar, equipar y comprar mejoras, y el dinero sube solo cuando tienes equipo (lo hará de verdad con el bucle de la fase 6; para probar ahora, un botón temporal que haga `TICK`). Commit `feat: interfaz jugable`.
 
-## Fase 5 · Gimnasios
+## Fase 5 · Gimnasios ✅
 
 Al final puedes retar a los 8 líderes en orden y ganar medallas.
 
+> **Fase terminada** (8 oct 2026). 159 tests en verde y combate jugado en Chrome sin ventana: se gana a Brock, aparece su medalla y se desbloquea Misty.
+>
+> Cómo quedó:
+>
+> - **La lógica del combate también es pura**, en `game/battle.js`: `createBattle(state, gym)` fija los números del jugador al empezar (cambiar el equipo a mitad no altera el combate) y `battleReducer` gestiona `START`, `ATTACK`, `TICK` y `RETRY`. La página solo lo usa con `useReducer`. Así se prueba sin React.
+> - **Un solo botón** que pasa de «¡Empezar!» a «¡Atacar!»: si fueran dos, al empezar se perdería el foco y con teclado no se podría atacar. Al terminar, el foco va a «Volver» o «Reintentar».
+> - **La pista** de la lista calcula los clicks por segundo que hacen falta (`clicksPerSecondNeeded`) y avisa si son más de 6.
+> - **Las imágenes de los líderes** usan los sprites de URL fija: no hace falta pedir nada a la API.
+> - Nuevos números en `config/gyms.js`: `BATTLE_TICK_MS` (100) y `EXPECTED_CLICKS_PER_SECOND` (6).
+> - **Para el equilibrio (6.4):** un equipo normal ya hace ~110 de daño/s y llega a su tope (la mitad de la vida) en pocos segundos. Si pasa en todos los gimnasios, el ataque del equipo apenas importa; solo llegar al tope. Revisarlo con la simulación.
+
 ### 5.1 `GymsPage`
 
-- [ ] Los 8 líderes con el Pokémon que los representa (`ace`), su tipo y su vida.
-- [ ] Estado con `gymStatus`: vencido (medalla), actual (botón «Retar») y bloqueado (con texto, no solo gris).
-- [ ] Junto al actual, una pista: «Tu equipo hace X de daño por segundo» y qué Pokémon de tu equipo tienen ventaja de tipo.
+- [x] Los 8 líderes con el Pokémon que los representa (`ace`), su tipo y su vida.
+- [x] Estado con `gymStatus`: vencido (medalla), actual (botón «Retar») y bloqueado (con texto, no solo gris).
+- [x] Junto al actual, una pista: «Tu equipo hace X de daño por segundo» y qué Pokémon de tu equipo tienen ventaja de tipo.
 
 ### 5.2 `BattlePage`
 
 El estado del combate es local: `useReducer` dentro de la página con `{ hp, timeLeft, teamDamage, status }`, donde `status` es `'ready' | 'fighting' | 'won' | 'lost'`.
 
-- [ ] Pantalla de inicio: líder, vida, tiempo y botón «¡Empezar!». El tiempo no corre hasta pulsarlo.
-- [ ] `hooks/useBattleTimer.js`: un `setInterval` de 100 ms que calcula el tiempo real pasado con `Date.now()` (igual que el bucle del juego) y se limpia al terminar o al salir de la pantalla.
-- [ ] Cada tick resta a la vida el daño del equipo (`teamDps × segundos`), sin pasar del tope `maxTeamDamage`.
-- [ ] Cada click resta `clickDamage(state)`. El botón de ataque es un `<button>`.
-- [ ] **Teclado:** con Enter o Espacio se puede atacar, pero ignora las pulsaciones repetidas de mantener la tecla (`event.repeat`): si no, dejar Enter pulsado sería un autoclicker.
-- [ ] Barra de vida (`<progress>` o `role="progressbar"`) y temporizador grande.
-- [ ] Vida a 0 → `won`: `dispatch({ type: 'GYM_WON', number })`, pantalla de victoria con la recompensa. Tiempo a 0 → `lost`: «Reintentar» al momento.
-- [ ] El resultado se anuncia con una región `aria-live` (solo el resultado, no la vida en cada tick).
+- [x] Pantalla de inicio: líder, vida, tiempo y botón «¡Empezar!». El tiempo no corre hasta pulsarlo.
+- [x] `hooks/useBattleTimer.js`: un `setInterval` de 100 ms que calcula el tiempo real pasado con `Date.now()` (igual que el bucle del juego) y se limpia al terminar o al salir de la pantalla.
+- [x] Cada tick resta a la vida el daño del equipo (`teamDps × segundos`), sin pasar del tope `maxTeamDamage`.
+- [x] Cada click resta `clickDamage(state)`. El botón de ataque es un `<button>`.
+- [x] **Teclado:** con Enter o Espacio se puede atacar, pero ignora las pulsaciones repetidas de mantener la tecla (`event.repeat`): si no, dejar Enter pulsado sería un autoclicker.
+- [x] Barra de vida (`<progress>` o `role="progressbar"`) y temporizador grande.
+- [x] Vida a 0 → `won`: `dispatch({ type: 'GYM_WON', number })`, pantalla de victoria con la recompensa. Tiempo a 0 → `lost`: «Reintentar» al momento.
+- [x] El resultado se anuncia con una región `aria-live` (solo el resultado, no la vida en cada tick).
 
 ### 5.3 Tests del combate
 
-- [ ] `BattlePage.test.jsx` con `vi.useFakeTimers()`: el tiempo no corre antes de empezar; clicks hasta ganar → se envía `GYM_WON`; sin clicks se pierde al acabar el tiempo; mantener Enter (`repeat: true`) no hace daño.
+- [x] `BattlePage.test.jsx` con `vi.useFakeTimers()`: el tiempo no corre antes de empezar; clicks hasta ganar → se envía `GYM_WON`; sin clicks se pierde al acabar el tiempo; mantener Enter (`repeat: true`) no hace daño.
 
 **Al terminar:** commit `feat: gimnasios y combate`.
 

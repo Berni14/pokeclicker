@@ -5,17 +5,24 @@ import { RARITIES, getRarity } from './rarities';
 import { TYPE_COLORS } from './types';
 
 describe('tabla de la Pokédex (generada con npm run pokedex)', () => {
-  const gen1 = POKEDEX[1];
+  const all = Object.values(POKEDEX).flat();
 
-  it('tiene los 151 de la primera generación, en orden y sin huecos', () => {
-    const { from, to } = GENERATIONS[1];
-    expect(gen1.map((e) => e.id)).toEqual(
-      Array.from({ length: to - from + 1 }, (_, i) => from + i),
-    );
+  it('cada generación de generations.js tiene su tabla', () => {
+    expect(Object.keys(POKEDEX)).toEqual(Object.keys(GENERATIONS));
   });
 
+  it.each(Object.keys(GENERATIONS))(
+    'la generación %s tiene todos sus Pokémon, en orden y sin huecos',
+    (generation) => {
+      const { from, to } = GENERATIONS[generation];
+      expect(POKEDEX[generation].map((e) => e.id)).toEqual(
+        Array.from({ length: to - from + 1 }, (_, i) => from + i),
+      );
+    },
+  );
+
   it('cada entrada tiene datos válidos', () => {
-    for (const entry of gen1) {
+    for (const entry of all) {
       expect(RARITIES).toHaveProperty(entry.rarity);
       expect(entry.statTotal).toBeGreaterThan(0);
       expect(entry.attack).toBeGreaterThan(0);
@@ -26,7 +33,7 @@ describe('tabla de la Pokédex (generada con npm run pokedex)', () => {
 
   it('está generada con los umbrales de rareza actuales', () => {
     // Si cambian los umbrales de rarities.js, hay que regenerar la tabla.
-    for (const entry of gen1) {
+    for (const entry of all) {
       if (entry.rarity === 'legendary' || entry.rarity === 'mythical') continue;
       expect(getRarity({ statTotal: entry.statTotal })).toBe(entry.rarity);
     }
@@ -41,8 +48,19 @@ describe('tabla de la Pokédex (generada con npm run pokedex)', () => {
     expect(groups.mythical.map((e) => e.id)).toEqual([151]);
   });
 
+  it('reparto de rarezas de la segunda generación', () => {
+    const groups = pokedexByRarity(2);
+    expect(groups.common).toHaveLength(39);
+    expect(groups.rare).toHaveLength(36);
+    expect(groups.epic).toHaveLength(19);
+    expect(groups.legendary.map((e) => e.id)).toEqual([
+      243, 244, 245, 249, 250,
+    ]);
+    expect(groups.mythical.map((e) => e.id)).toEqual([251]);
+  });
+
   it('pokedexEntry acepta el id como número o como texto', () => {
     expect(pokedexEntry(25)).toBe(pokedexEntry('25'));
-    expect(pokedexEntry(999)).toBeUndefined();
+    expect(pokedexEntry(252)).toBeUndefined();
   });
 });

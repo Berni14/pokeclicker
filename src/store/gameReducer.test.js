@@ -62,6 +62,17 @@ describe('gameReducer', () => {
     expect(next.team).toEqual([150, 1]);
   });
 
+  it('CHANGE_GENERATION viaja a la siguiente región', () => {
+    const state = makeState({
+      collection: { 6: 2, 25: 1 },
+      team: [6, 25],
+      medals: { 1: [1, 2, 3, 4, 5, 6, 7, 8] },
+    });
+    const next = gameReducer(state, { type: 'CHANGE_GENERATION', keepId: 6 });
+    expect(next.generation).toBe(2);
+    expect(next.collection).toEqual({ 6: 2 });
+  });
+
   it('EQUIP y UNEQUIP cambian el equipo', () => {
     const state = makeState({ collection: { 25: 1 } });
     const equipped = gameReducer(state, { type: 'EQUIP', id: 25 });

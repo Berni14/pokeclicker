@@ -1,8 +1,10 @@
 import gen1 from './pokedex-gen1.json';
+import gen2 from './pokedex-gen2.json';
 
 // Datos de juego de cada generación, generados con `npm run pokedex -- N`.
 export const POKEDEX = {
   1: gen1,
+  2: gen2,
 };
 
 const byId = new Map(

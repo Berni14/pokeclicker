@@ -817,13 +817,15 @@ Con la v1.0 publicada, cada ampliación es una rama, una versión nueva y algo n
 
 ### 8.1 Cambio de generación (v1.1)
 
-- [ ] `node scripts/build-pokedex.js 2` → `config/pokedex-gen2.json` y la generación 2 en `config/generations.js` (152–251).
-- [ ] Líderes de Johto en `config/gyms.js`: Pegaso (volador), Antón (bicho), Blanca (normal), Morti (fantasma), Aníbal (lucha), Yasmina (acero), Fredo (hielo) y Débora (dragón). Sus tipos en `config/typeChart.js`.
-- [ ] `game/prestige.js` → `changeGeneration(state, keepId)`: aplica la tabla del apartado 9 de `FUNCIONAMIENTO_DEL_JUEGO.md` (dinero, mejoras y tiradas a 0; nivel y medallas se quedan; solo el Pokémon elegido, con sus estrellas y su nivel).
-- [ ] Acción `CHANGE_GENERATION` con `{ keepId }` y su test.
-- [ ] Pantalla de cambio de generación: resumen de la región y elección del Pokémon.
-- [ ] `saveVersion` a 2, con una función que convierta las partidas de la versión 1 en vez de borrarlas.
-- [ ] `npm run simulate` para la región 2 empezando con el nivel y el Pokémon típicos del final de la 1.
+> **Hecho** (9 oct 2026). 254 tests en verde. `saveVersion` sigue en 1: el cambio de generación no cambia la forma de la partida (`generation` ya se guardaba), así que no hace falta convertir partidas. La simulación juega ahora las dos regiones seguidas.
+
+- [x] `node scripts/build-pokedex.js 2` → `config/pokedex-gen2.json` y la generación 2 en `config/generations.js` (152–251).
+- [x] Líderes de Johto en `config/gyms.js`: Pegaso (volador), Antón (bicho), Blanca (normal), Morti (fantasma), Aníbal (lucha), Yasmina (acero), Fredo (hielo) y Débora (dragón). Sus tipos en `config/typeChart.js`.
+- [x] `game/prestige.js` → `changeGeneration(state, keepId)`: aplica la tabla del apartado 9 de `FUNCIONAMIENTO_DEL_JUEGO.md` (dinero, mejoras y tiradas a 0; nivel y medallas se quedan; solo el Pokémon elegido, con sus estrellas y su nivel).
+- [x] Acción `CHANGE_GENERATION` con `{ keepId }` y su test.
+- [x] Pantalla de cambio de generación: resumen de la región y elección del Pokémon (`pages/TravelPanel.jsx`, dentro de Gimnasios).
+- [x] ~~`saveVersion` a 2~~: no hace falta, la forma de la partida no cambia (ver arriba).
+- [x] `npm run simulate` para la región 2 empezando con el nivel y el Pokémon típicos del final de la 1.
 
 ### 8.2 Base de datos propia
 

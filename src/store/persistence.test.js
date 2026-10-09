@@ -88,6 +88,21 @@ describe('sanitizeSave', () => {
     expect(state.pulls).toEqual({ basic: 7, epic: 0, legendary: 0 });
   });
 
+  it('una partida en Johto mantiene la región, el Pokémon de Kanto y las medallas', () => {
+    const state = sanitizeSave(
+      validSave({
+        generation: 2,
+        collection: { 6: 3, 152: 1 },
+        team: [6, 152],
+        medals: { 1: [1, 2, 3, 4, 5, 6, 7, 8], 2: [1] },
+      }),
+    );
+    expect(state.generation).toBe(2);
+    expect(state.collection).toEqual({ 6: 3, 152: 1 });
+    expect(state.team).toEqual([6, 152]);
+    expect(state.medals).toEqual({ 1: [1, 2, 3, 4, 5, 6, 7, 8], 2: [1] });
+  });
+
   it('otra versión o algo que no es una partida → null', () => {
     expect(sanitizeSave(validSave({ saveVersion: 999 }))).toBeNull();
     expect(sanitizeSave(null)).toBeNull();

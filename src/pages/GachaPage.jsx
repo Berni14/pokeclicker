@@ -25,8 +25,10 @@ import styles from './GachaPage.module.css';
 export function GachaPage({ rng = Math.random }) {
   const { state, dispatch } = useGame();
   const [result, setResult] = useState(null); // { id, banner, outcome, price, pull }
-  const owned = Object.keys(state.collection).length;
-  const total = POKEDEX[state.generation].length;
+  // Solo los de esta generación: el Pokémon que te traes de la anterior no cuenta.
+  const entries = POKEDEX[state.generation];
+  const owned = entries.filter(({ id }) => state.collection[id]).length;
+  const total = entries.length;
 
   function handlePull(banner) {
     if (!canPull(state, banner)) return;

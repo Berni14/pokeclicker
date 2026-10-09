@@ -7,6 +7,7 @@ import { buyItem } from '../game/items';
 import { buyUpgrade } from '../game/shop';
 import { autoEquip, equip, unequip } from '../game/team';
 import { applyGymWin } from '../game/battle';
+import { changeGeneration } from '../game/prestige';
 import { initialState } from './initialState';
 
 // Cada acción delega en su función de game/. El sorteo del gacha se hace fuera
@@ -35,6 +36,8 @@ export function gameReducer(state, action) {
       return autoEquip(state, action.by);
     case 'GYM_WON':
       return applyGymWin(state, action.number);
+    case 'CHANGE_GENERATION':
+      return changeGeneration(state, action.keepId);
     case 'POKEMON_LOADED':
       return {
         ...state,

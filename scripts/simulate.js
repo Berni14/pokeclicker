@@ -10,7 +10,8 @@
 // - compra siempre lo más barato (tirada, mejora, objeto o subir de nivel a uno
 //   del equipo); los potenciadores no, porque dependen de cuánto juegues;
 // - equipa a los 6 que más producen;
-// - reta al gimnasio en cuanto puede ganarlo.
+// - reta al gimnasio en cuanto puede ganarlo;
+// - al ganar los 8, viaja a la siguiente región llevándose al que más produce.
 import { test } from 'vitest';
 import { EXPECTED_CLICKS_PER_SECOND } from '../src/config/gyms';
 import { ITEMS } from '../src/config/items';
@@ -28,20 +29,29 @@ import { canPull, pullPrice, rollPokemon, totalPulls } from '../src/game/gacha';
 import { itemStatus } from '../src/game/items';
 import { isMaxLevel, levelUpCost, pokemonLevel } from '../src/game/levels';
 import { pokemonProduction, teamProduction } from '../src/game/production';
+import { canChangeGeneration, regionOf } from '../src/game/prestige';
 import { nextUpgradeCost, upgradeStatus } from '../src/game/shop';
 import { gameReducer } from '../src/store/gameReducer';
 import { initialState } from '../src/store/initialState';
 import { seededRng } from '../src/__mocks__/gameState';
 
 const SEEDS = [1, 2, 3, 4, 5];
-const MAX_SECONDS = 6 * 3600;
+const MAX_SECONDS = 10 * 3600;
 const IDLE_CLICKS_PER_SECOND = 1;
 
 function play(seed) {
   const rng = seededRng(seed);
   let state = structuredClone(initialState);
   const dispatch = (action) => (state = gameReducer(state, action));
-  const gyms = [];
+  // Una entrada por región: sus gimnasios y cómo acaba la partida en ella.
+  const regions = [{ generation: 1, gyms: [], start: 0 }];
+  const region = () => regions.at(-1);
+  const bestByProduction = () =>
+    Object.keys(state.collection)
+      .map(Number)
+      .sort(
+        (a, b) => pokemonProduction(state, b) - pokemonProduction(state, a),
+      );
 
   for (let t = 1; t <= MAX_SECONDS; t++) {
     dispatch({ type: 'TICK', seconds: 1 });
@@ -49,15 +59,21 @@ function play(seed) {
       dispatch({ type: 'CLICK' });
 
     const gym = currentGym(state);
-    if (!gym) break;
+    if (!gym) {
+      region().state = state;
+      if (!canChangeGeneration(state)) break;
+      dispatch({ type: 'CHANGE_GENERATION', keepId: bestByProduction()[0] });
+      regions.push({ generation: state.generation, gyms: [], start: t });
+      continue;
+    }
     const seconds = battleDuration(state);
     const fromTeam = teamDps(state, gym) * seconds;
     const fromClicks =
       clickDamage(state) * EXPECTED_CLICKS_PER_SECOND * seconds;
     if (fromClicks + fromTeam >= gym.hp) {
-      gyms.push({
+      region().gyms.push({
         leader: gym.leader,
-        minute: t / 60,
+        minute: (t - region().start) / 60,
         // Parte de la vida del líder que quita el equipo (como mucho, toda).
         teamShare: Math.min(1, fromTeam / gym.hp),
         levels: state.team.map((id) => pokemonLevel(state, id)),
@@ -71,7 +87,11 @@ function play(seed) {
         if (canPull({ ...state, coins: Infinity }, banner)) {
           options.push({
             cost: pullPrice(state, banner),
-            action: { type: 'PULL', banner, id: rollPokemon(1, banner, rng) },
+            action: {
+              type: 'PULL',
+              banner,
+              id: rollPokemon(state.generation, banner, rng),
+            },
           });
         }
       }
@@ -100,18 +120,14 @@ function play(seed) {
       if (state.coins < options[0].cost) break;
       dispatch(options[0].action);
 
-      const best = Object.keys(state.collection)
-        .map(Number)
-        .sort(
-          (a, b) => pokemonProduction(state, b) - pokemonProduction(state, a),
-        )
-        .slice(0, 6);
+      const best = bestByProduction().slice(0, 6);
       for (const id of state.team)
         if (!best.includes(id)) dispatch({ type: 'UNEQUIP', id });
       for (const id of best) dispatch({ type: 'EQUIP', id });
     }
   }
-  return { gyms, state };
+  region().state ??= state;
+  return regions;
 }
 
 const fmtMin = (m) =>
@@ -121,44 +137,45 @@ const fmtMin = (m) =>
 const avg = (list) => list.reduce((a, b) => a + b, 0) / list.length;
 const pct = (n) => `${Math.round(n * 100)} %`;
 
-test('simulación de una región', () => {
-  const runs = SEEDS.map(play);
-  const leaders = runs[0].gyms.map((g) => g.leader);
+function report(regions) {
+  const { generation } = regions[0];
+  const leaders = regions[0].gyms.map((g) => g.leader);
 
-  console.log(`\nSimulación con ${SEEDS.length} semillas (media):\n`);
+  console.log(`\n${regionOf(generation)} (generación ${generation})\n`);
   console.log(
-    'Gimnasio      Tiempo de juego   Daño del equipo   Nivel medio del equipo',
+    'Gimnasio      Tiempo en la región   Daño del equipo   Nivel medio del equipo',
   );
   leaders.forEach((leader, i) => {
-    const done = runs.filter((r) => r.gyms[i]);
+    const done = regions.filter((r) => r.gyms[i]);
     const minute = avg(done.map((r) => r.gyms[i].minute));
     const share = avg(done.map((r) => r.gyms[i].teamShare));
     const level = avg(done.map((r) => avg(r.gyms[i].levels)));
     console.log(
-      `${leader.padEnd(13)} ${fmtMin(minute).padEnd(17)} ${pct(share).padEnd(17)} ${level.toFixed(1)}` +
-        (done.length < runs.length
-          ? `  (solo ${done.length}/${runs.length} partidas)`
+      `${leader.padEnd(13)} ${fmtMin(minute).padEnd(21)} ${pct(share).padEnd(17)} ${level.toFixed(1)}` +
+        (done.length < regions.length
+          ? `  (solo ${done.length}/${regions.length} partidas)`
           : ''),
     );
   });
-  const finished = runs.filter((r) => r.gyms.length === 8).length;
+  const finished = regions.filter((r) => r.gyms.length === 8).length;
   console.log(
-    `\nPartidas que ganan los 8 gimnasios: ${finished}/${runs.length}`,
+    `\nPartidas que ganan los 8 gimnasios: ${finished}/${regions.length}`,
   );
+  const end = regions.map((r) => r.state);
   console.log(
-    `Al final: nivel ${avg(runs.map((r) => r.state.trainer.level)).toFixed(1)}, ` +
-      `${Math.round(avg(runs.map((r) => totalPulls(r.state))))} tiradas, ` +
-      `${Math.round(avg(runs.map((r) => Object.keys(r.state.collection).length)))} Pokémon, ` +
-      `${Math.round(avg(runs.map((r) => teamProduction(r.state))))} monedas/s`,
+    `Al final: nivel ${avg(end.map((s) => s.trainer.level)).toFixed(1)}, ` +
+      `${Math.round(avg(end.map(totalPulls)))} tiradas, ` +
+      `${Math.round(avg(end.map((s) => Object.keys(s.collection).length)))} Pokémon, ` +
+      `${Math.round(avg(end.map(teamProduction)))} monedas/s`,
   );
-  const rarities = (r) =>
-    Object.keys(r.state.collection).map((id) => pokedexEntry(id).rarity);
+  const rarities = (s) =>
+    Object.keys(s.collection).map((id) => pokedexEntry(id).rarity);
   console.log(
     'Tiradas por gacha: ' +
       Object.entries(BANNERS)
         .map(
           ([key, { label }]) =>
-            `${label} ${Math.round(avg(runs.map((r) => r.state.pulls[key])))}`,
+            `${label} ${Math.round(avg(end.map((s) => s.pulls[key])))}`,
         )
         .join(' · '),
   );
@@ -167,9 +184,18 @@ test('simulación de una región', () => {
       Object.entries(RARITIES)
         .map(
           ([key, { label }]) =>
-            `${label} ${avg(runs.map((r) => rarities(r).filter((x) => x === key).length)).toFixed(1)}`,
+            `${label} ${avg(end.map((s) => rarities(s).filter((x) => x === key).length)).toFixed(1)}`,
         )
-        .join(' · ') +
-      '\n',
+        .join(' · '),
   );
-}, 300_000);
+}
+
+test('simulación de las regiones', () => {
+  const runs = SEEDS.map(play);
+  console.log(`\nSimulación con ${SEEDS.length} semillas (media)`);
+  const generations = [...new Set(runs.flat().map((r) => r.generation))];
+  for (const generation of generations) {
+    report(runs.flatMap((r) => r.filter((g) => g.generation === generation)));
+  }
+  console.log('');
+}, 600_000);

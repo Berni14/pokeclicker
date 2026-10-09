@@ -11,10 +11,12 @@ import {
   hasTypeAdvantage,
   teamDps,
 } from '../game/battle';
+import { canChangeGeneration, regionOf } from '../game/prestige';
 import { pixelSpriteUrl } from '../models/pokemon';
 import { useGame } from '../store/GameContext';
 import { formatName, formatNumber } from '../utils/format';
 import { BattlePage } from './BattlePage';
+import { TravelPanel } from './TravelPanel';
 import styles from './GymsPage.module.css';
 
 const STATUS_TEXT = {
@@ -39,7 +41,7 @@ export function GymsPage() {
 
   return (
     <div className={styles.page}>
-      <h2 tabIndex={-1}>Gimnasios</h2>
+      <h2 tabIndex={-1}>Gimnasios de {regionOf(state.generation)}</h2>
       <p className={styles.medals}>
         Medallas: {medals} / {gyms.length}
       </p>
@@ -84,13 +86,16 @@ export function GymsPage() {
         })}
       </ol>
 
-      {currentGym(state) ? (
-        <Hint gym={currentGym(state)} />
-      ) : (
-        <p className={styles.hint}>
-          ¡Has vencido a todos los líderes de la región!
-        </p>
-      )}
+      {currentGym(state) && <Hint gym={currentGym(state)} />}
+      {!currentGym(state) &&
+        (canChangeGeneration(state) ? (
+          <TravelPanel />
+        ) : (
+          <p className={styles.hint}>
+            ¡Has vencido a todos los líderes de {regionOf(state.generation)}! Es
+            la última región por ahora.
+          </p>
+        ))}
     </div>
   );
 }

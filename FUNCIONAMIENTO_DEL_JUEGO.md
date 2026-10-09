@@ -141,7 +141,7 @@ Multiplican **solo el dinero** (clicks o producción), no el daño en combate.
 
 ## 8. Gimnasios
 
-- ✅ Hay **8 gimnasios** por región. En la primera generación: Brock (roca), Misty (agua), Lt. Surge (eléctrico), Erika (planta), Koga (veneno), Sabrina (psíquico), Blaine (fuego) y Giovanni (tierra).
+- ✅ Hay **8 gimnasios** por región. En la primera generación: Brock (roca), Misty (agua), Lt. Surge (eléctrico), Erika (planta), Koga (veneno), Sabrina (psíquico), Blaine (fuego) y Giovanni (tierra). En la segunda (Johto): Pegaso (volador), Antón (bicho), Blanca (normal), Morti (fantasma), Aníbal (lucha), Yasmina (acero), Fredo (hielo) y Débora (dragón).
 - ✅ Cada combate dura **un tiempo fijo**: tienes que quitarle toda la vida al líder antes de que acabe.
 - ✅ El combate dura **30 segundos**, ampliables con la mejora Cronómetro.
 - ✅ En el combate cuentan **tus clicks y el daño de tus Pokémon** equipados.
@@ -158,6 +158,11 @@ Multiplican **solo el dinero** (clicks o producción), no el daño en combate.
 ## 9. Cambio de generación (v1.1)
 
 Al vencer al octavo líder puedes pasar a la siguiente región.
+
+- ✅ En la pantalla de gimnasios aparece el aviso de región completada con el botón **Viajar a Johto**. No es obligatorio: puedes seguir jugando en la región y viajar cuando quieras.
+- ✅ Al viajar se abre un resumen de lo que se mantiene y lo que se pierde, y eliges el Pokémon de una lista (se propone el que más produce).
+- ✅ En la última región disponible (por ahora, Johto) sale un aviso de que no hay más regiones.
+- ✅ El Pokémon que te llevas no cuenta para la Pokédex ni para el «Tienes X de Y» de la nueva región.
 
 - ✅ Eliges **1 solo Pokémon** para llevarte contigo, y **conserva sus estrellas y su nivel**.
 - ✅ El **dinero** se reinicia a 0.

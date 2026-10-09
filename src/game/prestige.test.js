@@ -51,16 +51,12 @@ describe('canChangeGeneration', () => {
 });
 
 describe('changeGeneration', () => {
-  it('se lleva solo al Pokémon elegido, con sus estrellas y su nivel', () => {
-    const next = changeGeneration(endOfKanto(), 6);
+  it('se lleva solo al Pokémon elegido, que vuelve a 1★ y Nv 1', () => {
+    const next = changeGeneration(endOfKanto(), 6); // tenía 3★ y Nv 30
     expect(next.generation).toBe(2);
-    expect(next.collection).toEqual({ 6: 3 });
-    expect(next.levels).toEqual({ 6: 30 });
+    expect(next.collection).toEqual({ 6: 1 });
+    expect(next.levels).toEqual({});
     expect(next.team).toEqual([6]);
-  });
-
-  it('un Pokémon a nivel 1 no deja niveles guardados', () => {
-    expect(changeGeneration(endOfKanto(), 150).levels).toEqual({});
   });
 
   it('reinicia dinero, mejoras, objetos, potenciadores y tiradas', () => {

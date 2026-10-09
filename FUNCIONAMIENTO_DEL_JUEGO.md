@@ -160,11 +160,11 @@ Multiplican **solo el dinero** (clicks o producción), no el daño en combate.
 Al vencer al octavo líder puedes pasar a la siguiente región.
 
 - ✅ En la pantalla de gimnasios aparece el aviso de región completada con el botón **Viajar a Johto**. No es obligatorio: puedes seguir jugando en la región y viajar cuando quieras.
-- ✅ Al viajar se abre un resumen de lo que se mantiene y lo que se pierde, y eliges el Pokémon de una lista (se propone el que más produce).
+- ✅ Al viajar se abre un resumen de lo que se mantiene y lo que se pierde, y eliges el Pokémon de una lista con lo que producirá al llegar (se propone el que más).
 - ✅ En la última región disponible (por ahora, Johto) sale un aviso de que no hay más regiones.
 - ✅ El Pokémon que te llevas no cuenta para la Pokédex ni para el «Tienes X de Y» de la nueva región.
 
-- ✅ Eliges **1 solo Pokémon** para llevarte contigo, y **conserva sus estrellas y su nivel**.
+- ✅ Eliges **1 solo Pokémon** para llevarte contigo. Llega **como recién conseguido: 1★ y Nv 1**.
 - ✅ El **dinero** se reinicia a 0.
 - ✅ Las **mejoras** de la tienda se reinician a 0, y se pierden los **objetos** y los potenciadores activos.
 - ✅ El precio de la tirada vuelve al inicial.
@@ -172,14 +172,14 @@ Al vencer al octavo líder puedes pasar a la siguiente región.
 - ✅ El resto de la caja se pierde, y el gacha pasa a dar Pokémon de la nueva generación.
 - ✅ Las **medallas** se quedan como colección; los gimnasios de la nueva región empiezan de cero.
 
-| Al cambiar de gen     | Se mantiene                   | Se reinicia                  |
-| --------------------- | ----------------------------- | ---------------------------- |
-| Dinero                |                               | ✅                           |
-| Mejoras de la tienda  |                               | ✅                           |
-| Precio de las tiradas |                               | ✅ (los tres gachas)         |
-| Nivel de entrenador   | ✅                            |                              |
-| Pokémon               | Solo 1 elegido, con estrellas | El resto                     |
-| Medallas              | ✅ (colección)                | Gimnasios de la nueva región |
+| Al cambiar de gen     | Se mantiene                  | Se reinicia                  |
+| --------------------- | ---------------------------- | ---------------------------- |
+| Dinero                |                              | ✅                           |
+| Mejoras de la tienda  |                              | ✅                           |
+| Precio de las tiradas |                              | ✅ (los tres gachas)         |
+| Nivel de entrenador   | ✅                           |                              |
+| Pokémon               | Solo 1 elegido (a 1★ y Nv 1) | El resto                     |
+| Medallas              | ✅ (colección)               | Gimnasios de la nueva región |
 
 ---
 

@@ -21,13 +21,12 @@ export const regionOf = (generation) => GENERATIONS[generation]?.region ?? '';
 export const canChangeGeneration = (state) =>
   currentGym(state) === null && nextGeneration(state) !== null;
 
-// Pasa a la siguiente región llevándote solo `keepId`, con sus estrellas y su
-// nivel. Se mantienen el nivel de entrenador y las medallas; el resto vuelve a
-// empezar (ver el apartado 9 de FUNCIONAMIENTO_DEL_JUEGO.md).
+// Pasa a la siguiente región llevándote solo `keepId`, que vuelve a 1★ y Nv 1
+// como si fuera nuevo. Se mantienen el nivel de entrenador y las medallas; el
+// resto vuelve a empezar (ver el apartado 9 de FUNCIONAMIENTO_DEL_JUEGO.md).
 export function changeGeneration(state, keepId) {
   if (!canChangeGeneration(state) || !state.collection[keepId]) return state;
   const id = Number(keepId);
-  const level = state.levels[id];
   return {
     ...state,
     generation: nextGeneration(state),
@@ -36,8 +35,8 @@ export function changeGeneration(state, keepId) {
     items: [],
     boosts: {},
     pulls: zeroFor(BANNERS),
-    collection: { [id]: state.collection[id] },
-    levels: level ? { [id]: level } : {},
+    collection: { [id]: 1 },
+    levels: {},
     team: [id],
   };
 }

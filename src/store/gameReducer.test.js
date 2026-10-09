@@ -70,7 +70,7 @@ describe('gameReducer', () => {
     });
     const next = gameReducer(state, { type: 'CHANGE_GENERATION', keepId: 6 });
     expect(next.generation).toBe(2);
-    expect(next.collection).toEqual({ 6: 2 });
+    expect(next.collection).toEqual({ 6: 1 });
   });
 
   it('EQUIP y UNEQUIP cambian el equipo', () => {

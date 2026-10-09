@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { Modal } from '../components/Modal/Modal';
-import { StarRating } from '../components/StarRating/StarRating';
-import { pokemonLevel } from '../game/levels';
+import { productionOf } from '../config/economy';
+import { pokedexEntry } from '../config/pokedex';
+import { RARITIES } from '../config/rarities';
 import { nextGeneration, regionOf } from '../game/prestige';
-import { pokemonProduction } from '../game/production';
 import { pixelSpriteUrl } from '../models/pokemon';
 import { useGame } from '../store/GameContext';
 import { formatDexNumber, formatName, formatNumber } from '../utils/format';
 import styles from './TravelPanel.module.css';
 
 // Aviso de región completada con el botón para viajar a la siguiente. Al
-// viajar eliges el único Pokémon que te llevas.
+// viajar eliges el único Pokémon que te llevas, que llega con 1★ y Nv 1.
 export function TravelPanel() {
   const { state, dispatch } = useGame();
   const [open, setOpen] = useState(false);
@@ -18,10 +18,11 @@ export function TravelPanel() {
   const region = regionOf(state.generation);
   const next = regionOf(nextGeneration(state));
 
-  // De más a menos producción: el primero es el que se propone llevarse.
+  // De más a menos producción con 1★ y Nv 1, que es como llega: el primero es
+  // el que se propone llevarse.
   const options = Object.keys(state.collection)
     .map(Number)
-    .map((id) => ({ id, production: pokemonProduction(state, id) }))
+    .map((id) => ({ id, production: productionOf(pokedexEntry(id), 1) }))
     .sort((a, b) => b.production - a.production || a.id - b.id);
   const chosen = keepId ?? options[0]?.id;
 
@@ -56,7 +57,7 @@ export function TravelPanel() {
           <ul className={styles.summary}>
             <li>
               <strong>Se mantiene:</strong> nivel de entrenador, medallas y el
-              Pokémon que elijas, con sus estrellas y su nivel.
+              Pokémon que elijas, que vuelve a <strong>1★ y Nv 1</strong>.
             </li>
             <li>
               <strong>Vuelve a empezar:</strong> monedas, mejoras, objetos,
@@ -87,11 +88,10 @@ export function TravelPanel() {
                     <span className={styles.name}>
                       <strong>{nameOf(id)}</strong>
                       <span>
-                        Nv {pokemonLevel(state, id)} ·{' '}
-                        {formatNumber(production)}/s
+                        {RARITIES[pokedexEntry(id).rarity].label} · en {next}{' '}
+                        empieza con {formatNumber(production)}/s
                       </span>
                     </span>
-                    <StarRating stars={state.collection[id]} />
                   </label>
                 </li>
               ))}

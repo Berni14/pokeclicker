@@ -1,8 +1,15 @@
 import { memo } from 'react';
+import { BERRIES } from '../../config/berries';
 import { MAX_POKEMON_LEVEL } from '../../config/economy';
 import { RARITIES } from '../../config/rarities';
 import { TYPE_COLORS } from '../../config/types';
-import { formatDexNumber, formatName, formatNumber } from '../../utils/format';
+import {
+  formatClock,
+  formatDexNumber,
+  formatName,
+  formatNumber,
+} from '../../utils/format';
+import { Berry } from '../Berry/Berry';
 import { Loader } from '../Loader/Loader';
 import { StarRating } from '../StarRating/StarRating';
 import { TypeBadge } from '../TypeBadge/TypeBadge';
@@ -12,13 +19,15 @@ import styles from './PokemonCard.module.css';
 // API, puede no haber llegado aún), estrellas, nivel y producción. Las acciones
 // opcionales (equipar, quitar, subir de nivel…) llegan como funciones que
 // reciben el id: así no cambian en cada render y React.memo evita repintar la
-// tarjeta en cada tick.
+// tarjeta en cada tick. `berry` es la baya que lleva ({ key, seconds }), si
+// lleva alguna.
 export const PokemonCard = memo(function PokemonCard({
   entry,
   pokemon,
   stars,
   level = 1,
   production,
+  berry,
   levelUpCost,
   canLevelUp,
   onLevelUp,
@@ -74,6 +83,17 @@ export const PokemonCard = memo(function PokemonCard({
           {formatNumber(production)} <abbr title="monedas por segundo">/s</abbr>
         </span>
       </p>
+
+      {berry && (
+        <p className={styles.berry}>
+          <Berry type={berry.key} size={18} />
+          {BERRIES[berry.key].label}
+          <span className={styles.berryTime}>
+            <span className="visually-hidden">, le quedan </span>
+            {formatClock(berry.seconds)}
+          </span>
+        </p>
+      )}
 
       {(onLevelUp || onAction) && (
         <div className={styles.actions}>

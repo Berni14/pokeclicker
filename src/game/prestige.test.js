@@ -71,6 +71,18 @@ describe('changeGeneration', () => {
     expect(next.pulls).toEqual({ basic: 0, epic: 0, legendary: 0 });
   });
 
+  it('la granja se queda y las bayas equipadas se pierden', () => {
+    const next = changeGeneration(
+      endOfKanto({
+        farm: { growth: 10, stock: ['oran'], harvested: 4 },
+        heldBerries: { 6: { key: 'liechi', seconds: 300 } },
+      }),
+      6,
+    );
+    expect(next.farm).toEqual({ growth: 10, stock: ['oran'], harvested: 4 });
+    expect(next.heldBerries).toEqual({});
+  });
+
   it('mantiene el nivel de entrenador y las medallas', () => {
     const next = changeGeneration(endOfKanto(), 6);
     expect(next.trainer).toEqual({ level: 7, xp: 120 });

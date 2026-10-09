@@ -2,6 +2,7 @@ import { click } from '../game/clicker';
 import { tick } from '../game/production';
 import { applyPull } from '../game/gacha';
 import { levelUp } from '../game/levels';
+import { giveBerry } from '../game/berries';
 import { buyBoost } from '../game/boosts';
 import { buyItem } from '../game/items';
 import { buyUpgrade } from '../game/shop';
@@ -28,6 +29,8 @@ export function gameReducer(state, action) {
       return buyBoost(state, action.key);
     case 'LEVEL_UP':
       return levelUp(state, action.id);
+    case 'GIVE_BERRY':
+      return giveBerry(state, action.key, action.id);
     case 'EQUIP':
       return equip(state, action.id, action.replaceId);
     case 'UNEQUIP':

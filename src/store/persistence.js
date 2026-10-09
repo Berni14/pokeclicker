@@ -5,6 +5,12 @@ import {
   MAX_POKEMON_LEVEL,
   TEAM_SIZE,
 } from '../config/economy';
+import {
+  BERRIES,
+  BERRY_GROW_SECONDS,
+  BERRY_SECONDS,
+  BERRY_STORAGE,
+} from '../config/berries';
 import { BANNERS, MAX_STARS } from '../config/gacha';
 import { GYMS } from '../config/gyms';
 import { BOOST_MAX_SECONDS, BOOSTS, ITEMS } from '../config/items';
@@ -29,6 +35,8 @@ const SAVED_FIELDS = [
   'levels',
   'team',
   'medals',
+  'farm',
+  'heldBerries',
 ];
 
 export function saveGame(state, now = Date.now()) {
@@ -130,6 +138,38 @@ function cleanPulls(pulls) {
   );
 }
 
+// Las partidas de antes de la granja no la traen: empieza vacía.
+function cleanFarm(farm) {
+  const stock = Array.isArray(farm?.stock)
+    ? farm.stock.filter((key) => Object.hasOwn(BERRIES, key))
+    : [];
+  return {
+    growth: clamp(validNumber(farm?.growth, 0), 0, BERRY_GROW_SECONDS),
+    stock: stock.slice(0, BERRY_STORAGE),
+    harvested:
+      isInt(farm?.harvested) && farm.harvested >= 0 ? farm.harvested : 0,
+  };
+}
+
+// Solo bayas de Pokémon que tienes, de una baya que exista y con tiempo.
+function cleanHeldBerries(heldBerries, collection) {
+  const clean = {};
+  for (const [id, held] of Object.entries(heldBerries ?? {})) {
+    if (
+      collection[id] &&
+      Object.hasOwn(BERRIES, held?.key) &&
+      Number.isFinite(held.seconds) &&
+      held.seconds > 0
+    ) {
+      clean[id] = {
+        key: held.key,
+        seconds: Math.min(held.seconds, BERRY_SECONDS),
+      };
+    }
+  }
+  return clean;
+}
+
 function cleanMedals(medals) {
   const clean = {};
   for (const [generation, numbers] of Object.entries(medals ?? {})) {
@@ -167,6 +207,8 @@ export function sanitizeSave(save) {
     levels: cleanLevels(save.levels, collection),
     team: cleanTeam(save.team, collection),
     medals: cleanMedals(save.medals),
+    farm: cleanFarm(save.farm),
+    heldBerries: cleanHeldBerries(save.heldBerries, collection),
   };
 }
 

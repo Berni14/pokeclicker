@@ -124,6 +124,13 @@ Scripts en `package.json`:
 - [ ] Un potenciador activo se ve con su cuenta atrás en la tienda y arriba; comprar otro suma el tiempo; al acabarse, todo vuelve a la normalidad.
 - [ ] Los objetos no cambian el daño del click en combate.
 
+### Granja de bayas
+
+- [ ] Cada 5 min aparece una baya; con 5 la granja pone «Granja llena» y deja de crecer.
+- [ ] Al volver tras un rato fuera, la granja ha crecido (como mucho hasta 5).
+- [ ] «Dar» solo deja elegir Pokémon del equipo que no lleven baya; la tarjeta muestra la baya con su cuenta atrás y la producción (Aranja, Zidra) o el daño del combate (Lichi, Zidra) se dobla.
+- [ ] A los 10 min la baya desaparece de la tarjeta y la producción vuelve a la de antes.
+
 ### Gimnasios
 
 - [ ] Solo se puede retar al gimnasio actual; los siguientes están bloqueados.
@@ -171,6 +178,7 @@ Scripts en `package.json`:
 | 09/10/2026 | Precio inicial del Épico y del Legendario (`gacha.js`); vida de los gimnasios (`gyms.js`) | 1.000 → 100.000 y 25.000 → 1.000.000; 4.500…100.000 → 4.500…62.000 | Decisión de diseño: que el Épico y el Legendario sean objetivos caros. Solo con los precios, Giovanni pasaba de ~1 h 52 min a ~2 h 42 min. Con la vida nueva (Misty 6.000, Surge 9.000, Erika 15.000, Koga 22.000, Sabrina 33.000, Blaine 45.000, Giovanni 62.000), `npm run simulate`: Brock ~3 min, Giovanni ~1 h 54 min, 5/5 partidas. El jugador simulado (compra lo más barato) no llega a tirar del Épico ni del Legendario: con ~250 monedas/s al final, quedan para quien ahorre |
 | 09/10/2026 | Vida de los gimnasios de Johto (`gyms.js`, generación 2)                                  | — → 8.000…90.000                                                   | Región nueva. Con la misma vida que Kanto, el Pokémon que te llevas (Nv ~34) ganaba a Pegaso y Antón nada más llegar y Johto duraba ~1 h 18 min. Con Pegaso 8.000, Antón 11.000, Blanca 15.000, Morti 22.000, Aníbal 30.000, Yasmina 45.000, Fredo 62.000 y Débora 90.000, `npm run simulate` (llevándose al que más produce): Pegaso ~2 min, Débora ~1 h 47 min, 5/5 partidas. Algo más rápida que Kanto (~1 h 54 min) gracias al nivel de entrenador, como pide el diseño              |
 | 09/10/2026 | Pokémon que te llevas a 1★ y Nv 1 (`prestige.js`); vida de Johto                          | 8.000…90.000 → 4.500…50.000                                        | Decisión de diseño: el Pokémon que te llevas ya no conserva estrellas ni nivel. Con la vida anterior, Pegaso tardaba ~15 min y Débora ~2 h 29 min. Con Pegaso 4.500, Antón 6.000, Blanca 9.000, Morti 13.000, Aníbal 18.000, Yasmina 26.000, Fredo 36.000 y Débora 50.000, `npm run simulate`: Pegaso ~5 min, Débora ~1 h 44 min (Kanto ~1 h 54 min), 5/5 partidas                                                                                                                       |
+| 09/10/2026 | Granja de bayas nueva (`berries.js`); vida de los gimnasios sin cambiar                   | —                                                                  | Una baya cada 5 min (máx. 5), ×2 durante 10 min. `npm run simulate` dando cada baya nada más salir: Kanto ~1 h 14 min (antes ~1 h 54 min) y Johto ~55 min (antes ~1 h 44 min), 5/5 partidas. Decisión: se deja así, la granja premia a quien la usa. Si se quiere volver a ~2 h, suavizar las bayas (×1,5) o subir la vida de los gimnasios                                                                                                                                              |
 
 ---
 
@@ -183,11 +191,12 @@ Prioridad alta (lógica pura, fáciles de probar con Vitest):
 - [ ] `game/gacha.test.js` → precio de cada gacha, solo sus rarezas, nuevo / estrella / devolución, auto-equipar, `rng` fijo y proporciones de rareza de cada gacha.
 - [ ] `game/team.test.js` → límite de 6, sin repetidos, sustituir, equipo automático por dinero y por daño (ventaja de tipo, sin gimnasio, ya era el mejor).
 - [ ] `game/shop.test.js` → bloqueada, máximo, coste creciente, sin dinero.
+- [ ] `game/berries.test.js` → una baya cada 5 min, tope de 5, crece sin jugar, sorteo estable, dar solo al equipo y una por Pokémon, efecto ×2 y la baya que se acaba a mitad.
 - [ ] `game/battle.test.js` → duración, daño, ventaja de tipo, nivel y Poder del equipo, el equipo gana solo sin pasarse de la vida, solo el gimnasio actual.
 - [ ] `game/items.test.js` → objetos bloqueados, comprados y multiplicándose; precio de los potenciadores, sumar tiempo, tope de 1 h y el incienso solo en los segundos que le quedan.
 - [ ] `game/levels.test.js` → nivel 1 por defecto, precio creciente, sin dinero o al máximo no sube, también en la caja.
 - [ ] `game/production.test.js` y `game/trainer.test.js` → producción del equipo, estrellas, bonus y subida de nivel.
-- [ ] `store/gameReducer.test.js` → `CLICK`, `TICK`, `PULL`, `BUY_UPGRADE`, `EQUIP`, `UNEQUIP`, `AUTO_EQUIP`, `GYM_WON`, `POKEMON_LOADED`, `LEVEL_UP`, `BUY_ITEM`, `BUY_BOOST`, `RESET`, acción desconocida.
+- [ ] `store/gameReducer.test.js` → `CLICK`, `TICK`, `PULL`, `BUY_UPGRADE`, `EQUIP`, `UNEQUIP`, `AUTO_EQUIP`, `GYM_WON`, `POKEMON_LOADED`, `LEVEL_UP`, `BUY_ITEM`, `BUY_BOOST`, `GIVE_BERRY`, `CHANGE_GENERATION`, `RESET`, acción desconocida.
 - [ ] `utils/format.test.js` → `formatName` y `formatNumber` (0, 999, 1500, 2 300 000).
 
 Prioridad media (React Testing Library):

@@ -6,6 +6,7 @@ import { POKEDEX, pokedexEntry } from '../config/pokedex';
 import { RARITIES } from '../config/rarities';
 import { TYPE_NAMES } from '../config/types';
 import { currentGym } from '../game/battle';
+import { heldBerry } from '../game/berries';
 import { canLevelUp, levelUpCost, pokemonLevel } from '../game/levels';
 import { pokemonProduction } from '../game/production';
 import { bestTeam, isTeamFull } from '../game/team';
@@ -194,6 +195,7 @@ function MyPokemon() {
                 stars={state.collection[entry.id]}
                 level={pokemonLevel(state, entry.id)}
                 production={production}
+                berry={heldBerry(state, entry.id)}
                 levelUpCost={levelUpCost(state, entry.id)}
                 canLevelUp={canLevelUp(state, entry.id)}
                 onLevelUp={handleLevelUp}

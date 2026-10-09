@@ -73,6 +73,21 @@ describe('gameReducer', () => {
     expect(next.collection).toEqual({ 6: 1 });
   });
 
+  it('GIVE_BERRY da una baya de la granja', () => {
+    const state = makeState({
+      collection: { 25: 1 },
+      team: [25],
+      farm: { growth: 0, stock: ['oran'], harvested: 1 },
+    });
+    const next = gameReducer(state, {
+      type: 'GIVE_BERRY',
+      key: 'oran',
+      id: 25,
+    });
+    expect(next.farm.stock).toEqual([]);
+    expect(next.heldBerries[25].key).toBe('oran');
+  });
+
   it('EQUIP y UNEQUIP cambian el equipo', () => {
     const state = makeState({ collection: { 25: 1 } });
     const equipped = gameReducer(state, { type: 'EQUIP', id: 25 });

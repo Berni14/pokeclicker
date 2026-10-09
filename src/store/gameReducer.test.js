@@ -55,6 +55,12 @@ describe('gameReducer', () => {
     expect(next.coins).toBe(0);
   });
 
+  it('AUTO_EQUIP pone el mejor equipo', () => {
+    const state = makeState({ collection: { 1: 1, 150: 1 }, team: [] });
+    const next = gameReducer(state, { type: 'AUTO_EQUIP', by: 'production' });
+    expect(next.team).toEqual([150, 1]);
+  });
+
   it('EQUIP y UNEQUIP cambian el equipo', () => {
     const state = makeState({ collection: { 25: 1 } });
     const equipped = gameReducer(state, { type: 'EQUIP', id: 25 });

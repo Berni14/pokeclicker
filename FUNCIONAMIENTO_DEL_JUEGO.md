@@ -117,6 +117,7 @@ Multiplican **solo el dinero** (clicks o producción), no el daño en combate.
 - ✅ Un Pokémon de la caja también sube de estrellas si te sale repetido.
 - ✅ La caja tiene una pestaña de **Pokédex de la generación** con los que te faltan en silueta.
 - ✅ Filtros por tipo y rareza, y orden por producción.
+- ✅ **Equipo automático**: un botón pone los 6 que **más dinero** producen y otro los 6 que **más daño** hacen contra el gimnasio actual (contando la ventaja de tipo, estrellas y nivel). Si ya tienes ese equipo, el botón sale marcado con ✓.
 
 ### Niveles de los Pokémon
 

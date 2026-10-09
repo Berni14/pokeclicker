@@ -5,7 +5,7 @@ import { levelUp } from '../game/levels';
 import { buyBoost } from '../game/boosts';
 import { buyItem } from '../game/items';
 import { buyUpgrade } from '../game/shop';
-import { equip, unequip } from '../game/team';
+import { autoEquip, equip, unequip } from '../game/team';
 import { applyGymWin } from '../game/battle';
 import { initialState } from './initialState';
 
@@ -31,6 +31,8 @@ export function gameReducer(state, action) {
       return equip(state, action.id, action.replaceId);
     case 'UNEQUIP':
       return unequip(state, action.id);
+    case 'AUTO_EQUIP':
+      return autoEquip(state, action.by);
     case 'GYM_WON':
       return applyGymWin(state, action.number);
     case 'POKEMON_LOADED':

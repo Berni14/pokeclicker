@@ -1,6 +1,9 @@
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(var(--card-min-width, 150px), 1fr)
+  );
   gap: var(--space-3);
   padding: 0;
   list-style: none;

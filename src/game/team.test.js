@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { equip, isTeamFull, unequip } from './team';
+import { autoEquip, bestTeam, equip, isTeamFull, unequip } from './team';
+import { currentGym, pokemonDps } from './battle';
+import { pokemonProduction } from './production';
 import { makeState } from '../__mocks__/gameState';
 
 const FULL = {
@@ -45,5 +47,67 @@ describe('unequip', () => {
   it('si no estaba equipado no cambia nada', () => {
     const state = makeState({ collection: { 25: 1 } });
     expect(unequip(state, 25)).toBe(state);
+  });
+});
+
+describe('bestTeam y autoEquip', () => {
+  const SEVEN = { 1: 1, 4: 1, 6: 1, 7: 1, 54: 1, 95: 1, 150: 1 };
+
+  it('elige los 6 que más producen', () => {
+    const state = makeState({ collection: SEVEN, team: [] });
+    const expected = Object.keys(SEVEN)
+      .map(Number)
+      .sort((a, b) => pokemonProduction(state, b) - pokemonProduction(state, a))
+      .slice(0, 6);
+    expect(bestTeam(state, 'production')).toEqual(expected);
+  });
+
+  it('las estrellas y el nivel cuentan', () => {
+    const state = makeState({ collection: { 1: 1, 7: 1 }, team: [] });
+    const [first, second] = bestTeam(state, 'production');
+    const trained = makeState({
+      collection: { 1: 1, 7: 1 },
+      levels: { [second]: 30 },
+      team: [],
+    });
+    expect(bestTeam(trained, 'production')).toEqual([second, first]);
+    const starred = makeState({ collection: { [first]: 1, [second]: 5 } });
+    expect(bestTeam(starred, 'production')).toEqual([second, first]);
+  });
+
+  it('para combatir cuenta la ventaja de tipo contra el gimnasio actual', () => {
+    // Contra Brock (roca), Squirtle (agua) tiene ventaja y Charmander no.
+    const state = makeState({ collection: { 4: 1, 7: 1 }, team: [] });
+    expect(pokemonDps(state, 7, currentGym(state))).toBeGreaterThan(
+      pokemonDps(state, 7, null),
+    );
+    expect(bestTeam(state, 'damage')).toEqual([7, 4]);
+  });
+
+  it('con menos de 6 Pokémon los equipa a todos', () => {
+    const state = makeState({ collection: { 25: 1, 1: 1 }, team: [] });
+    expect(autoEquip(state, 'production').team).toHaveLength(2);
+  });
+
+  it('si ya es el mejor equipo no cambia nada', () => {
+    const state = makeState({ collection: SEVEN, team: [] });
+    const best = autoEquip(state, 'production');
+    const shuffled = { ...best, team: [...best.team].reverse() };
+    expect(autoEquip(shuffled, 'production')).toBe(shuffled);
+  });
+
+  it('con todos los gimnasios ganados también funciona', () => {
+    const state = makeState({
+      collection: SEVEN,
+      team: [],
+      medals: { 1: [1, 2, 3, 4, 5, 6, 7, 8] },
+    });
+    expect(currentGym(state)).toBeNull();
+    expect(bestTeam(state, 'damage')).toHaveLength(6);
+  });
+
+  it('un criterio desconocido deja el equipo como está', () => {
+    const state = makeState({ collection: SEVEN, team: [1] });
+    expect(autoEquip(state, 'nope')).toBe(state);
   });
 });

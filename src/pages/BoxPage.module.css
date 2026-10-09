@@ -3,6 +3,13 @@
   gap: var(--space-4);
 }
 
+/* La caja ocupa 3rem más que el resto de pantallas cuando hay sitio. */
+@media (min-width: 1200px) {
+  .page {
+    margin-inline: -1.5rem;
+  }
+}
+
 .views {
   display: flex;
   gap: var(--space-2);
@@ -100,4 +107,16 @@
 
 .unknown span:last-child {
   color: var(--color-text-muted);
+}
+
+.auto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.autoTitle {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
 }

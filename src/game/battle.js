@@ -28,7 +28,9 @@ export const clickDamage = (state) =>
   clickPower(state) *
   (1 + BATTLE_DAMAGE_PER_LEVEL * state.upgrades.battleDamage);
 
+// Sin gimnasio (todos ganados) no hay ventaja de tipo.
 export const hasTypeAdvantage = (entry, gym) =>
+  Boolean(gym) &&
   entry.types.some((type) => STRONG_AGAINST[gym.type]?.includes(type));
 
 // Multiplicador de la mejora Poder del equipo.

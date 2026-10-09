@@ -5,6 +5,7 @@ import { PokemonCard } from '../components/PokemonCard/PokemonCard';
 import { POKEDEX, pokedexEntry } from '../config/pokedex';
 import { RARITIES } from '../config/rarities';
 import { TYPE_NAMES } from '../config/types';
+import { canLevelUp, levelUpCost, pokemonLevel } from '../game/levels';
 import { pokemonProduction } from '../game/production';
 import { isTeamFull } from '../game/team';
 import { pixelSpriteUrl } from '../models/pokemon';
@@ -89,6 +90,11 @@ function MyPokemon() {
     [team, dispatch],
   );
 
+  const handleLevelUp = useCallback(
+    (id) => dispatch({ type: 'LEVEL_UP', id }),
+    [dispatch],
+  );
+
   function handleReplace(replaceId) {
     dispatch({ type: 'EQUIP', id: replacing, replaceId });
     setReplacing(null);
@@ -154,7 +160,11 @@ function MyPokemon() {
                 entry={entry}
                 pokemon={state.pokemonById[entry.id]}
                 stars={state.collection[entry.id]}
+                level={pokemonLevel(state, entry.id)}
                 production={production}
+                levelUpCost={levelUpCost(state, entry.id)}
+                canLevelUp={canLevelUp(state, entry.id)}
+                onLevelUp={handleLevelUp}
                 actionLabel={team.includes(entry.id) ? 'Quitar' : 'Equipar'}
                 onAction={handleToggle}
               />

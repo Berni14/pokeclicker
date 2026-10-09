@@ -122,7 +122,8 @@ Scripts en `package.json`:
 
 - [ ] Solo se puede retar al gimnasio actual; los siguientes están bloqueados.
 - [ ] El tiempo no corre hasta pulsar «Empezar».
-- [ ] Sin clicks no se gana nunca, aunque el equipo sea muy fuerte (tope de la mitad de la vida).
+- [ ] El equipo no tiene tope: un equipo con nivel suficiente gana sin clicks, y la pista de gimnasios lo dice.
+- [ ] Subir de nivel a un Pokémon cobra su precio y sube su producción y su daño; al Nv 100 ya no se puede.
 - [ ] Un Pokémon con ventaja de tipo hace más daño (y se indica).
 - [ ] Mantener pulsado Enter no ataca solo.
 - [ ] Al ganar: medalla, experiencia, monedas y se desbloquea el siguiente. Al perder: reintento inmediato.
@@ -149,13 +150,14 @@ Scripts en `package.json`:
 - [ ] `npm run simulate` da tiempos parecidos a los objetivos: Brock ~3 min, Giovanni ~2–2,5 h.
 - [ ] Siempre hay algo que comprar «pronto» (el jugador no se queda 10 minutos esperando).
 - [ ] Con las mismas estrellas, un Pokémon más raro o con más stats nunca produce menos.
-- [ ] Las tres mejoras de combate se notan: sin ellas el gimnasio 8 no se puede ganar.
+- [ ] Las mejoras de combate y los niveles se notan: sin ellos el gimnasio 8 no se puede ganar.
 - [ ] Apuntar aquí los cambios de números en `config/` y por qué.
 
-| Fecha      | Qué número cambia                  | De → a            | Por qué                                                                                                                                                                                                                                                                 |
-| ---------- | ---------------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 08/10/2026 | Umbrales de rareza (`rarities.js`) | 300/450 → 400/500 | Con 300/450 salían 59 épicas y 19 comunes; con 400/500, 69 comunes, 49 raras y 28 épicas                                                                                                                                                                                |
-| 08/10/2026 | Ninguno (revisión de la fase 6)    | —                 | `npm run simulate` (5 semillas): Brock ~2 min, Giovanni ~2 h, 5/5 partidas completas. El equipo llega a su tope enseguida en los primeros gimnasios (2 s de 30 contra Brock) pero no en los últimos (43 s de 45 contra Giovanni): su ataque sí importa donde hace falta |
+| Fecha      | Qué número cambia                                        | De → a                     | Por qué                                                                                                                                                                                                                                                                 |
+| ---------- | -------------------------------------------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 08/10/2026 | Umbrales de rareza (`rarities.js`)                       | 300/450 → 400/500          | Con 300/450 salían 59 épicas y 19 comunes; con 400/500, 69 comunes, 49 raras y 28 épicas                                                                                                                                                                                |
+| 08/10/2026 | Ninguno (revisión de la fase 6)                          | —                          | `npm run simulate` (5 semillas): Brock ~2 min, Giovanni ~2 h, 5/5 partidas completas. El equipo llega a su tope enseguida en los primeros gimnasios (2 s de 30 contra Brock) pero no en los últimos (43 s de 45 contra Giovanni): su ataque sí importa donde hace falta |
+| 09/10/2026 | Vida de los gimnasios (`gyms.js`); sin `TEAM_DAMAGE_CAP` | 700…16.000 → 4.500…100.000 | Se quita el tope del equipo y se añaden niveles por Pokémon y Poder del equipo. Sin cambiar la vida, la región se pasaba en 19 min. Con la nueva, `npm run simulate`: Brock ~2 min, Giovanni ~1 h 55 min, 5/5 partidas; el equipo hace >90 % del daño y llega a Nv ~34  |
 
 ---
 
@@ -168,9 +170,10 @@ Prioridad alta (lógica pura, fáciles de probar con Vitest):
 - [ ] `game/gacha.test.js` → precio, nuevo / estrella / devolución, auto-equipar, `rng` fijo y proporciones de rareza.
 - [ ] `game/team.test.js` → límite de 6, sin repetidos, sustituir.
 - [ ] `game/shop.test.js` → bloqueada, máximo, coste creciente, sin dinero.
-- [ ] `game/battle.test.js` → duración, daño, ventaja de tipo, tope del equipo, solo el gimnasio actual.
+- [ ] `game/battle.test.js` → duración, daño, ventaja de tipo, nivel y Poder del equipo, el equipo gana solo sin pasarse de la vida, solo el gimnasio actual.
+- [ ] `game/levels.test.js` → nivel 1 por defecto, precio creciente, sin dinero o al máximo no sube, también en la caja.
 - [ ] `game/production.test.js` y `game/trainer.test.js` → producción del equipo, estrellas, bonus y subida de nivel.
-- [ ] `store/gameReducer.test.js` → `CLICK`, `TICK`, `PULL`, `BUY_UPGRADE`, `EQUIP`, `UNEQUIP`, `GYM_WON`, `POKEMON_LOADED`, `RESET`, acción desconocida.
+- [ ] `store/gameReducer.test.js` → `CLICK`, `TICK`, `PULL`, `BUY_UPGRADE`, `EQUIP`, `UNEQUIP`, `GYM_WON`, `POKEMON_LOADED`, `LEVEL_UP`, `RESET`, acción desconocida.
 - [ ] `utils/format.test.js` → `formatName` y `formatNumber` (0, 999, 1500, 2 300 000).
 
 Prioridad media (React Testing Library):

@@ -56,7 +56,6 @@ export function BattlePage({ gym, onExit }) {
 
   const hp = Math.ceil(battle.hp);
   const seconds = Math.ceil(battle.timeLeft);
-  const teamPerSecond = Math.min(battle.teamDps, battle.teamCap);
 
   return (
     <div className={styles.page}>
@@ -101,8 +100,7 @@ export function BattlePage({ gym, onExit }) {
         </label>
 
         <p className={styles.team}>
-          Tu equipo: {formatNumber(teamPerSecond)} de daño/s (máx.{' '}
-          {formatNumber(battle.teamCap)} en total) · Tu click:{' '}
+          Tu equipo: {formatNumber(battle.teamDps)} de daño/s · Tu click:{' '}
           {formatNumber(battle.clickDamage)}
         </p>
 
@@ -152,8 +150,8 @@ export function BattlePage({ gym, onExit }) {
         {battle.status === 'lost' && (
           <div className={styles.reward}>
             <p>
-              Le quedaban {formatNumber(hp)} de vida. Mejora tu click en la
-              tienda o refuerza tu equipo.
+              Le quedaban {formatNumber(hp)} de vida. Sube de nivel a tu equipo
+              o compra Poder del equipo en la tienda.
             </p>
             <button
               ref={endRef}

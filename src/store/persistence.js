@@ -1,6 +1,10 @@
 // Guardar y cargar la partida. Todo el guardado pasa por este archivo: si algún
 // día se guarda en la nube, solo cambia esto.
-import { MAX_OFFLINE_SECONDS, TEAM_SIZE } from '../config/economy';
+import {
+  MAX_OFFLINE_SECONDS,
+  MAX_POKEMON_LEVEL,
+  TEAM_SIZE,
+} from '../config/economy';
 import { MAX_STARS } from '../config/gacha';
 import { GYMS } from '../config/gyms';
 import { POKEDEX, pokedexEntry } from '../config/pokedex';
@@ -19,6 +23,7 @@ const SAVED_FIELDS = [
   'upgrades',
   'pulls',
   'collection',
+  'levels',
   'team',
   'medals',
 ];
@@ -63,6 +68,18 @@ function cleanCollection(collection) {
   for (const [id, stars] of Object.entries(collection ?? {})) {
     if (pokedexEntry(id) && isInt(stars) && stars >= 1) {
       clean[id] = clamp(stars, 1, MAX_STARS);
+    }
+  }
+  return clean;
+}
+
+// Solo niveles de Pokémon que tienes. Las partidas de antes de los niveles no
+// traen `levels`: todos sus Pokémon empiezan al 1.
+function cleanLevels(levels, collection) {
+  const clean = {};
+  for (const [id, level] of Object.entries(levels ?? {})) {
+    if (collection[id] && isInt(level) && level > 1) {
+      clean[id] = Math.min(level, MAX_POKEMON_LEVEL);
     }
   }
   return clean;
@@ -115,6 +132,7 @@ export function sanitizeSave(save) {
     upgrades: cleanUpgrades(save.upgrades),
     pulls: isInt(save.pulls) && save.pulls >= 0 ? save.pulls : 0,
     collection,
+    levels: cleanLevels(save.levels, collection),
     team: cleanTeam(save.team, collection),
     medals: cleanMedals(save.medals),
   };

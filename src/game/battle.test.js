@@ -9,7 +9,6 @@ import {
   currentGym,
   gymStatus,
   hasTypeAdvantage,
-  maxTeamDamage,
   pokemonDps,
   teamDps,
 } from './battle';
@@ -58,8 +57,17 @@ describe('daño del equipo', () => {
     expect(teamDps(state, MISTY)).toBeCloseTo(9.6);
   });
 
-  it('el equipo hace como mucho la mitad de la vida', () => {
-    expect(maxTeamDamage(BROCK)).toBe(350);
+  it('cada nivel por encima de 1 suma un 10 % de daño', () => {
+    const state = makeState({ collection: { 7: 1 }, levels: { 7: 11 } });
+    expect(pokemonDps(state, 7, MISTY)).toBeCloseTo(19.2);
+  });
+
+  it('Poder del equipo suma un 25 % por nivel', () => {
+    const state = makeState({
+      collection: { 7: 1 },
+      upgrades: { teamPower: 2 },
+    });
+    expect(pokemonDps(state, 7, MISTY)).toBeCloseTo(14.4);
   });
 });
 
@@ -74,7 +82,7 @@ describe('gimnasios', () => {
   it('ganar da medalla, monedas y experiencia, y desbloquea el siguiente', () => {
     const next = applyGymWin(makeState(), 1);
     expect(next.medals).toEqual({ 1: [1] });
-    expect(next.coins).toBe(350);
+    expect(next.coins).toBe(2250);
     expect(next.trainer.xp).toBe(50);
     expect(gymStatus(next, 1)).toBe('won');
     expect(currentGym(next)).toBe(MISTY);
@@ -95,14 +103,30 @@ describe('gimnasios', () => {
 
 describe('clicksPerSecondNeeded', () => {
   it('sin equipo, toda la vida sale de los clicks', () => {
-    // Brock: 700 de vida, 30 s, 1 de daño por click → 23,3 clicks/s.
-    expect(clicksPerSecondNeeded(makeState(), BROCK)).toBeCloseTo(700 / 30);
+    // Brock: 4500 de vida, 30 s, 1 de daño por click → 150 clicks/s.
+    expect(clicksPerSecondNeeded(makeState(), BROCK)).toBeCloseTo(150);
   });
 
-  it('el equipo ayuda, pero como mucho con la mitad', () => {
+  it('todo el daño del equipo cuenta, sin tope', () => {
     const strong = makeState({ collection: { 150: 5 }, team: [150] });
-    // Mewtwo 5★ haría 66 de daño/s × 30 s, pero el tope es 350.
-    expect(clicksPerSecondNeeded(strong, BROCK)).toBeCloseTo(350 / 30);
+    // Mewtwo 5★: 66 de daño/s × 30 s = 1980. Quedan 2520 → 84 clicks/s.
+    expect(clicksPerSecondNeeded(strong, BROCK)).toBeCloseTo(84);
+  });
+
+  it('un equipo fuerte gana sin clicks', () => {
+    const strong = makeState({
+      collection: { 150: 5 },
+      levels: { 150: 11 },
+      team: [150],
+    });
+    // 132 de daño/s × 30 s = 3960: le faltan 540 → 18 clicks/s.
+    expect(clicksPerSecondNeeded(strong, BROCK)).toBeCloseTo(18);
+    const stronger = makeState({
+      collection: { 150: 5 },
+      levels: { 150: 21 },
+      team: [150],
+    });
+    expect(clicksPerSecondNeeded(stronger, BROCK)).toBeLessThanOrEqual(0);
   });
 });
 
@@ -119,10 +143,9 @@ describe('battleReducer', () => {
   it('guarda los números del jugador al empezar', () => {
     const battle = createBattle(state, BROCK);
     expect(battle).toMatchObject({
-      hp: 700,
+      hp: 4500,
       timeLeft: 30,
       clickDamage: 10,
-      teamCap: 350,
       status: 'ready',
     });
     expect(battle.teamDps).toBeCloseTo(14.4);
@@ -137,23 +160,31 @@ describe('battleReducer', () => {
   it('cada click quita su daño y a 0 de vida se gana', () => {
     let battle = start();
     battle = battleReducer(battle, { type: 'ATTACK' });
-    expect(battle.hp).toBe(690);
-    for (let i = 0; i < 69; i++)
+    expect(battle.hp).toBe(4490);
+    for (let i = 0; i < 449; i++)
       battle = battleReducer(battle, { type: 'ATTACK' });
     expect(battle).toMatchObject({ hp: 0, status: 'won' });
     // Ganado: ya no cambia nada.
     expect(battleReducer(battle, { type: 'ATTACK' })).toBe(battle);
   });
 
-  it('el equipo daña con el tiempo, sin pasar del tope', () => {
+  it('el equipo daña con el tiempo', () => {
     let battle = start();
     battle = battleReducer(battle, { type: 'TICK', seconds: 10 });
-    expect(battle.hp).toBeCloseTo(700 - 144);
+    expect(battle.hp).toBeCloseTo(4500 - 144);
     expect(battle.timeLeft).toBeCloseTo(20);
-    battle = battleReducer(battle, { type: 'TICK', seconds: 19 });
-    expect(battle.teamDamage).toBe(350); // tope: la mitad de la vida
-    expect(battle.hp).toBe(350);
     expect(battle.status).toBe('fighting');
+  });
+
+  it('el equipo puede ganar solo, sin pasarse de la vida', () => {
+    const strong = makeState({
+      collection: { 150: 5 },
+      levels: { 150: 21 },
+      team: [150],
+    });
+    let battle = battleReducer(createBattle(strong, BROCK), { type: 'START' });
+    battle = battleReducer(battle, { type: 'TICK', seconds: 30 });
+    expect(battle).toMatchObject({ hp: 0, teamDamage: 4500, status: 'won' });
   });
 
   it('si se acaba el tiempo con vida, se pierde', () => {
@@ -166,7 +197,7 @@ describe('battleReducer', () => {
     let battle = battleReducer(start(), { type: 'TICK', seconds: 31 });
     battle = battleReducer(battle, { type: 'RETRY' });
     expect(battle).toMatchObject({
-      hp: 700,
+      hp: 4500,
       timeLeft: 30,
       teamDamage: 0,
       status: 'ready',

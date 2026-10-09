@@ -41,14 +41,14 @@ describe('BattlePage', () => {
   });
 
   it('a clicks se gana: medalla y el siguiente gimnasio se desbloquea', () => {
-    // Poder de click 9 → 10 de daño: 70 clicks para los 700 de Brock.
-    renderGyms({ upgrades: { clickPower: 9 } });
+    // Poder de click 89 → 90 de daño: 50 clicks para los 4500 de Brock.
+    renderGyms({ upgrades: { clickPower: 89 } });
     fireEvent.click(actionButton());
-    for (let i = 0; i < 70; i++) fireEvent.click(actionButton());
+    for (let i = 0; i < 50; i++) fireEvent.click(actionButton());
 
     expect(screen.getByRole('status')).toHaveTextContent('¡Has ganado!');
     expect(
-      screen.getByText(/\+350 monedas y \+50 de experiencia/),
+      screen.getByText(/\+2,3\smil monedas y \+50 de experiencia/),
     ).toBeInTheDocument();
 
     fireEvent.click(
@@ -77,7 +77,9 @@ describe('BattlePage', () => {
     renderGyms({ collection: { 7: 1 }, team: [7] });
     fireEvent.click(actionButton());
     advance(10_000);
-    expect(screen.getByText(/^Vida:/)).toHaveTextContent('Vida: 556 / 700');
+    // 4500 − 144 = 4356.
+    const value = Number(screen.getByRole('progressbar').getAttribute('value'));
+    expect(value).toBeCloseTo(4356);
   });
 
   it('mantener Enter pulsado no ataca', () => {
@@ -94,11 +96,11 @@ describe('BattlePage', () => {
   });
 
   it('el foco sigue al botón que toca, para jugar con teclado', () => {
-    renderGyms({ upgrades: { clickPower: 699 } });
+    renderGyms({ upgrades: { clickPower: 4499 } });
     expect(actionButton()).toHaveFocus();
     fireEvent.click(actionButton()); // empezar
     expect(actionButton()).toHaveFocus();
-    fireEvent.click(actionButton()); // un click: 700 de daño
+    fireEvent.click(actionButton()); // un click: 4500 de daño
     expect(
       screen.getByRole('button', { name: 'Volver a los gimnasios' }),
     ).toHaveFocus();

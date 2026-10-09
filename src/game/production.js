@@ -1,10 +1,11 @@
 import { productionOf, TRAINING_BONUS } from '../config/economy';
 import { pokedexEntry } from '../config/pokedex';
+import { pokemonLevel } from './levels';
 import { moneyMultiplier } from './trainer';
 
-// Monedas por segundo de un Pokémon de tu colección, con sus estrellas.
+// Monedas por segundo de un Pokémon de tu colección, con estrellas y nivel.
 export const pokemonProduction = (state, id) =>
-  productionOf(pokedexEntry(id), state.collection[id]);
+  productionOf(pokedexEntry(id), state.collection[id], pokemonLevel(state, id));
 
 // Monedas por segundo de todo el equipo. Es la que usan el tick y la interfaz.
 export function teamProduction(state) {

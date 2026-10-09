@@ -66,6 +66,7 @@ Los datos de los Pokémon (nombre, imagen, tipos, estadísticas) vienen de la [P
 | Poder de click       | Más dinero y más daño por click            | Nivel 1    |
 | Entrenamiento        | Multiplica la producción de todo el equipo | Nivel 2    |
 | Ataque en combate    | Más daño de tus clicks en los gimnasios    | Nivel 3    |
+| Poder del equipo     | Más daño de tu equipo en los gimnasios     | Nivel 3    |
 | Cronómetro           | Más tiempo en los combates                 | Nivel 4    |
 | Descuento en tiradas | Tiradas del gacha más baratas              | Nivel 5    |
 
@@ -97,16 +98,24 @@ Estados de una mejora en la interfaz: **Disponible**, **Máximo** y **Bloqueada*
 - ✅ La caja tiene una pestaña de **Pokédex de la generación** con los que te faltan en silueta.
 - ✅ Filtros por tipo y rareza, y orden por producción.
 
+### Niveles de los Pokémon
+
+- ✅ Cada Pokémon tiene un **nivel**, del 1 al **100**. Empieza en el 1.
+- ✅ Se sube **con monedas**, desde la caja o desde el equipo de la pantalla principal. También se puede subir a los de la caja.
+- ✅ Cada nivel por encima de 1 suma un **10 %** de producción **y** de daño en combate (Nv 11 = el doble).
+- ✅ El precio depende de lo que produce el Pokémon: subir a un legendario cuesta más que a un común. Cada nivel cuesta un **15 %** más que el anterior.
+- ✅ Estrellas y nivel se multiplican: un 5★ al Nv 11 produce y pega ×6.
+
 ---
 
 ## 8. Gimnasios
 
 - ✅ Hay **8 gimnasios** por región. En la primera generación: Brock (roca), Misty (agua), Lt. Surge (eléctrico), Erika (planta), Koga (veneno), Sabrina (psíquico), Blaine (fuego) y Giovanni (tierra).
-- ✅ Cada combate se gana a **clicks en un tiempo fijo**: tienes que quitarle toda la vida al líder antes de que acabe el tiempo.
+- ✅ Cada combate dura **un tiempo fijo**: tienes que quitarle toda la vida al líder antes de que acabe.
 - ✅ El combate dura **30 segundos**, ampliables con la mejora Cronómetro.
 - ✅ En el combate cuentan **tus clicks y el daño de tus Pokémon** equipados.
-- ✅ El daño de tus Pokémon sale de su estadística de **ataque** (y sus estrellas), no de su producción: así un Pokémon puede ser bueno para ganar dinero, para combatir o para las dos cosas.
-- ✅ Tu equipo puede hacer como mucho **la mitad** de la vida del líder: la otra mitad tiene que salir de tus clicks. Así el combate nunca se gana solo.
+- ✅ El daño de tus Pokémon sale de su estadística de **ataque**, sus estrellas, su **nivel** y la mejora **Poder del equipo**, no de su producción: así un Pokémon puede ser bueno para ganar dinero, para combatir o para las dos cosas.
+- ✅ El equipo **no tiene tope de daño**: es lo que más pega. Un equipo bien subido puede ganar solo; si no llega, tus clicks ponen lo que falta.
 - ✅ **Ventajas de tipo:** un Pokémon cuyo tipo es fuerte contra el del líder hace ×1,5 de daño (agua contra fuego…).
 - ✅ Los gimnasios se desbloquean **en orden** (del 1 al 8).
 - ✅ Cada gimnasio tiene más vida que el anterior.
@@ -119,7 +128,7 @@ Estados de una mejora en la interfaz: **Disponible**, **Máximo** y **Bloqueada*
 
 Al vencer al octavo líder puedes pasar a la siguiente región.
 
-- ✅ Eliges **1 solo Pokémon** para llevarte contigo, y **conserva sus estrellas**.
+- ✅ Eliges **1 solo Pokémon** para llevarte contigo, y **conserva sus estrellas y su nivel**.
 - ✅ El **dinero** se reinicia a 0.
 - ✅ Las **mejoras** de la tienda se reinician a 0.
 - ✅ El precio de la tirada vuelve al inicial.

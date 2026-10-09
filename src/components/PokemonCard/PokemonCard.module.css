@@ -59,15 +59,35 @@
   list-style: none;
 }
 
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-1) var(--space-3);
+}
+
+.level {
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
 .production {
   font-weight: 700;
 }
 
-.production abbr {
+.stats abbr {
   text-decoration: none;
 }
 
-.action {
+.actions {
+  display: grid;
+  gap: var(--space-2);
   width: 100%;
   margin-top: auto;
+}
+
+.maxLevel {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-text-muted);
 }

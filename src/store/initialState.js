@@ -9,9 +9,11 @@ export const initialState = {
     battleDamage: 0,
     battleTime: 0,
     pullDiscount: 0,
+    teamPower: 0,
   },
   pulls: 0,
   collection: {}, // { [id]: estrellas }
+  levels: {}, // { [id]: nivel }; si no está, nivel 1
   team: [], // hasta 6 ids
   medals: {}, // { [generación]: [1, 2, …] }
   pokemonById: {}, // datos de la API para pintar; no se guarda en la partida

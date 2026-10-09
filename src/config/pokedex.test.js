@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { POKEDEX, pokedexByRarity, pokedexEntry } from './pokedex';
 import { GENERATIONS } from './generations';
-import { RARITIES, getRarity } from './rarities';
+import { RARITIES, RARITY_OVERRIDES, getRarity } from './rarities';
 import { TYPE_COLORS } from './types';
 
 describe('tabla de la Pokédex (generada con npm run pokedex)', () => {
@@ -36,6 +36,14 @@ describe('tabla de la Pokédex (generada con npm run pokedex)', () => {
     for (const entry of all) {
       if (entry.rarity === 'legendary' || entry.rarity === 'mythical') continue;
       expect(getRarity({ statTotal: entry.statTotal })).toBe(entry.rarity);
+    }
+  });
+
+  it('respeta las rarezas elegidas a mano', () => {
+    expect(pokedexEntry(448).rarity).toBe('legendary'); // Lucario
+    for (const [id, rarity] of Object.entries(RARITY_OVERRIDES)) {
+      expect(pokedexEntry(id).rarity).toBe(rarity);
+      expect(getRarity({ id: Number(id), statTotal: 300 })).toBe(rarity);
     }
   });
 
@@ -77,8 +85,8 @@ describe('tabla de la Pokédex (generada con npm run pokedex)', () => {
     expect(count(4)).toEqual({
       common: 36,
       rare: 29,
-      epic: 28,
-      legendary: 9,
+      epic: 27,
+      legendary: 10, // con Lucario
       mythical: 5,
     });
   });

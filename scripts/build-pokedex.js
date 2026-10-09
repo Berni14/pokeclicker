@@ -24,6 +24,7 @@ async function buildEntry(id) {
   return {
     id,
     rarity: getRarity({
+      id,
       statTotal,
       isLegendary: species.is_legendary,
       isMythical: species.is_mythical,

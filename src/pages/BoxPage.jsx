@@ -5,9 +5,10 @@ import { PokemonCard } from '../components/PokemonCard/PokemonCard';
 import { POKEDEX, pokedexEntry } from '../config/pokedex';
 import { RARITIES } from '../config/rarities';
 import { TYPE_NAMES } from '../config/types';
+import { currentGym } from '../game/battle';
 import { canLevelUp, levelUpCost, pokemonLevel } from '../game/levels';
 import { pokemonProduction } from '../game/production';
-import { isTeamFull } from '../game/team';
+import { bestTeam, isTeamFull } from '../game/team';
 import { pixelSpriteUrl } from '../models/pokemon';
 import { useGame } from '../store/GameContext';
 import { formatDexNumber, formatName } from '../utils/format';
@@ -113,8 +114,39 @@ function MyPokemon() {
     );
   }
 
+  const gym = currentGym(state);
+  const autoOptions = [
+    { by: 'production', label: 'Más dinero' },
+    {
+      by: 'damage',
+      label: gym ? `Más daño contra ${gym.leader}` : 'Más daño',
+    },
+  ];
+
   return (
     <>
+      <div className={styles.auto} role="group" aria-label="Equipo automático">
+        <span className={styles.autoTitle}>Equipo automático</span>
+        {autoOptions.map(({ by, label }) => {
+          const best = bestTeam(state, by);
+          const isBest =
+            best.length === team.length &&
+            best.every((id) => team.includes(id));
+          return (
+            <button
+              key={by}
+              type="button"
+              className="button button-secondary"
+              disabled={isBest}
+              onClick={() => dispatch({ type: 'AUTO_EQUIP', by })}
+            >
+              {label}
+              {isBest && ' ✓'}
+            </button>
+          );
+        })}
+      </div>
+
       <div className={styles.filters}>
         <label>
           Tipo
@@ -153,7 +185,7 @@ function MyPokemon() {
       {items.length === 0 ? (
         <p className={styles.empty}>Ningún Pokémon con esos filtros.</p>
       ) : (
-        <CardGrid label="Tus Pokémon">
+        <CardGrid label="Tus Pokémon" minWidth="180px">
           {items.map(({ entry, production }) => (
             <li key={entry.id}>
               <PokemonCard

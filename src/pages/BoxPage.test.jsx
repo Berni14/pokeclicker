@@ -39,6 +39,21 @@ describe('BoxPage', () => {
     ).toBeInTheDocument();
   });
 
+  it('el equipo automático pone a los que más producen', () => {
+    renderBox({
+      collection: { 1: 1, 4: 1, 6: 1, 7: 1, 54: 1, 95: 1, 150: 1 },
+      team: [1],
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Más dinero' }));
+    expect(
+      screen.getByRole('button', { name: 'Quitar a Poke 150' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Más dinero ✓' })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Más daño contra Brock' }),
+    ).toBeInTheDocument();
+  });
+
   it('filtra por rareza y ordena', () => {
     renderBox({ collection: { 1: 1, 6: 1, 150: 1 }, team: [] });
     const names = () =>

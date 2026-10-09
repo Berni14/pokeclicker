@@ -114,6 +114,7 @@ Scripts en `package.json`:
 - [ ] Un Pokémon nuevo se equipa solo si hay hueco; un repetido sube una estrella; con 5★ se convierte en monedas.
 - [ ] La producción pasiva suma cada segundo y solo cuentan los 6 equipados.
 - [ ] Equipar con el equipo lleno pide a quién sustituir.
+- [ ] «Más dinero» pone los 6 que más producen y las monedas/s suben; «Más daño contra …» cambia con el gimnasio actual; el botón del equipo que ya tienes sale con ✓ y desactivado.
 - [ ] La Pokédex muestra en silueta los que faltan y el contador cuadra con la caja.
 - [ ] Las mejoras pasan de bloqueada → disponible → máximo; el nivel de entrenador desbloquea las que tocan.
 - [ ] El nivel de entrenador sube con las tiradas y los gimnasios, no con los clicks.
@@ -172,13 +173,13 @@ Prioridad alta (lógica pura, fáciles de probar con Vitest):
 - [ ] `models/pokemon.test.js` → `toPokemon()` con una respuesta real de ejemplo y con sprites vacíos.
 - [ ] `config/pokedex.test.js` → 151 entradas sin huecos y el reparto de rarezas esperado.
 - [ ] `game/gacha.test.js` → precio, nuevo / estrella / devolución, auto-equipar, `rng` fijo y proporciones de rareza.
-- [ ] `game/team.test.js` → límite de 6, sin repetidos, sustituir.
+- [ ] `game/team.test.js` → límite de 6, sin repetidos, sustituir, equipo automático por dinero y por daño (ventaja de tipo, sin gimnasio, ya era el mejor).
 - [ ] `game/shop.test.js` → bloqueada, máximo, coste creciente, sin dinero.
 - [ ] `game/battle.test.js` → duración, daño, ventaja de tipo, nivel y Poder del equipo, el equipo gana solo sin pasarse de la vida, solo el gimnasio actual.
 - [ ] `game/items.test.js` → objetos bloqueados, comprados y multiplicándose; precio de los potenciadores, sumar tiempo, tope de 1 h y el incienso solo en los segundos que le quedan.
 - [ ] `game/levels.test.js` → nivel 1 por defecto, precio creciente, sin dinero o al máximo no sube, también en la caja.
 - [ ] `game/production.test.js` y `game/trainer.test.js` → producción del equipo, estrellas, bonus y subida de nivel.
-- [ ] `store/gameReducer.test.js` → `CLICK`, `TICK`, `PULL`, `BUY_UPGRADE`, `EQUIP`, `UNEQUIP`, `GYM_WON`, `POKEMON_LOADED`, `LEVEL_UP`, `BUY_ITEM`, `BUY_BOOST`, `RESET`, acción desconocida.
+- [ ] `store/gameReducer.test.js` → `CLICK`, `TICK`, `PULL`, `BUY_UPGRADE`, `EQUIP`, `UNEQUIP`, `AUTO_EQUIP`, `GYM_WON`, `POKEMON_LOADED`, `LEVEL_UP`, `BUY_ITEM`, `BUY_BOOST`, `RESET`, acción desconocida.
 - [ ] `utils/format.test.js` → `formatName` y `formatNumber` (0, 999, 1500, 2 300 000).
 
 Prioridad media (React Testing Library):

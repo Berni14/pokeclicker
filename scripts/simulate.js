@@ -43,7 +43,7 @@ import { initialState } from '../src/store/initialState';
 import { seededRng } from '../src/__mocks__/gameState';
 
 const SEEDS = [1, 2, 3, 4, 5];
-const MAX_SECONDS = 10 * 3600;
+const MAX_SECONDS = 16 * 3600;
 const IDLE_CLICKS_PER_SECOND = 1;
 
 function play(seed) {

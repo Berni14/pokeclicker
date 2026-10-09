@@ -1,6 +1,6 @@
 # Pokémon Clicker
 
-Un juego incremental en el navegador: haz click para ganar monedas, consigue Pokémon en el gacha, sube a tu equipo de nivel y derrota a los líderes de gimnasio de Kanto y Johto.
+Un juego incremental en el navegador: haz click para ganar monedas, consigue Pokémon en el gacha, sube a tu equipo de nivel y derrota a los líderes de gimnasio de cuatro regiones: Kanto, Johto, Hoenn y Sinnoh.
 
 **[▶ Jugar](https://pokeclickers.netlify.app/)**
 
@@ -47,9 +47,9 @@ Está organizado **de abajo arriba**, para que cada capa dependa solo de la de d
 - **Los números están separados de las reglas (`config/`).** Equilibrar el juego es cambiar un número, no tocar la lógica.
 - **La API está aislada (`api/`, `models/`, `services/`).** Si la PokeAPI cambia, solo se tocan esas carpetas.
 
-**¿Por qué la tabla de la Pokédex se genera con un script?** Para sortear el gacha, el juego necesita la rareza y las estadísticas de todos los Pokémon de la región desde el principio. Pedirlas a la API en cada partida serían más de 300 peticiones antes de poder jugar. `npm run pokedex -- 1` (o `-- 2`) las descarga una sola vez y las guarda en `src/config/pokedex-gen1.json` (o `gen2`), que va en el repositorio. Durante el juego, la API solo se usa para los nombres y las imágenes de los Pokémon que tienes.
+**¿Por qué la tabla de la Pokédex se genera con un script?** Para sortear el gacha, el juego necesita la rareza y las estadísticas de todos los Pokémon de la región desde el principio. Pedirlas a la API en cada partida serían más de 300 peticiones antes de poder jugar. `npm run pokedex -- 1` (o `-- 2`, `-- 3`, `-- 4`) las descarga una sola vez y las guarda en `src/config/pokedex-gen1.json` (o `gen2`, `gen3`, `gen4`), que va en el repositorio. Durante el juego, la API solo se usa para los nombres y las imágenes de los Pokémon que tienes.
 
-**Equilibrio con simulación.** `npm run simulate` juega regiones enteras con las mismas funciones que el juego real. Así se ajustaron la vida de los gimnasios y los precios: cada región dura unas 2 horas (Kanto ~1 h 54 min y Johto ~1 h 44 min).
+**Equilibrio con simulación.** `npm run simulate` juega regiones enteras con las mismas funciones que el juego real. Así se ajustaron la vida de los gimnasios y los precios: sin bayas, Kanto y Johto duran unas 2 horas; usando la granja de bayas, entre ~45 min y ~1 h 15 min por región.
 
 ## Ejecutarlo en local
 

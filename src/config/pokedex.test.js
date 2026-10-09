@@ -59,8 +59,32 @@ describe('tabla de la Pokédex (generada con npm run pokedex)', () => {
     expect(groups.mythical.map((e) => e.id)).toEqual([251]);
   });
 
+  it('reparto de rarezas de la tercera y la cuarta generación', () => {
+    const count = (generation) =>
+      Object.fromEntries(
+        Object.entries(pokedexByRarity(generation)).map(([rarity, list]) => [
+          rarity,
+          list.length,
+        ]),
+      );
+    expect(count(3)).toEqual({
+      common: 58,
+      rare: 54,
+      epic: 13,
+      legendary: 8,
+      mythical: 2,
+    });
+    expect(count(4)).toEqual({
+      common: 36,
+      rare: 29,
+      epic: 28,
+      legendary: 9,
+      mythical: 5,
+    });
+  });
+
   it('pokedexEntry acepta el id como número o como texto', () => {
     expect(pokedexEntry(25)).toBe(pokedexEntry('25'));
-    expect(pokedexEntry(252)).toBeUndefined();
+    expect(pokedexEntry(494)).toBeUndefined();
   });
 });

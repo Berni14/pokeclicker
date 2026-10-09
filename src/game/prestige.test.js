@@ -37,8 +37,8 @@ describe('canChangeGeneration', () => {
 
   it('no si no hay una región siguiente', () => {
     const state = makeState({
-      generation: 2,
-      medals: { 2: [1, 2, 3, 4, 5, 6, 7, 8] },
+      generation: 4,
+      medals: { 4: [1, 2, 3, 4, 5, 6, 7, 8] },
     });
     expect(nextGeneration(state)).toBeNull();
     expect(canChangeGeneration(state)).toBe(false);
@@ -47,10 +47,36 @@ describe('canChangeGeneration', () => {
   it('cada generación tiene su región', () => {
     expect(regionOf(1)).toBe('Kanto');
     expect(regionOf(2)).toBe('Johto');
+    expect(regionOf(3)).toBe('Hoenn');
+    expect(regionOf(4)).toBe('Sinnoh');
   });
 });
 
 describe('changeGeneration', () => {
+  it('de Johto se viaja a Hoenn y de Hoenn a Sinnoh', () => {
+    const fromJohto = changeGeneration(
+      makeState({
+        generation: 2,
+        collection: { 152: 1 },
+        medals: { 2: [1, 2, 3, 4, 5, 6, 7, 8] },
+      }),
+      152,
+    );
+    expect(fromJohto.generation).toBe(3);
+    expect(currentGym(fromJohto).leader).toBe('Petra');
+
+    const fromHoenn = changeGeneration(
+      makeState({
+        generation: 3,
+        collection: { 252: 1 },
+        medals: { 3: [1, 2, 3, 4, 5, 6, 7, 8] },
+      }),
+      252,
+    );
+    expect(fromHoenn.generation).toBe(4);
+    expect(currentGym(fromHoenn).leader).toBe('Roco');
+  });
+
   it('se lleva solo al Pokémon elegido, que vuelve a 1★ y Nv 1', () => {
     const next = changeGeneration(endOfKanto(), 6); // tenía 3★ y Nv 30
     expect(next.generation).toBe(2);

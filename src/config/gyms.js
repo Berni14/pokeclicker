@@ -12,12 +12,12 @@ export const EXPECTED_CLICKS_PER_SECOND = 6; // para la pista de la pantalla de 
 export const GYMS = {
   1: [
     { number: 1, leader: 'Brock', type: 'rock', hp: 4500, ace: 95 },
-    { number: 2, leader: 'Misty', type: 'water', hp: 6500, ace: 121 },
-    { number: 3, leader: 'Lt. Surge', type: 'electric', hp: 10000, ace: 26 },
-    { number: 4, leader: 'Erika', type: 'grass', hp: 18000, ace: 45 },
-    { number: 5, leader: 'Koga', type: 'poison', hp: 28000, ace: 110 },
-    { number: 6, leader: 'Sabrina', type: 'psychic', hp: 48000, ace: 65 },
-    { number: 7, leader: 'Blaine', type: 'fire', hp: 70000, ace: 59 },
-    { number: 8, leader: 'Giovanni', type: 'ground', hp: 100000, ace: 112 },
+    { number: 2, leader: 'Misty', type: 'water', hp: 6000, ace: 121 },
+    { number: 3, leader: 'Lt. Surge', type: 'electric', hp: 9000, ace: 26 },
+    { number: 4, leader: 'Erika', type: 'grass', hp: 15000, ace: 45 },
+    { number: 5, leader: 'Koga', type: 'poison', hp: 22000, ace: 110 },
+    { number: 6, leader: 'Sabrina', type: 'psychic', hp: 33000, ace: 65 },
+    { number: 7, leader: 'Blaine', type: 'fire', hp: 45000, ace: 59 },
+    { number: 8, leader: 'Giovanni', type: 'ground', hp: 62000, ace: 112 },
   ],
 };

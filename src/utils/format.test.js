@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   formatDexNumber,
+  formatClock,
   formatDuration,
   formatName,
   formatNumber,
@@ -57,5 +58,13 @@ describe('formatDuration', () => {
     expect(formatDuration(300)).toBe('5 min');
     expect(formatDuration(7200)).toBe('2 h');
     expect(formatDuration(7500)).toBe('2 h 5 min');
+  });
+});
+
+describe('formatClock', () => {
+  it('minutos y segundos, redondeando hacia arriba', () => {
+    expect(formatClock(41.2)).toBe('0:42');
+    expect(formatClock(600)).toBe('10:00');
+    expect(formatClock(65)).toBe('1:05');
   });
 });

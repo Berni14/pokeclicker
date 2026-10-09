@@ -128,6 +128,19 @@ describe('sanitizeSave', () => {
     const state = sanitizeSave(validSave());
     expect(state.levels).toEqual({});
     expect(state.upgrades.teamPower).toBe(0);
+    expect(state.items).toEqual([]);
+    expect(state.boosts).toEqual({});
+  });
+
+  it('limpia objetos y potenciadores', () => {
+    const state = sanitizeSave(
+      validSave({
+        items: ['quickClaw', 'quickClaw', 'espada', 'toString'],
+        boosts: { xAttack: 30, luckIncense: 99999, otro: 5, constructor: 1 },
+      }),
+    );
+    expect(state.items).toEqual(['quickClaw']);
+    expect(state.boosts).toEqual({ xAttack: 30, luckIncense: 3600 });
   });
 
   it('limpia los niveles', () => {

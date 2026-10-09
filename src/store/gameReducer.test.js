@@ -34,6 +34,20 @@ describe('gameReducer', () => {
     expect(next.upgrades.clickPower).toBe(1);
   });
 
+  it('BUY_ITEM y BUY_BOOST compran objetos y potenciadores', () => {
+    const state = makeState({ coins: 3630, trainer: { level: 2 } });
+    const withItem = gameReducer(state, { type: 'BUY_ITEM', key: 'quickClaw' });
+    expect(withItem.items).toEqual(['quickClaw']);
+    expect(withItem.coins).toBe(630);
+    // Ataque X: click de 1,05 (nivel 2) × 2 (Garra Rápida) × 5 clicks/s × 60 s = 630.
+    const withBoost = gameReducer(withItem, {
+      type: 'BUY_BOOST',
+      key: 'xAttack',
+    });
+    expect(withBoost.boosts).toEqual({ xAttack: 60 });
+    expect(withBoost.coins).toBe(0);
+  });
+
   it('LEVEL_UP sube de nivel a un Pokémon', () => {
     const state = makeState({ coins: 60, collection: { 25: 1 } });
     const next = gameReducer(state, { type: 'LEVEL_UP', id: 25 });

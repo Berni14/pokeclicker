@@ -15,7 +15,7 @@ export const UpgradeCard = memo(function UpgradeCard({
 }) {
   return (
     <article className={styles.card} data-state={status}>
-      <h3 className={styles.title}>{upgrade.label}</h3>
+      <h4 className={styles.title}>{upgrade.label}</h4>
       <p className={styles.effect}>{upgrade.effect}</p>
       <p className={styles.level}>
         Nv {level}/{upgrade.maxLevel}

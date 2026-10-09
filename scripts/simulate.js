@@ -7,11 +7,13 @@
 //
 // El jugador simulado:
 // - hace 1 click/s fuera de combate y 6 clicks/s en combate;
-// - compra siempre lo más barato (tirada, mejora o subir de nivel a uno del equipo);
+// - compra siempre lo más barato (tirada, mejora, objeto o subir de nivel a uno
+//   del equipo); los potenciadores no, porque dependen de cuánto juegues;
 // - equipa a los 6 que más producen;
 // - reta al gimnasio en cuanto puede ganarlo.
 import { test } from 'vitest';
 import { EXPECTED_CLICKS_PER_SECOND } from '../src/config/gyms';
+import { ITEMS } from '../src/config/items';
 import { UPGRADES } from '../src/config/upgrades';
 import {
   battleDuration,
@@ -20,6 +22,7 @@ import {
   teamDps,
 } from '../src/game/battle';
 import { pullPrice, rollPokemon } from '../src/game/gacha';
+import { itemStatus } from '../src/game/items';
 import { isMaxLevel, levelUpCost, pokemonLevel } from '../src/game/levels';
 import { pokemonProduction, teamProduction } from '../src/game/production';
 import { nextUpgradeCost, upgradeStatus } from '../src/game/shop';
@@ -72,6 +75,11 @@ function play(seed) {
             cost: nextUpgradeCost(state, key),
             action: { type: 'BUY_UPGRADE', key },
           });
+        }
+      }
+      for (const [key, item] of Object.entries(ITEMS)) {
+        if (itemStatus(state, key) === 'available') {
+          options.push({ cost: item.cost, action: { type: 'BUY_ITEM', key } });
         }
       }
       for (const id of state.team) {

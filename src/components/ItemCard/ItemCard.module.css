@@ -1,0 +1,52 @@
+.card {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.card[data-state='locked'] {
+  background: var(--color-bg);
+  border-style: dashed;
+}
+
+.card[data-state='owned'] {
+  border-color: var(--color-success);
+}
+
+.title {
+  font-size: var(--font-size-md);
+}
+
+.effect {
+  color: var(--color-text-muted);
+}
+
+.active {
+  font-weight: 700;
+  color: var(--color-success);
+}
+
+.clock {
+  font-variant-numeric: tabular-nums;
+}
+
+.note {
+  margin-top: auto;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.card[data-state='owned'] .note {
+  color: var(--color-success);
+}
+
+.card :global(.button) {
+  margin-top: auto;
+}

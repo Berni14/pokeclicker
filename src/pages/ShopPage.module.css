@@ -1,0 +1,15 @@
+.page {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.sectionTitle {
+  margin-bottom: var(--space-2);
+  font-size: var(--font-size-md);
+}
+
+.intro {
+  margin-bottom: var(--space-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}

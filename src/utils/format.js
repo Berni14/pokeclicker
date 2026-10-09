@@ -37,3 +37,10 @@ export function formatDuration(totalSeconds) {
   if (hours === 0) return `${minutes} min`;
   return minutes === 0 ? `${hours} h` : `${hours} h ${minutes} min`;
 }
+
+// Cuenta atrás con minutos y segundos: 42 → "0:42", 600 → "10:00".
+export function formatClock(totalSeconds) {
+  const seconds = Math.ceil(totalSeconds);
+  const minutes = Math.floor(seconds / 60);
+  return `${minutes}:${String(seconds % 60).padStart(2, '0')}`;
+}

@@ -12,6 +12,7 @@ import {
 import { pokedexEntry } from '../config/pokedex';
 import { XP_PER_GYM } from '../config/trainer';
 import { STRONG_AGAINST } from '../config/typeChart';
+import { berryMultiplier } from './berries';
 import { clickPower } from './clicker';
 import { pokemonLevel } from './levels';
 import { addXp } from './trainer';
@@ -46,6 +47,7 @@ export function pokemonDps(state, id, gym) {
     starMultiplier(state.collection[id]) *
     levelMultiplier(pokemonLevel(state, id)) *
     teamPowerMultiplier(state) *
+    berryMultiplier(state, id, 'damage') *
     advantage
   );
 }

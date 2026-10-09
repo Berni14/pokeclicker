@@ -12,7 +12,9 @@
 // - equipa a los 6 que más producen;
 // - reta al gimnasio en cuanto puede ganarlo;
 // - al ganar los 8, viaja a la siguiente región llevándose al que más produce
-//   con 1★ y Nv 1 (como llega).
+//   con 1★ y Nv 1 (como llega);
+// - da cada baya en cuanto sale: Aranja y Zidra al que más produce y Lichi al
+//   que más daño hace contra el gimnasio actual (si no llevan ya una).
 import { test } from 'vitest';
 import { EXPECTED_CLICKS_PER_SECOND } from '../src/config/gyms';
 import { ITEMS } from '../src/config/items';
@@ -21,13 +23,16 @@ import {
   battleDuration,
   clickDamage,
   currentGym,
+  pokemonDps,
   teamDps,
 } from '../src/game/battle';
 import { productionOf } from '../src/config/economy';
 import { BANNERS } from '../src/config/gacha';
+import { BERRIES } from '../src/config/berries';
 import { pokedexEntry } from '../src/config/pokedex';
 import { RARITIES } from '../src/config/rarities';
 import { canPull, pullPrice, rollPokemon, totalPulls } from '../src/game/gacha';
+import { canGiveBerry } from '../src/game/berries';
 import { itemStatus } from '../src/game/items';
 import { isMaxLevel, levelUpCost, pokemonLevel } from '../src/game/levels';
 import { pokemonProduction, teamProduction } from '../src/game/production';
@@ -59,6 +64,18 @@ function play(seed) {
     dispatch({ type: 'TICK', seconds: 1 });
     for (let c = 0; c < IDLE_CLICKS_PER_SECOND; c++)
       dispatch({ type: 'CLICK' });
+
+    for (const key of [...state.farm.stock]) {
+      const byDamage = BERRIES[key].production === 1;
+      const score = (id) =>
+        byDamage
+          ? pokemonDps(state, id, currentGym(state))
+          : pokemonProduction(state, id);
+      const [id] = state.team
+        .filter((id) => canGiveBerry(state, key, id))
+        .sort((a, b) => score(b) - score(a));
+      if (id !== undefined) dispatch({ type: 'GIVE_BERRY', key, id });
+    }
 
     const gym = currentGym(state);
     if (!gym) {

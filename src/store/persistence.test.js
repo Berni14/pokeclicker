@@ -103,6 +103,33 @@ describe('sanitizeSave', () => {
     expect(state.medals).toEqual({ 1: [1, 2, 3, 4, 5, 6, 7, 8], 2: [1] });
   });
 
+  it('una partida de antes de la granja empieza con la granja vacía', () => {
+    const state = sanitizeSave(validSave());
+    expect(state.farm).toEqual({ growth: 0, stock: [], harvested: 0 });
+    expect(state.heldBerries).toEqual({});
+  });
+
+  it('limpia la granja y las bayas equipadas', () => {
+    const state = sanitizeSave(
+      validSave({
+        farm: { growth: -5, stock: ['oran', 'nope', 'sitrus'], harvested: 2.5 },
+        heldBerries: {
+          25: { key: 'liechi', seconds: 99_999 },
+          150: { key: 'nope', seconds: 30 },
+          7: { key: 'oran', seconds: 30 }, // no lo tienes
+        },
+      }),
+    );
+    expect(state.farm).toEqual({
+      growth: 0,
+      stock: ['oran', 'sitrus'],
+      harvested: 0,
+    });
+    expect(state.heldBerries).toEqual({
+      25: { key: 'liechi', seconds: 600 },
+    });
+  });
+
   it('otra versión o algo que no es una partida → null', () => {
     expect(sanitizeSave(validSave({ saveVersion: 999 }))).toBeNull();
     expect(sanitizeSave(null)).toBeNull();

@@ -24,6 +24,7 @@ export const canChangeGeneration = (state) =>
 // Pasa a la siguiente región llevándote solo `keepId`, que vuelve a 1★ y Nv 1
 // como si fuera nuevo. Se mantienen el nivel de entrenador y las medallas; el
 // resto vuelve a empezar (ver el apartado 9 de FUNCIONAMIENTO_DEL_JUEGO.md).
+// La granja se queda con sus bayas; las que llevaban los Pokémon se pierden.
 export function changeGeneration(state, keepId) {
   if (!canChangeGeneration(state) || !state.collection[keepId]) return state;
   const id = Number(keepId);
@@ -38,5 +39,6 @@ export function changeGeneration(state, keepId) {
     collection: { [id]: 1 },
     levels: {},
     team: [id],
+    heldBerries: {},
   };
 }

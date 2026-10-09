@@ -139,6 +139,26 @@ Multiplican **solo el dinero** (clicks o producción), no el daño en combate.
 
 ---
 
+### Granja de bayas
+
+Está en la pantalla principal, al lado del botón.
+
+- ✅ Da **una baya cada 5 minutos** y guarda **hasta 5**. Llena, deja de crecer hasta que gastes una.
+- ✅ **Sigue creciendo mientras no juegas**, hasta llenarse.
+- ✅ La baya que sale es al azar entre tres:
+
+| Baya        | Efecto en el Pokémon que la lleva | Probabilidad |
+| ----------- | --------------------------------- | ------------ |
+| Baya Aranja | Producción ×2                     | 45 %         |
+| Baya Lichi  | Daño en combate ×2                | 45 %         |
+| Baya Zidra  | Producción y daño ×2              | 10 %         |
+
+- ✅ Se da a un Pokémon **del equipo**; cada Pokémon lleva **una como máximo**. Dura **10 minutos** (también corre mientras no juegas) y su tarjeta muestra la baya y el tiempo que le queda.
+- ✅ Si quitas del equipo a un Pokémon con baya, la baya sigue con él (y su tiempo corriendo), pero solo cuenta mientras está equipado.
+- ✅ Al cambiar de región, la granja se queda con sus bayas; las que llevaban los Pokémon se pierden.
+
+---
+
 ## 8. Gimnasios
 
 - ✅ Hay **8 gimnasios** por región. En la primera generación: Brock (roca), Misty (agua), Lt. Surge (eléctrico), Erika (planta), Koga (veneno), Sabrina (psíquico), Blaine (fuego) y Giovanni (tierra). En la segunda (Johto): Pegaso (volador), Antón (bicho), Blanca (normal), Morti (fantasma), Aníbal (lucha), Yasmina (acero), Fredo (hielo) y Débora (dragón).
@@ -185,15 +205,15 @@ Al vencer al octavo líder puedes pasar a la siguiente región.
 
 ## 10. Pantallas
 
-| Pantalla             | Qué muestra                                                                          |
-| -------------------- | ------------------------------------------------------------------------------------ |
-| Juego principal      | Zona de click, dinero, producción por segundo, nivel de entrenador y los 6 equipados |
-| Gacha                | Los tres gachas con sus probabilidades y precio, animación y resultado               |
-| Caja                 | Todos tus Pokémon con estrellas, filtros, y pestaña de Pokédex de la generación      |
-| Tienda               | Mejoras disponibles, al máximo y bloqueadas por nivel                                |
-| Gimnasios            | Los 8 líderes: vencidos, el actual y los bloqueados                                  |
-| Combate              | Temporizador, vida del líder, zona de click y daño del equipo                        |
-| Cambio de generación | Resumen de la región y elección del Pokémon que te llevas (v1.1)                     |
+| Pantalla             | Qué muestra                                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------------- |
+| Juego principal      | Botón de click en el centro, granja de bayas a un lado y los 6 equipados en una fila debajo |
+| Gacha                | Los tres gachas con sus probabilidades y precio, animación y resultado                      |
+| Caja                 | Todos tus Pokémon con estrellas, filtros, y pestaña de Pokédex de la generación             |
+| Tienda               | Mejoras disponibles, al máximo y bloqueadas por nivel                                       |
+| Gimnasios            | Los 8 líderes: vencidos, el actual y los bloqueados                                         |
+| Combate              | Temporizador, vida del líder, zona de click y daño del equipo                               |
+| Cambio de generación | Resumen de la región y elección del Pokémon que te llevas (v1.1)                            |
 
 ---
 

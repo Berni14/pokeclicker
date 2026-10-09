@@ -3,9 +3,11 @@ import { ClickButton } from '../components/ClickButton/ClickButton';
 import { PokemonCard } from '../components/PokemonCard/PokemonCard';
 import { TEAM_SIZE } from '../config/economy';
 import { pokedexEntry } from '../config/pokedex';
+import { heldBerry } from '../game/berries';
 import { canLevelUp, levelUpCost, pokemonLevel } from '../game/levels';
 import { pokemonProduction } from '../game/production';
 import { useGame } from '../store/GameContext';
+import { BerryFarm } from './BerryFarm';
 import styles from './GamePage.module.css';
 
 export function GamePage({ onNavigate }) {
@@ -22,9 +24,14 @@ export function GamePage({ onNavigate }) {
         Juego
       </h2>
 
-      <section className={styles.clickZone} aria-label="Zona de click">
-        <ClickButton />
-      </section>
+      <div className={styles.top}>
+        <section className={styles.clickZone} aria-label="Zona de click">
+          <ClickButton />
+        </section>
+        <div className={styles.farm}>
+          <BerryFarm />
+        </div>
+      </div>
 
       <section className={styles.team} aria-labelledby="team-title">
         <h3 id="team-title" className={styles.teamTitle}>
@@ -40,6 +47,7 @@ export function GamePage({ onNavigate }) {
                   stars={state.collection[id]}
                   level={pokemonLevel(state, id)}
                   production={pokemonProduction(state, id)}
+                  berry={heldBerry(state, id)}
                   levelUpCost={levelUpCost(state, id)}
                   canLevelUp={canLevelUp(state, id)}
                   onLevelUp={handleLevelUp}

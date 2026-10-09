@@ -1,9 +1,9 @@
 export const RARITIES = {
-  common: { label: 'Común', multiplier: 1 },
-  rare: { label: 'Rara', multiplier: 1.2 },
-  epic: { label: 'Épica', multiplier: 1.5 },
-  legendary: { label: 'Legendaria', multiplier: 3 },
-  mythical: { label: 'Singular', multiplier: 3 },
+  common: { label: 'Común', multiplier: 1, ball: 'poke' },
+  rare: { label: 'Rara', multiplier: 1.2, ball: 'super' },
+  epic: { label: 'Épica', multiplier: 1.5, ball: 'ultra' },
+  legendary: { label: 'Legendaria', multiplier: 3, ball: 'master' },
+  mythical: { label: 'Singular', multiplier: 3, ball: 'premier' },
 };
 
 // Suma de stats a partir de la cual un Pokémon normal sube de rareza.

@@ -7,6 +7,7 @@ import {
 } from '../config/economy';
 import { MAX_STARS } from '../config/gacha';
 import { GYMS } from '../config/gyms';
+import { BOOST_MAX_SECONDS, BOOSTS, ITEMS } from '../config/items';
 import { POKEDEX, pokedexEntry } from '../config/pokedex';
 import { UPGRADES } from '../config/upgrades';
 import { tick } from '../game/production';
@@ -21,6 +22,8 @@ const SAVED_FIELDS = [
   'coins',
   'trainer',
   'upgrades',
+  'items',
+  'boosts',
   'pulls',
   'collection',
   'levels',
@@ -100,6 +103,21 @@ function cleanUpgrades(upgrades) {
   );
 }
 
+function cleanItems(items) {
+  if (!Array.isArray(items)) return [];
+  return [...new Set(items.filter((key) => Object.hasOwn(ITEMS, key)))];
+}
+
+function cleanBoosts(boosts) {
+  const clean = {};
+  for (const [key, seconds] of Object.entries(boosts ?? {})) {
+    if (Object.hasOwn(BOOSTS, key) && Number.isFinite(seconds) && seconds > 0) {
+      clean[key] = Math.min(seconds, BOOST_MAX_SECONDS);
+    }
+  }
+  return clean;
+}
+
 function cleanMedals(medals) {
   const clean = {};
   for (const [generation, numbers] of Object.entries(medals ?? {})) {
@@ -130,6 +148,8 @@ export function sanitizeSave(save) {
       xp: validNumber(save.trainer?.xp, 0),
     },
     upgrades: cleanUpgrades(save.upgrades),
+    items: cleanItems(save.items),
+    boosts: cleanBoosts(save.boosts),
     pulls: isInt(save.pulls) && save.pulls >= 0 ? save.pulls : 0,
     collection,
     levels: cleanLevels(save.levels, collection),

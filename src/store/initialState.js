@@ -11,6 +11,8 @@ export const initialState = {
     pullDiscount: 0,
     teamPower: 0,
   },
+  items: [], // objetos permanentes comprados
+  boosts: {}, // { [potenciador]: segundos que le quedan }
   pulls: 0,
   collection: {}, // { [id]: estrellas }
   levels: {}, // { [id]: nivel }; si no está, nivel 1

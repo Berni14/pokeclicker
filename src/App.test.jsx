@@ -102,8 +102,8 @@ describe('App', () => {
     expect(screen.getByText('Monedas:').parentElement).toHaveTextContent('0');
     // Las mejoras de nivel más alto siguen bloqueadas, y se dice con texto.
     expect(
-      screen.getByText('Se desbloquea en el nivel 2 de entrenador'),
-    ).toBeInTheDocument();
+      screen.getAllByText('Se desbloquea en el nivel 2 de entrenador').length,
+    ).toBeGreaterThan(0);
   }, 15_000);
 
   it('si la API falla, avisa y deja reintentar', async () => {

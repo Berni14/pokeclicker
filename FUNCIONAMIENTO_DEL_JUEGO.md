@@ -72,6 +72,26 @@ Los datos de los Pokémon (nombre, imagen, tipos, estadísticas) vienen de la [P
 
 Estados de una mejora en la interfaz: **Disponible**, **Máximo** y **Bloqueada** (y, dentro de Disponible, si te llega el dinero o no).
 
+### Objetos
+
+Multiplican **solo el dinero** (clicks o producción), no el daño en combate.
+
+- ✅ **Permanentes:** se compran una vez y duran toda la generación. Se multiplican entre sí.
+
+| Objeto         | Qué hace            | Precio  | Desbloqueo |
+| -------------- | ------------------- | ------- | ---------- |
+| Garra Rápida   | Dinero por click ×2 | 3.000   | Nivel 2    |
+| Amuleto Moneda | Producción ×2       | 20.000  | Nivel 3    |
+| Cinta Elección | Dinero por click ×3 | 250.000 | Nivel 5    |
+| Restos         | Producción ×3       | 600.000 | Nivel 6    |
+
+- ✅ **Potenciadores:** de un solo uso, con un efecto fuerte durante un rato. Su precio son unos segundos de lo que ganas en ese momento, así que nunca se quedan baratos ni imposibles. Comprar otro mientras dura **suma el tiempo** (como mucho 1 h acumulada). El tiempo corre también mientras no juegas.
+
+| Potenciador    | Qué hace                         | Precio                     | Desbloqueo |
+| -------------- | -------------------------------- | -------------------------- | ---------- |
+| Ataque X       | Dinero por click ×5 durante 60 s | 60 s clicando a 5 clicks/s | Nivel 1    |
+| Incienso Duplo | Producción ×2 durante 10 min     | 4 min de producción        | Nivel 2    |
+
 ---
 
 ## 6. Gacha
@@ -130,7 +150,7 @@ Al vencer al octavo líder puedes pasar a la siguiente región.
 
 - ✅ Eliges **1 solo Pokémon** para llevarte contigo, y **conserva sus estrellas y su nivel**.
 - ✅ El **dinero** se reinicia a 0.
-- ✅ Las **mejoras** de la tienda se reinician a 0.
+- ✅ Las **mejoras** de la tienda se reinician a 0, y se pierden los **objetos** y los potenciadores activos.
 - ✅ El precio de la tirada vuelve al inicial.
 - ✅ El **nivel de entrenador** se mantiene.
 - ✅ El resto de la caja se pierde, y el gacha pasa a dar Pokémon de la nueva generación.

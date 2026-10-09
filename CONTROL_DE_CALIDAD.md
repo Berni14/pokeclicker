@@ -117,6 +117,9 @@ Scripts en `package.json`:
 - [ ] La Pokédex muestra en silueta los que faltan y el contador cuadra con la caja.
 - [ ] Las mejoras pasan de bloqueada → disponible → máximo; el nivel de entrenador desbloquea las que tocan.
 - [ ] El nivel de entrenador sube con las tiradas y los gimnasios, no con los clicks.
+- [ ] Los objetos permanentes se compran una vez y pasan a «Comprado»; el click y las monedas/s de arriba se multiplican al momento.
+- [ ] Un potenciador activo se ve con su cuenta atrás en la tienda y arriba; comprar otro suma el tiempo; al acabarse, todo vuelve a la normalidad.
+- [ ] Los objetos no cambian el daño del click en combate.
 
 ### Gimnasios
 
@@ -131,7 +134,7 @@ Scripts en `package.json`:
 
 ### Guardado
 
-- [ ] Recargar la página mantiene monedas, colección con estrellas, equipo, mejoras, nivel y medallas.
+- [ ] Recargar la página mantiene monedas, colección con estrellas y niveles, equipo, mejoras, objetos, potenciadores activos, nivel y medallas.
 - [ ] Cerrar y abrir el navegador mantiene la partida y da las monedas del tiempo fuera (máximo 8 h).
 - [ ] Recargar justo después de tirar no pierde la tirada.
 - [ ] Botón de reiniciar partida pide confirmación y deja todo a cero.
@@ -158,6 +161,7 @@ Scripts en `package.json`:
 | 08/10/2026 | Umbrales de rareza (`rarities.js`)                       | 300/450 → 400/500          | Con 300/450 salían 59 épicas y 19 comunes; con 400/500, 69 comunes, 49 raras y 28 épicas                                                                                                                                                                                |
 | 08/10/2026 | Ninguno (revisión de la fase 6)                          | —                          | `npm run simulate` (5 semillas): Brock ~2 min, Giovanni ~2 h, 5/5 partidas completas. El equipo llega a su tope enseguida en los primeros gimnasios (2 s de 30 contra Brock) pero no en los últimos (43 s de 45 contra Giovanni): su ataque sí importa donde hace falta |
 | 09/10/2026 | Vida de los gimnasios (`gyms.js`); sin `TEAM_DAMAGE_CAP` | 700…16.000 → 4.500…100.000 | Se quita el tope del equipo y se añaden niveles por Pokémon y Poder del equipo. Sin cambiar la vida, la región se pasaba en 19 min. Con la nueva, `npm run simulate`: Brock ~2 min, Giovanni ~1 h 55 min, 5/5 partidas; el equipo hace >90 % del daño y llega a Nv ~34  |
+| 09/10/2026 | Objetos nuevos (`items.js`)                              | —                          | Objetos permanentes (click y producción ×2 y ×3) y potenciadores. `npm run simulate` comprando objetos (sin potenciadores): Giovanni pasa de ~1 h 55 min a ~1 h 41 min y la producción final de ~500 a ~960 monedas/s. Los primeros gimnasios no cambian                |
 
 ---
 
@@ -171,9 +175,10 @@ Prioridad alta (lógica pura, fáciles de probar con Vitest):
 - [ ] `game/team.test.js` → límite de 6, sin repetidos, sustituir.
 - [ ] `game/shop.test.js` → bloqueada, máximo, coste creciente, sin dinero.
 - [ ] `game/battle.test.js` → duración, daño, ventaja de tipo, nivel y Poder del equipo, el equipo gana solo sin pasarse de la vida, solo el gimnasio actual.
+- [ ] `game/items.test.js` → objetos bloqueados, comprados y multiplicándose; precio de los potenciadores, sumar tiempo, tope de 1 h y el incienso solo en los segundos que le quedan.
 - [ ] `game/levels.test.js` → nivel 1 por defecto, precio creciente, sin dinero o al máximo no sube, también en la caja.
 - [ ] `game/production.test.js` y `game/trainer.test.js` → producción del equipo, estrellas, bonus y subida de nivel.
-- [ ] `store/gameReducer.test.js` → `CLICK`, `TICK`, `PULL`, `BUY_UPGRADE`, `EQUIP`, `UNEQUIP`, `GYM_WON`, `POKEMON_LOADED`, `LEVEL_UP`, `RESET`, acción desconocida.
+- [ ] `store/gameReducer.test.js` → `CLICK`, `TICK`, `PULL`, `BUY_UPGRADE`, `EQUIP`, `UNEQUIP`, `GYM_WON`, `POKEMON_LOADED`, `LEVEL_UP`, `BUY_ITEM`, `BUY_BOOST`, `RESET`, acción desconocida.
 - [ ] `utils/format.test.js` → `formatName` y `formatNumber` (0, 999, 1500, 2 300 000).
 
 Prioridad media (React Testing Library):

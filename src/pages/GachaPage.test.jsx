@@ -42,7 +42,7 @@ describe('GachaPage', () => {
     expect(banner('Legendario')).toHaveTextContent('0 / 5 conseguidos');
     expect(
       within(banner('Épico')).getByRole('button', { name: /^Tirar ·/ }),
-    ).toHaveTextContent('Tirar · 1 mil monedas');
+    ).toHaveTextContent('Tirar · 100 mil monedas');
   });
 
   it('sin dinero el botón está deshabilitado y dice cuánto falta', () => {
@@ -64,14 +64,14 @@ describe('GachaPage', () => {
   });
 
   it('el gacha épico da un Pokémon épico y sube solo su precio', () => {
-    renderGacha({ coins: 1000 });
+    renderGacha({ coins: 100_000 });
     pull('Épico');
     const dialog = screen.getByRole('dialog');
     expect(dialog).toHaveTextContent('Venusaur se ha unido a tu equipo.');
     fireEvent.click(within(dialog).getByRole('button', { name: 'Cerrar' }));
     expect(
       within(banner('Épico')).getByRole('button', { name: /^Tirar ·/ }),
-    ).toHaveTextContent('Tirar · 1,1 mil monedas');
+    ).toHaveTextContent('Tirar · 110 mil monedas');
     expect(
       within(banner('Básico')).getByRole('button', { name: /^Tirar ·/ }),
     ).toHaveTextContent('Tirar · 25 monedas');

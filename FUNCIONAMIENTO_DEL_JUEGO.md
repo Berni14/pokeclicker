@@ -103,8 +103,8 @@ Multiplican **solo el dinero** (clicks o producción), no el daño en combate.
 | Gacha      | Bola        | Qué puede salir                 | Precio inicial | Sube por tirada |
 | ---------- | ----------- | ------------------------------- | -------------- | --------------- |
 | Básico     | Poké Ball   | Común 70 % · Rara 30 %          | 25             | 7 %             |
-| Épico      | Ultra Ball  | Épica 85 % · Legendaria 15 %    | 1.000          | 10 %            |
-| Legendario | Master Ball | Legendaria 80 % · Singular 20 % | 25.000         | 15 %            |
+| Épico      | Ultra Ball  | Épica 85 % · Legendaria 15 %    | 100.000        | 10 %            |
+| Legendario | Master Ball | Legendaria 80 % · Singular 20 % | 1.000.000      | 15 %            |
 
 - ✅ Cada Pokémon tiene un **valor distinto**: según sus estadísticas y su rareza, produce más o menos.
 - ✅ Si te sale un Pokémon **repetido**, sube de **estrellas** y produce más. Máximo **5 estrellas**.

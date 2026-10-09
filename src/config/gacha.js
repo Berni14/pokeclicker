@@ -16,14 +16,14 @@ export const BANNERS = {
   epic: {
     label: 'Épico',
     ball: 'ultra',
-    basePrice: 1000,
+    basePrice: 100_000,
     priceGrowth: 1.1,
     weights: { epic: 85, legendary: 15 },
   },
   legendary: {
     label: 'Legendario',
     ball: 'master',
-    basePrice: 25000,
+    basePrice: 1_000_000,
     priceGrowth: 1.15,
     weights: { legendary: 80, mythical: 20 },
   },

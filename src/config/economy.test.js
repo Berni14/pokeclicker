@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { baseProduction, productionOf, starMultiplier } from './economy';
+import {
+  baseProduction,
+  levelMultiplier,
+  levelUpCostOf,
+  productionOf,
+  starMultiplier,
+} from './economy';
 import { POKEDEX, pokedexEntry } from './pokedex';
 import { RARITIES } from './rarities';
 
@@ -15,6 +21,20 @@ describe('producción', () => {
     expect(starMultiplier(1)).toBe(1);
     expect(starMultiplier(5)).toBe(3);
     expect(productionOf(pokedexEntry(150), 5)).toBe(41.7);
+  });
+
+  it('cada nivel por encima de 1 suma un 10 %', () => {
+    expect(levelMultiplier(1)).toBe(1);
+    expect(levelMultiplier(11)).toBe(2);
+    expect(productionOf(pokedexEntry(150), 5, 11)).toBe(83.4);
+  });
+
+  it('subir de nivel a un legendario cuesta más que a un común', () => {
+    const mewtwo = levelUpCostOf(pokedexEntry(150), 1);
+    const pidgey = levelUpCostOf(pokedexEntry(16), 1);
+    expect(mewtwo).toBe(834); // 13,9/s × 60 s
+    expect(mewtwo).toBeGreaterThan(pidgey);
+    expect(levelUpCostOf(pokedexEntry(150), 2)).toBe(959); // × 1,15
   });
 
   it('con más stats y más rareza nunca se produce menos', () => {

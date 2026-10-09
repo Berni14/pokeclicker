@@ -1,13 +1,19 @@
+import { useCallback } from 'react';
 import { ClickButton } from '../components/ClickButton/ClickButton';
 import { PokemonCard } from '../components/PokemonCard/PokemonCard';
 import { TEAM_SIZE } from '../config/economy';
 import { pokedexEntry } from '../config/pokedex';
+import { canLevelUp, levelUpCost, pokemonLevel } from '../game/levels';
 import { pokemonProduction } from '../game/production';
 import { useGame } from '../store/GameContext';
 import styles from './GamePage.module.css';
 
 export function GamePage({ onNavigate }) {
-  const { state } = useGame();
+  const { state, dispatch } = useGame();
+  const handleLevelUp = useCallback(
+    (id) => dispatch({ type: 'LEVEL_UP', id }),
+    [dispatch],
+  );
   const slots = Array.from({ length: TEAM_SIZE }, (_, i) => state.team[i]);
 
   return (
@@ -32,7 +38,11 @@ export function GamePage({ onNavigate }) {
                   entry={pokedexEntry(id)}
                   pokemon={state.pokemonById[id]}
                   stars={state.collection[id]}
+                  level={pokemonLevel(state, id)}
                   production={pokemonProduction(state, id)}
+                  levelUpCost={levelUpCost(state, id)}
+                  canLevelUp={canLevelUp(state, id)}
+                  onLevelUp={handleLevelUp}
                 />
               </li>
             ) : (

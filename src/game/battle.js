@@ -1,4 +1,4 @@
-import { starMultiplier } from '../config/economy';
+import { levelMultiplier, starMultiplier } from '../config/economy';
 import {
   ATTACK_DIVISOR,
   BATTLE_DAMAGE_PER_LEVEL,
@@ -6,13 +6,14 @@ import {
   BATTLE_SECONDS_PER_LEVEL,
   GYM_MONEY_REWARD,
   GYMS,
-  TEAM_DAMAGE_CAP,
+  TEAM_POWER_PER_LEVEL,
   TYPE_ADVANTAGE,
 } from '../config/gyms';
 import { pokedexEntry } from '../config/pokedex';
 import { XP_PER_GYM } from '../config/trainer';
 import { STRONG_AGAINST } from '../config/typeChart';
 import { clickPower } from './clicker';
+import { pokemonLevel } from './levels';
 import { addXp } from './trainer';
 
 export const gymsOf = (state) => GYMS[state.generation] ?? [];
@@ -30,6 +31,10 @@ export const clickDamage = (state) =>
 export const hasTypeAdvantage = (entry, gym) =>
   entry.types.some((type) => STRONG_AGAINST[gym.type]?.includes(type));
 
+// Multiplicador de la mejora Poder del equipo.
+export const teamPowerMultiplier = (state) =>
+  1 + TEAM_POWER_PER_LEVEL * state.upgrades.teamPower;
+
 // Daño por segundo de un Pokémon de tu colección contra un líder.
 export function pokemonDps(state, id, gym) {
   const entry = pokedexEntry(id);
@@ -37,15 +42,14 @@ export function pokemonDps(state, id, gym) {
   return (
     (entry.attack / ATTACK_DIVISOR) *
     starMultiplier(state.collection[id]) *
+    levelMultiplier(pokemonLevel(state, id)) *
+    teamPowerMultiplier(state) *
     advantage
   );
 }
 
 export const teamDps = (state, gym) =>
   state.team.reduce((sum, id) => sum + pokemonDps(state, id, gym), 0);
-
-// El equipo nunca puede hacer más de esto: el resto tiene que salir de los clicks.
-export const maxTeamDamage = (gym) => gym.hp * TEAM_DAMAGE_CAP;
 
 // El primer gimnasio sin medalla, o null si ya están todos.
 export const currentGym = (state) =>
@@ -74,10 +78,11 @@ export function applyGymWin(state, number) {
 }
 
 // Clicks por segundo que harían falta para ganar, contando con el equipo.
-// Infinity si no hay daño de click (no debería pasar: el click base es 1).
+// 0 o menos si el equipo gana solo. Infinity si no hay daño de click (no
+// debería pasar: el click base es 1).
 export function clicksPerSecondNeeded(state, gym) {
   const seconds = battleDuration(state);
-  const fromTeam = Math.min(teamDps(state, gym) * seconds, maxTeamDamage(gym));
+  const fromTeam = teamDps(state, gym) * seconds;
   return (gym.hp - fromTeam) / (clickDamage(state) * seconds);
 }
 
@@ -93,7 +98,6 @@ export function createBattle(state, gym) {
     duration,
     clickDamage: clickDamage(state),
     teamDps: teamDps(state, gym),
-    teamCap: maxTeamDamage(gym),
     hp: gym.hp,
     timeLeft: duration,
     teamDamage: 0,
@@ -118,10 +122,7 @@ export function battleReducer(battle, action) {
       if (battle.status !== 'fighting') return battle;
       const seconds = Math.min(action.seconds, battle.timeLeft);
       if (!(seconds > 0)) return battle;
-      const teamHit = Math.min(
-        battle.teamDps * seconds,
-        battle.teamCap - battle.teamDamage,
-      );
+      const teamHit = Math.min(battle.teamDps * seconds, battle.hp);
       const hp = Math.max(0, battle.hp - teamHit);
       const timeLeft = battle.timeLeft - seconds;
       let status = 'fighting';

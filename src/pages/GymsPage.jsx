@@ -99,6 +99,8 @@ export function GymsPage() {
 function Hint({ gym }) {
   const { state } = useGame();
   const needed = clicksPerSecondNeeded(state, gym);
+  const seconds = battleDuration(state);
+  const teamShare = (teamDps(state, gym) * seconds) / gym.hp;
   const strong = state.team.filter((id) =>
     hasTypeAdvantage(pokedexEntry(id), gym),
   );
@@ -110,8 +112,9 @@ function Hint({ gym }) {
       <h3 id="hint-title">Contra {gym.leader}</h3>
       <ul>
         <li>
-          Tu equipo hace {formatNumber(teamDps(state, gym))} de daño por segundo
-          (como mucho {formatNumber(gym.hp / 2)} en total).
+          Tu equipo hace {formatNumber(teamDps(state, gym))} de daño por
+          segundo: {Math.round(Math.min(100, teamShare * 100))} % de su vida en{' '}
+          {seconds} s.
         </li>
         <li>
           {strong.length > 0
@@ -119,13 +122,17 @@ function Hint({ gym }) {
             : `Ningún Pokémon de tu equipo tiene ventaja contra el tipo ${TYPE_NAMES[gym.type]}.`}
         </li>
         <li>
-          Necesitas unos{' '}
-          <strong>
-            {formatNumber(Math.max(0, needed))} clicks por segundo
-          </strong>{' '}
-          durante {battleDuration(state)} s.
-          {needed > EXPECTED_CLICKS_PER_SECOND &&
-            ' Es mucho: mejora tu click en la tienda primero.'}
+          {needed <= 0 ? (
+            <strong>Tu equipo puede ganarle sin que hagas click.</strong>
+          ) : (
+            <>
+              Necesitas unos{' '}
+              <strong>{formatNumber(needed)} clicks por segundo</strong> durante{' '}
+              {seconds} s.
+              {needed > EXPECTED_CLICKS_PER_SECOND &&
+                ' Es mucho: sube de nivel a tu equipo primero.'}
+            </>
+          )}
         </li>
       </ul>
     </section>

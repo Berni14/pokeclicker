@@ -34,6 +34,13 @@ describe('gameReducer', () => {
     expect(next.upgrades.clickPower).toBe(1);
   });
 
+  it('LEVEL_UP sube de nivel a un Pokémon', () => {
+    const state = makeState({ coins: 60, collection: { 25: 1 } });
+    const next = gameReducer(state, { type: 'LEVEL_UP', id: 25 });
+    expect(next.levels).toEqual({ 25: 2 });
+    expect(next.coins).toBe(0);
+  });
+
   it('EQUIP y UNEQUIP cambian el equipo', () => {
     const state = makeState({ collection: { 25: 1 } });
     const equipped = gameReducer(state, { type: 'EQUIP', id: 25 });

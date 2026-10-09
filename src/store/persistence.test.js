@@ -124,6 +124,20 @@ describe('sanitizeSave', () => {
     expect(state.medals).toEqual({ 1: [1, 3] });
   });
 
+  it('una partida de antes de los niveles carga con todos al nivel 1', () => {
+    const state = sanitizeSave(validSave());
+    expect(state.levels).toEqual({});
+    expect(state.upgrades.teamPower).toBe(0);
+  });
+
+  it('limpia los niveles', () => {
+    const state = sanitizeSave(
+      validSave({ levels: { 25: 12, 150: 500, 7: 4, 1: 'x', 6: 0 } }),
+    );
+    // 7 no está en la colección; 150 se queda en el máximo.
+    expect(state.levels).toEqual({ 25: 12, 150: 100 });
+  });
+
   it('nunca más de 6 en el equipo', () => {
     const ids = [1, 2, 3, 4, 5, 6, 7, 8];
     const state = sanitizeSave(

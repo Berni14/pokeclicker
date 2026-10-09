@@ -6,6 +6,7 @@ import { MAX_STARS, MAX_STARS_REFUND, RARITY_WEIGHTS } from '../config/gacha';
 import { POKEDEX, pokedexByRarity, pokedexEntry } from '../config/pokedex';
 import { RARITIES } from '../config/rarities';
 import { canPull, pullOutcome, pullPrice, rollPokemon } from '../game/gacha';
+import { pokemonLevel } from '../game/levels';
 import { pokemonProduction } from '../game/production';
 import { useGame } from '../store/GameContext';
 import { formatName, formatNumber } from '../utils/format';
@@ -189,6 +190,7 @@ function PullResult({ result, state, onPullAgain }) {
         entry={pokedexEntry(id)}
         pokemon={pokemon}
         stars={stars}
+        level={pokemonLevel(state, id)}
         production={pokemonProduction(state, id)}
       />
       <p role="status">{message}</p>

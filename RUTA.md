@@ -819,7 +819,7 @@ Con la v1.0 publicada, cada ampliación es una rama, una versión nueva y algo n
 
 - [ ] `node scripts/build-pokedex.js 2` → `config/pokedex-gen2.json` y la generación 2 en `config/generations.js` (152–251).
 - [ ] Líderes de Johto en `config/gyms.js`: Pegaso (volador), Antón (bicho), Blanca (normal), Morti (fantasma), Aníbal (lucha), Yasmina (acero), Fredo (hielo) y Débora (dragón). Sus tipos en `config/typeChart.js`.
-- [ ] `game/prestige.js` → `changeGeneration(state, keepId)`: aplica la tabla del apartado 9 de `FUNCIONAMIENTO_DEL_JUEGO.md` (dinero, mejoras y tiradas a 0; nivel y medallas se quedan; solo el Pokémon elegido, con sus estrellas).
+- [ ] `game/prestige.js` → `changeGeneration(state, keepId)`: aplica la tabla del apartado 9 de `FUNCIONAMIENTO_DEL_JUEGO.md` (dinero, mejoras y tiradas a 0; nivel y medallas se quedan; solo el Pokémon elegido, con sus estrellas y su nivel).
 - [ ] Acción `CHANGE_GENERATION` con `{ keepId }` y su test.
 - [ ] Pantalla de cambio de generación: resumen de la región y elección del Pokémon.
 - [ ] `saveVersion` a 2, con una función que convierta las partidas de la versión 1 en vez de borrarlas.

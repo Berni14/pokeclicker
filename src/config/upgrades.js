@@ -24,6 +24,14 @@ export const UPGRADES = {
     maxLevel: 5,
     minTrainerLevel: 3,
   },
+  teamPower: {
+    label: 'Poder del equipo',
+    effect: '+25 % de daño del equipo',
+    baseCost: 1800,
+    growth: 1.6,
+    maxLevel: 10,
+    minTrainerLevel: 3,
+  },
   battleTime: {
     label: 'Cronómetro',
     effect: '+5 s de combate',

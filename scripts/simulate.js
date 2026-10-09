@@ -7,7 +7,7 @@
 //
 // El jugador simulado:
 // - hace 1 click/s fuera de combate y 6 clicks/s en combate;
-// - compra siempre lo más barato (tirada o mejora);
+// - compra siempre lo más barato (tirada, mejora o subir de nivel a uno del equipo);
 // - equipa a los 6 que más producen;
 // - reta al gimnasio en cuanto puede ganarlo.
 import { test } from 'vitest';
@@ -17,10 +17,10 @@ import {
   battleDuration,
   clickDamage,
   currentGym,
-  maxTeamDamage,
   teamDps,
 } from '../src/game/battle';
 import { pullPrice, rollPokemon } from '../src/game/gacha';
+import { isMaxLevel, levelUpCost, pokemonLevel } from '../src/game/levels';
 import { pokemonProduction, teamProduction } from '../src/game/production';
 import { nextUpgradeCost, upgradeStatus } from '../src/game/shop';
 import { gameReducer } from '../src/store/gameReducer';
@@ -45,17 +45,16 @@ function play(seed) {
     const gym = currentGym(state);
     if (!gym) break;
     const seconds = battleDuration(state);
-    const dps = teamDps(state, gym);
-    const fromTeam = Math.min(dps * seconds, maxTeamDamage(gym));
+    const fromTeam = teamDps(state, gym) * seconds;
     const fromClicks =
       clickDamage(state) * EXPECTED_CLICKS_PER_SECOND * seconds;
     if (fromClicks + fromTeam >= gym.hp) {
       gyms.push({
         leader: gym.leader,
         minute: t / 60,
-        // Segundos de combate hasta que el equipo llega a su tope.
-        teamCapAt: dps > 0 ? maxTeamDamage(gym) / dps : Infinity,
-        seconds,
+        // Parte de la vida del líder que quita el equipo (como mucho, toda).
+        teamShare: Math.min(1, fromTeam / gym.hp),
+        levels: state.team.map((id) => pokemonLevel(state, id)),
       });
       dispatch({ type: 'GYM_WON', number: gym.number });
     }
@@ -72,6 +71,14 @@ function play(seed) {
           options.push({
             cost: nextUpgradeCost(state, key),
             action: { type: 'BUY_UPGRADE', key },
+          });
+        }
+      }
+      for (const id of state.team) {
+        if (!isMaxLevel(state, id)) {
+          options.push({
+            cost: levelUpCost(state, id),
+            action: { type: 'LEVEL_UP', id },
           });
         }
       }
@@ -98,20 +105,23 @@ const fmtMin = (m) =>
     ? `${Math.round(m)} min`
     : `${Math.floor(m / 60)} h ${Math.round(m % 60)} min`;
 const avg = (list) => list.reduce((a, b) => a + b, 0) / list.length;
+const pct = (n) => `${Math.round(n * 100)} %`;
 
 test('simulación de una región', () => {
   const runs = SEEDS.map(play);
   const leaders = runs[0].gyms.map((g) => g.leader);
 
   console.log(`\nSimulación con ${SEEDS.length} semillas (media):\n`);
-  console.log('Gimnasio      Tiempo de juego   Equipo en su tope a los');
+  console.log(
+    'Gimnasio      Tiempo de juego   Daño del equipo   Nivel medio del equipo',
+  );
   leaders.forEach((leader, i) => {
     const done = runs.filter((r) => r.gyms[i]);
     const minute = avg(done.map((r) => r.gyms[i].minute));
-    const capAt = avg(done.map((r) => r.gyms[i].teamCapAt));
-    const of = done[0].gyms[i].seconds;
+    const share = avg(done.map((r) => r.gyms[i].teamShare));
+    const level = avg(done.map((r) => avg(r.gyms[i].levels)));
     console.log(
-      `${leader.padEnd(13)} ${fmtMin(minute).padEnd(17)} ${capAt.toFixed(0)} s de ${of} s` +
+      `${leader.padEnd(13)} ${fmtMin(minute).padEnd(17)} ${pct(share).padEnd(17)} ${level.toFixed(1)}` +
         (done.length < runs.length
           ? `  (solo ${done.length}/${runs.length} partidas)`
           : ''),

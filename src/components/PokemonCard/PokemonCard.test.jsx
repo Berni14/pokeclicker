@@ -51,4 +51,48 @@ describe('PokemonCard', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Equipar a Pikachu' }));
     expect(onAction).toHaveBeenCalledWith(25);
   });
+
+  it('enseña el nivel y el botón de subirlo con su precio', () => {
+    const onLevelUp = vi.fn();
+    render(
+      <PokemonCard
+        entry={pokedexEntry(25)}
+        pokemon={pikachu}
+        stars={1}
+        level={4}
+        production={1}
+        levelUpCost={91}
+        canLevelUp
+        onLevelUp={onLevelUp}
+      />,
+    );
+    expect(screen.getByText('Nv.').parentElement).toHaveTextContent('Nv. 4');
+    const button = screen.getByRole('button', {
+      name: 'Subir a Pikachu al nivel 5 por 91 monedas',
+    });
+    expect(button).toHaveTextContent('Nv. 5 · 91');
+    fireEvent.click(button);
+    expect(onLevelUp).toHaveBeenCalledWith(25);
+  });
+
+  it('sin dinero el botón de nivel está desactivado; al máximo, no hay botón', () => {
+    const props = {
+      entry: pokedexEntry(25),
+      pokemon: pikachu,
+      stars: 1,
+      production: 1,
+      levelUpCost: 91,
+      onLevelUp: () => {},
+    };
+    const { rerender } = render(
+      <PokemonCard {...props} level={4} canLevelUp={false} />,
+    );
+    expect(
+      screen.getByRole('button', { name: /^Subir a Pikachu/ }),
+    ).toBeDisabled();
+
+    rerender(<PokemonCard {...props} level={100} canLevelUp={false} />);
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.getByText('Nivel máximo')).toBeInTheDocument();
+  });
 });

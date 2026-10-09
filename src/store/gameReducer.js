@@ -1,6 +1,7 @@
 import { click } from '../game/clicker';
 import { tick } from '../game/production';
 import { applyPull } from '../game/gacha';
+import { levelUp } from '../game/levels';
 import { buyUpgrade } from '../game/shop';
 import { equip, unequip } from '../game/team';
 import { applyGymWin } from '../game/battle';
@@ -18,6 +19,8 @@ export function gameReducer(state, action) {
       return applyPull(state, action.id);
     case 'BUY_UPGRADE':
       return buyUpgrade(state, action.key);
+    case 'LEVEL_UP':
+      return levelUp(state, action.id);
     case 'EQUIP':
       return equip(state, action.id, action.replaceId);
     case 'UNEQUIP':

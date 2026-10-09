@@ -825,7 +825,29 @@ Con la v1.0 publicada, cada ampliación es una rama, una versión nueva y algo n
 - [ ] `saveVersion` a 2, con una función que convierta las partidas de la versión 1 en vez de borrarlas.
 - [ ] `npm run simulate` para la región 2 empezando con el nivel y el Pokémon típicos del final de la 1.
 
-### 8.2 Otras ideas
+### 8.2 Base de datos propia
+
+Hoy la partida vive en `localStorage`: si borras el navegador o cambias de dispositivo, la pierdes. Con una base de datos propia, la partida va asociada a tu cuenta y la juegas desde cualquier sitio.
+
+Por decidir antes de empezar:
+
+- ❓ **Qué servicio.** Opciones gratuitas que funcionan con Netlify: **Supabase** (PostgreSQL con cuentas de usuario ya hechas; el más sencillo para empezar), **Firebase** (Firestore, base de datos de documentos) o un backend propio con **Netlify Functions** y una base de datos aparte (el que más enseña, pero también el más trabajo).
+- ❓ **Cuentas.** Con correo y contraseña, con Google o GitHub, o jugar sin cuenta y crearla solo para guardar en la nube.
+- ❓ **Qué se guarda.** Solo la partida o también datos para un ranking (por ejemplo, el tiempo en ganar a Giovanni).
+
+Pasos, sea cual sea el servicio:
+
+- [ ] Tabla `saves`: id del usuario, la partida en JSON (lo mismo que hoy va a `localStorage`), `saveVersion` y fecha de guardado.
+- [ ] Reglas de acceso: cada usuario solo puede leer y escribir su propia partida.
+- [ ] `services/cloudSave.js` con las mismas funciones que `store/persistence.js` (`saveGame`, `loadGame`, `clearSave`), pero asíncronas. El resto del juego no cambia: todo el guardado ya pasa por esas tres funciones.
+- [ ] `localStorage` se queda como copia local: el juego sigue funcionando sin conexión y sube la partida al volver.
+- [ ] Conflictos: si la partida de la nube y la local no coinciden, gana la de `savedAt` más reciente (o se pregunta al jugador).
+- [ ] Al crear la cuenta, subir la partida que ya tenía en `localStorage` para que no la pierda.
+- [ ] Guardar en la nube cada cierto tiempo (por ejemplo, cada 30 s y al cerrar la pestaña), no en cada tick: así no se gastan las peticiones gratuitas.
+- [ ] Las claves del servicio van en variables de entorno (`.env` en local, ajustes del sitio en Netlify), nunca en el repositorio.
+- [ ] Tests con el servicio simulado, igual que la PokeAPI en `__mocks__/`.
+
+### 8.3 Otras ideas
 
 | Ampliación                            | Qué aprendes                                    | Dónde va                                   |
 | ------------------------------------- | ----------------------------------------------- | ------------------------------------------ |

@@ -18,6 +18,7 @@ Los datos de los Pokémon (nombre, imagen, tipos, estadísticas) vienen de la [P
 
 - ✅ **v1.0:** la primera generación completa: click, tienda, gacha, equipo, caja y los 8 gimnasios.
 - ✅ **v1.1:** cambio de generación (de la 1 a la 2).
+- 💡 **Más adelante:** base de datos propia con cuentas, para guardar la partida en la nube y jugar desde cualquier dispositivo (ver `RUTA.md`, fase 8.2).
 - ❓ Qué pasa al terminar la última generación: se decide cuando haya varias.
 
 ---

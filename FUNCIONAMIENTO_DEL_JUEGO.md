@@ -18,6 +18,7 @@ Los datos de los Pokémon (nombre, imagen, tipos, estadísticas) vienen de la [P
 
 - ✅ **v1.0:** la primera generación completa: click, tienda, gacha, equipo, caja y los 8 gimnasios.
 - ✅ **v1.1:** cambio de generación (de la 1 a la 2).
+- 💡 **Más adelante:** base de datos propia con cuentas, para guardar la partida en la nube y jugar desde cualquier dispositivo (ver `RUTA.md`, fase 8.2).
 - ❓ Qué pasa al terminar la última generación: se decide cuando haya varias.
 
 ---
@@ -97,13 +98,22 @@ Multiplican **solo el dinero** (clicks o producción), no el daño en combate.
 ## 6. Gacha
 
 - ✅ Cada tirada da un **Pokémon aleatorio de la generación actual**.
+- ✅ Hay **tres gachas**, todos disponibles desde el principio. Cada uno sortea solo entre dos rarezas:
+
+| Gacha      | Bola        | Qué puede salir                 | Precio inicial | Sube por tirada |
+| ---------- | ----------- | ------------------------------- | -------------- | --------------- |
+| Básico     | Poké Ball   | Común 70 % · Rara 30 %          | 25             | 7 %             |
+| Épico      | Ultra Ball  | Épica 85 % · Legendaria 15 %    | 1.000          | 10 %            |
+| Legendario | Master Ball | Legendaria 80 % · Singular 20 % | 25.000         | 15 %            |
+
 - ✅ Cada Pokémon tiene un **valor distinto**: según sus estadísticas y su rareza, produce más o menos.
 - ✅ Si te sale un Pokémon **repetido**, sube de **estrellas** y produce más. Máximo **5 estrellas**.
 - ✅ Un repetido con 5 estrellas se convierte en **dinero y experiencia**.
 - ✅ Rareza calculada a partir de la PokeAPI: legendario o singular según `pokemon-species` (`is_legendary`, `is_mythical`); el resto, según la suma de sus estadísticas. **No** se usa `base_experience`: no refleja la rareza (Chansey tiene más que Mewtwo).
 - ✅ Cinco rarezas: **común, rara, épica, legendaria y singular** (singular es Mew: aún más rara que los legendarios).
-- ✅ Probabilidad por rareza: los comunes salen mucho y los legendarios y singulares muy poco. Primero se sortea la rareza y después un Pokémon de esa rareza.
-- ✅ El precio de la tirada **sube un poco con cada tirada** y vuelve al precio inicial al cambiar de generación.
+- ✅ Primero se sortea la rareza (con las probabilidades del gacha) y después un Pokémon de esa rareza.
+- ✅ Cada gacha tiene **su propio precio**, que sube con **sus propias tiradas**: tirar mucho del básico no encarece el legendario. Los tres vuelven al precio inicial al cambiar de generación. El descuento de la tienda baja los tres.
+- ✅ La animación empieza en la bola de la rareza más baja del gacha y evoluciona hasta la del Pokémon que sale.
 - ✅ Si tienes un hueco libre en el equipo, el Pokémon nuevo se equipa solo.
 
 ---
@@ -157,14 +167,14 @@ Al vencer al octavo líder puedes pasar a la siguiente región.
 - ✅ El resto de la caja se pierde, y el gacha pasa a dar Pokémon de la nueva generación.
 - ✅ Las **medallas** se quedan como colección; los gimnasios de la nueva región empiezan de cero.
 
-| Al cambiar de gen    | Se mantiene                   | Se reinicia                  |
-| -------------------- | ----------------------------- | ---------------------------- |
-| Dinero               |                               | ✅                           |
-| Mejoras de la tienda |                               | ✅                           |
-| Precio de la tirada  |                               | ✅                           |
-| Nivel de entrenador  | ✅                            |                              |
-| Pokémon              | Solo 1 elegido, con estrellas | El resto                     |
-| Medallas             | ✅ (colección)                | Gimnasios de la nueva región |
+| Al cambiar de gen     | Se mantiene                   | Se reinicia                  |
+| --------------------- | ----------------------------- | ---------------------------- |
+| Dinero                |                               | ✅                           |
+| Mejoras de la tienda  |                               | ✅                           |
+| Precio de las tiradas |                               | ✅ (los tres gachas)         |
+| Nivel de entrenador   | ✅                            |                              |
+| Pokémon               | Solo 1 elegido, con estrellas | El resto                     |
+| Medallas              | ✅ (colección)                | Gimnasios de la nueva región |
 
 ---
 
@@ -173,7 +183,7 @@ Al vencer al octavo líder puedes pasar a la siguiente región.
 | Pantalla             | Qué muestra                                                                          |
 | -------------------- | ------------------------------------------------------------------------------------ |
 | Juego principal      | Zona de click, dinero, producción por segundo, nivel de entrenador y los 6 equipados |
-| Gacha                | Precio de la tirada, animación y resultado con rareza y estrellas                    |
+| Gacha                | Los tres gachas con sus probabilidades y precio, animación y resultado               |
 | Caja                 | Todos tus Pokémon con estrellas, filtros, y pestaña de Pokédex de la generación      |
 | Tienda               | Mejoras disponibles, al máximo y bloqueadas por nivel                                |
 | Gimnasios            | Los 8 líderes: vencidos, el actual y los bloqueados                                  |

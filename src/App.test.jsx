@@ -47,12 +47,14 @@ describe('App', () => {
     render(<App />);
 
     goTo('Gacha');
-    expect(screen.getByRole('button', { name: /Tirar/ })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Tirar · 25 monedas' }),
+    ).toBeDisabled();
 
     goTo('Juego');
     clickBall(25);
     goTo('Gacha');
-    fireEvent.click(screen.getByRole('button', { name: /Tirar · 25/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Tirar · 25 monedas' }));
 
     const dialog = screen.getByRole('dialog');
     expect(within(dialog).getByText('¡Nuevo Pokémon!')).toBeInTheDocument();
@@ -77,7 +79,7 @@ describe('App', () => {
     render(<App />);
     clickBall(25);
     goTo('Gacha');
-    fireEvent.click(screen.getByRole('button', { name: /Tirar/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Tirar · 25 monedas' }));
     fireEvent.click(screen.getByRole('button', { name: 'Cerrar' }));
 
     goTo('Caja');
@@ -112,7 +114,7 @@ describe('App', () => {
     render(<App />);
     clickBall(25);
     goTo('Gacha');
-    fireEvent.click(screen.getByRole('button', { name: /Tirar/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Tirar · 25 monedas' }));
     fireEvent.click(screen.getByRole('button', { name: 'Cerrar' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(

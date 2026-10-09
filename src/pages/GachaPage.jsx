@@ -2,10 +2,18 @@ import { useEffect, useState } from 'react';
 import { Modal } from '../components/Modal/Modal';
 import { PokeBall } from '../components/PokeBall/PokeBall';
 import { PokemonCard } from '../components/PokemonCard/PokemonCard';
-import { MAX_STARS, MAX_STARS_REFUND, RARITY_WEIGHTS } from '../config/gacha';
-import { POKEDEX, pokedexByRarity, pokedexEntry } from '../config/pokedex';
+import { BANNERS, MAX_STARS, MAX_STARS_REFUND } from '../config/gacha';
+import { POKEDEX, pokedexEntry } from '../config/pokedex';
 import { RARITIES } from '../config/rarities';
-import { canPull, pullOutcome, pullPrice, rollPokemon } from '../game/gacha';
+import {
+  bannerPokemon,
+  bannerWeights,
+  canPull,
+  pullOutcome,
+  pullPrice,
+  rollPokemon,
+  totalPulls,
+} from '../game/gacha';
 import { pokemonLevel } from '../game/levels';
 import { pokemonProduction } from '../game/production';
 import { useGame } from '../store/GameContext';
@@ -16,79 +24,41 @@ import styles from './GachaPage.module.css';
 // `rng` se puede cambiar desde los tests para que la tirada sea siempre la misma.
 export function GachaPage({ rng = Math.random }) {
   const { state, dispatch } = useGame();
-  const [result, setResult] = useState(null); // { id, outcome, price, pull }
-  const price = pullPrice(state);
+  const [result, setResult] = useState(null); // { id, banner, outcome, price, pull }
   const owned = Object.keys(state.collection).length;
   const total = POKEDEX[state.generation].length;
 
-  function handlePull() {
-    if (!canPull(state)) return;
-    const id = rollPokemon(state.generation, rng);
+  function handlePull(banner) {
+    if (!canPull(state, banner)) return;
+    const id = rollPokemon(state.generation, banner, rng);
     // El resultado se calcula antes de aplicar la tirada.
     setResult({
       id,
+      banner,
       outcome: pullOutcome(state, id),
-      price,
-      pull: state.pulls,
+      price: pullPrice(state, banner),
+      pull: totalPulls(state),
     });
-    dispatch({ type: 'PULL', id });
+    dispatch({ type: 'PULL', id, banner });
   }
 
   return (
     <div className={styles.page}>
       <h2 tabIndex={-1}>Gacha</h2>
+      <p className={styles.collection}>
+        Tienes {owned} de {total} Pokémon
+      </p>
 
-      <section className={styles.machine}>
-        <p className={styles.collection}>
-          Tienes {owned} de {total} Pokémon
-        </p>
-        <button
-          type="button"
-          className={`button ${styles.pull}`}
-          disabled={!canPull(state)}
-          onClick={handlePull}
-        >
-          Tirar · {formatNumber(price)} monedas
-        </button>
-        {!canPull(state) && (
-          <p className={styles.missing}>
-            Te faltan {formatNumber(Math.ceil(price - state.coins))} monedas
-          </p>
-        )}
-      </section>
-
-      <section aria-labelledby="odds-title">
-        <h3 id="odds-title" className={styles.oddsTitle}>
-          Probabilidades
-        </h3>
-        <table className={styles.odds}>
-          <thead>
-            <tr>
-              <th scope="col">Rareza</th>
-              <th scope="col">Probabilidad</th>
-              <th scope="col">Pokémon</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Object.entries(RARITY_WEIGHTS).map(([rarity, weight]) => (
-              <tr key={rarity}>
-                <th scope="row">
-                  <span
-                    className={styles.rarity}
-                    style={{ '--rarity-color': `var(--rarity-${rarity})` }}
-                  >
-                    {RARITIES[rarity].label}
-                  </span>
-                </th>
-                <td>{formatNumber(weight)} %</td>
-                <td>
-                  {pokedexByRarity(state.generation)[rarity]?.length ?? 0}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
+      <div className={styles.banners}>
+        {Object.keys(BANNERS).map((banner) => (
+          <Banner
+            key={banner}
+            banner={banner}
+            state={state}
+            onPull={handlePull}
+          />
+        ))}
+      </div>
 
       <Modal
         open={result !== null}
@@ -100,11 +70,65 @@ export function GachaPage({ rng = Math.random }) {
             key={result.pull}
             result={result}
             state={state}
-            onPullAgain={canPull(state) ? handlePull : null}
+            onPullAgain={
+              canPull(state, result.banner)
+                ? () => handlePull(result.banner)
+                : null
+            }
           />
         )}
       </Modal>
     </div>
+  );
+}
+
+// Una máquina del gacha: su bola, qué puede salir, cuántos tienes y el botón.
+function Banner({ banner, state, onPull }) {
+  const { label, ball } = BANNERS[banner];
+  const weights = bannerWeights(state.generation, banner);
+  const pokemon = bannerPokemon(state.generation, banner);
+  const owned = pokemon.filter(({ id }) => state.collection[id]).length;
+  const price = pullPrice(state, banner);
+  const titleId = `banner-${banner}`;
+
+  if (pokemon.length === 0) return null;
+
+  return (
+    <section className={styles.machine} aria-labelledby={titleId}>
+      <PokeBall type={ball} className={styles.bannerBall} />
+      <h3 id={titleId} className={styles.bannerTitle}>
+        Gacha {label}
+      </h3>
+      <ul className={styles.odds} aria-label="Probabilidades">
+        {Object.entries(weights).map(([rarity, weight]) => (
+          <li key={rarity}>
+            <span
+              className={styles.rarity}
+              style={{ '--rarity-color': `var(--rarity-${rarity})` }}
+            >
+              {RARITIES[rarity].label}
+            </span>{' '}
+            {formatNumber(weight)} %
+          </li>
+        ))}
+      </ul>
+      <p className={styles.owned}>
+        {owned} / {pokemon.length} conseguidos
+      </p>
+      <button
+        type="button"
+        className={`button ${styles.pull}`}
+        disabled={!canPull(state, banner)}
+        onClick={() => onPull(banner)}
+      >
+        Tirar · {formatNumber(price)} monedas
+      </button>
+      {!canPull(state, banner) && (
+        <p className={styles.missing}>
+          Te faltan {formatNumber(Math.ceil(price - state.coins))} monedas
+        </p>
+      )}
+    </section>
   );
 }
 
@@ -117,19 +141,23 @@ function resultTitle(outcome) {
 const SHAKE_MS = 900; // lo que se agita la última bola antes de abrirse
 const EVOLVE_MS = 700; // lo que dura cada bola antes de evolucionar a la siguiente
 
-// Bolas por las que pasa la tirada: empieza en Poké Ball y sube hasta la de
-// su rareza (común → Poké, rara → Super, …, singular → Honor).
-function ballsUpTo(rarity) {
+// Bolas por las que pasa la tirada: empieza en la bola de la rareza más baja
+// del gacha y sube hasta la de la que ha salido (en el básico, común → Poké y
+// rara → Super; en el legendario, legendaria → Master y singular → Honor).
+function ballsUpTo(rarity, banner) {
   const order = Object.keys(RARITIES);
+  const from = Math.min(
+    ...Object.keys(BANNERS[banner].weights).map((key) => order.indexOf(key)),
+  );
   return order
-    .slice(0, order.indexOf(rarity) + 1)
+    .slice(from, order.indexOf(rarity) + 1)
     .map((key) => RARITIES[key].ball);
 }
 
 // Cada tirada monta un PullResult nuevo (key): la animación empieza de cero.
 function PullResult({ result, state, onPullAgain }) {
-  const { id, outcome, price } = result;
-  const balls = ballsUpTo(pokedexEntry(id).rarity);
+  const { id, banner, outcome, price } = result;
+  const balls = ballsUpTo(pokedexEntry(id).rarity, banner);
   const [stage, setStage] = useState(() =>
     prefersReducedMotion() ? balls.length : 0,
   );
@@ -196,7 +224,7 @@ function PullResult({ result, state, onPullAgain }) {
       <p role="status">{message}</p>
       {onPullAgain && (
         <button type="button" className="button" onClick={onPullAgain}>
-          Tirar otra vez · {formatNumber(pullPrice(state))}
+          Tirar otra vez · {formatNumber(pullPrice(state, banner))}
         </button>
       )}
     </div>

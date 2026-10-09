@@ -23,7 +23,7 @@ const validSave = (overrides = {}) => ({
   coins: 100,
   trainer: { level: 2, xp: 30 },
   upgrades: { clickPower: 3 },
-  pulls: 4,
+  pulls: { basic: 4, epic: 1, legendary: 0 },
   collection: { 25: 2, 150: 1 },
   team: [25],
   medals: { 1: [1] },
@@ -83,6 +83,11 @@ describe('sanitizeSave', () => {
     });
   });
 
+  it('una partida de antes de los tres gachas: sus tiradas eran del básico', () => {
+    const state = sanitizeSave(validSave({ pulls: 7 }));
+    expect(state.pulls).toEqual({ basic: 7, epic: 0, legendary: 0 });
+  });
+
   it('otra versión o algo que no es una partida → null', () => {
     expect(sanitizeSave(validSave({ saveVersion: 999 }))).toBeNull();
     expect(sanitizeSave(null)).toBeNull();
@@ -93,13 +98,13 @@ describe('sanitizeSave', () => {
     const state = sanitizeSave(
       validSave({
         coins: -50,
-        pulls: 2.5,
+        pulls: { basic: 2.5, epic: -1, nope: 3 },
         trainer: { level: 'nueve', xp: NaN },
         upgrades: { clickPower: 999, training: -1, battleTime: 'x' },
       }),
     );
     expect(state.coins).toBe(0);
-    expect(state.pulls).toBe(0);
+    expect(state.pulls).toEqual({ basic: 0, epic: 0, legendary: 0 });
     expect(state.trainer).toEqual({ level: 1, xp: 0 });
     expect(state.upgrades).toMatchObject({
       clickPower: 15, // el máximo

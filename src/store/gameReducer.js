@@ -18,7 +18,7 @@ export function gameReducer(state, action) {
     case 'TICK':
       return tick(state, action.seconds);
     case 'PULL':
-      return applyPull(state, action.id);
+      return applyPull(state, action.id, action.banner);
     case 'BUY_UPGRADE':
       return buyUpgrade(state, action.key);
     case 'BUY_ITEM':

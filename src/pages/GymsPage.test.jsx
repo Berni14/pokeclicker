@@ -58,9 +58,9 @@ describe('GymsPage · cambio de región', () => {
 
   it('en la última región no hay botón de viajar', () => {
     renderGyms({
-      generation: 2,
+      generation: 4,
       collection: { 25: 1 },
-      medals: { 2: [1, 2, 3, 4, 5, 6, 7, 8] },
+      medals: { 4: [1, 2, 3, 4, 5, 6, 7, 8] },
     });
     expect(screen.queryByRole('button', { name: /Viajar/ })).toBeNull();
     expect(

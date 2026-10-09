@@ -18,6 +18,7 @@ Los datos de los Pokémon (nombre, imagen, tipos, estadísticas) vienen de la [P
 
 - ✅ **v1.0:** la primera generación completa: click, tienda, gacha, equipo, caja y los 8 gimnasios.
 - ✅ **v1.1:** cambio de generación (de la 1 a la 2).
+- ✅ **v1.2:** generaciones 3 (Hoenn, 252–386) y 4 (Sinnoh, 387–493).
 - 💡 **Más adelante:** base de datos propia con cuentas, para guardar la partida en la nube y jugar desde cualquier dispositivo (ver `RUTA.md`, fase 8.2).
 - ❓ Qué pasa al terminar la última generación: se decide cuando haya varias.
 
@@ -161,7 +162,7 @@ Está en la pantalla principal, al lado del botón.
 
 ## 8. Gimnasios
 
-- ✅ Hay **8 gimnasios** por región. En la primera generación: Brock (roca), Misty (agua), Lt. Surge (eléctrico), Erika (planta), Koga (veneno), Sabrina (psíquico), Blaine (fuego) y Giovanni (tierra). En la segunda (Johto): Pegaso (volador), Antón (bicho), Blanca (normal), Morti (fantasma), Aníbal (lucha), Yasmina (acero), Fredo (hielo) y Débora (dragón).
+- ✅ Hay **8 gimnasios** por región. En la primera generación: Brock (roca), Misty (agua), Lt. Surge (eléctrico), Erika (planta), Koga (veneno), Sabrina (psíquico), Blaine (fuego) y Giovanni (tierra). En la segunda (Johto): Pegaso (volador), Antón (bicho), Blanca (normal), Morti (fantasma), Aníbal (lucha), Yasmina (acero), Fredo (hielo) y Débora (dragón). En la tercera (Hoenn): Petra (roca), Marcial (lucha), Erico (eléctrico), Candela (fuego), Norman (normal), Alana (volador), Vito y Leti (psíquico) y Plubio (agua). En la cuarta (Sinnoh): Roco (roca), Gardenia (planta), Brega (lucha), Mananti (agua), Fantina (fantasma), Acero (acero), Inverna (hielo) y Lectro (eléctrico).
 - ✅ Cada combate dura **un tiempo fijo**: tienes que quitarle toda la vida al líder antes de que acabe.
 - ✅ El combate dura **30 segundos**, ampliables con la mejora Cronómetro.
 - ✅ En el combate cuentan **tus clicks y el daño de tus Pokémon** equipados.
@@ -179,9 +180,9 @@ Está en la pantalla principal, al lado del botón.
 
 Al vencer al octavo líder puedes pasar a la siguiente región.
 
-- ✅ En la pantalla de gimnasios aparece el aviso de región completada con el botón **Viajar a Johto**. No es obligatorio: puedes seguir jugando en la región y viajar cuando quieras.
+- ✅ En la pantalla de gimnasios aparece el aviso de región completada con el botón para viajar a la siguiente (Kanto → Johto → Hoenn → Sinnoh). No es obligatorio: puedes seguir jugando en la región y viajar cuando quieras.
 - ✅ Al viajar se abre un resumen de lo que se mantiene y lo que se pierde, y eliges el Pokémon de una lista con lo que producirá al llegar (se propone el que más).
-- ✅ En la última región disponible (por ahora, Johto) sale un aviso de que no hay más regiones.
+- ✅ En la última región disponible (por ahora, Sinnoh) sale un aviso de que no hay más regiones.
 - ✅ El Pokémon que te llevas no cuenta para la Pokédex ni para el «Tienes X de Y» de la nueva región.
 
 - ✅ Eliges **1 solo Pokémon** para llevarte contigo. Llega **como recién conseguido: 1★ y Nv 1**.

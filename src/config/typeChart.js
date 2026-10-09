@@ -1,5 +1,6 @@
 // Tipos de ataque que son fuertes contra cada tipo de líder.
-// Solo los tipos de los líderes de Kanto y Johto; se amplía al añadir regiones.
+// Solo los tipos de los líderes de las regiones del juego; se amplía al añadir
+// regiones.
 export const STRONG_AGAINST = {
   rock: ['water', 'grass', 'fighting', 'ground', 'steel'],
   water: ['electric', 'grass'],

@@ -110,7 +110,7 @@ Multiplican **solo el dinero** (clicks o producción), no el daño en combate.
 - ✅ Cada Pokémon tiene un **valor distinto**: según sus estadísticas y su rareza, produce más o menos.
 - ✅ Si te sale un Pokémon **repetido**, sube de **estrellas** y produce más. Máximo **5 estrellas**.
 - ✅ Un repetido con 5 estrellas se convierte en **dinero y experiencia**.
-- ✅ Rareza calculada a partir de la PokeAPI: legendario o singular según `pokemon-species` (`is_legendary`, `is_mythical`); el resto, según la suma de sus estadísticas. **No** se usa `base_experience`: no refleja la rareza (Chansey tiene más que Mewtwo).
+- ✅ Rareza calculada a partir de la PokeAPI: legendario o singular según `pokemon-species` (`is_legendary`, `is_mythical`); el resto, según la suma de sus estadísticas. **No** se usa `base_experience`: no refleja la rareza (Chansey tiene más que Mewtwo). Hay excepciones elegidas a mano en `RARITY_OVERRIDES` (`config/rarities.js`): **Lucario es legendario**.
 - ✅ Cinco rarezas: **común, rara, épica, legendaria y singular** (singular es Mew: aún más rara que los legendarios).
 - ✅ Primero se sortea la rareza (con las probabilidades del gacha) y después un Pokémon de esa rareza.
 - ✅ Cada gacha tiene **su propio precio**, que sube con **sus propias tiradas**: tirar mucho del básico no encarece el legendario. Los tres vuelven al precio inicial al cambiar de generación. El descuento de la tienda baja los tres.

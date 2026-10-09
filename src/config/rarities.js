@@ -10,7 +10,13 @@ export const RARITIES = {
 const RARE_MIN_STATS = 400;
 const EPIC_MIN_STATS = 500;
 
-export function getRarity({ statTotal, isLegendary, isMythical }) {
+// Pokémon con una rareza elegida a mano, por encima de la regla de las stats.
+export const RARITY_OVERRIDES = {
+  448: 'legendary', // Lucario
+};
+
+export function getRarity({ id, statTotal, isLegendary, isMythical }) {
+  if (RARITY_OVERRIDES[id]) return RARITY_OVERRIDES[id];
   if (isMythical) return 'mythical';
   if (isLegendary) return 'legendary';
   if (statTotal >= EPIC_MIN_STATS) return 'epic';

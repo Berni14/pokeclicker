@@ -60,7 +60,7 @@
   {"id":445,"rarity":"epic","statTotal":600,"attack":130,"types":["dragon","ground"]},
   {"id":446,"rarity":"common","statTotal":390,"attack":85,"types":["normal"]},
   {"id":447,"rarity":"common","statTotal":285,"attack":70,"types":["fighting"]},
-  {"id":448,"rarity":"epic","statTotal":525,"attack":110,"types":["fighting","steel"]},
+  {"id":448,"rarity":"legendary","statTotal":525,"attack":110,"types":["fighting","steel"]},
   {"id":449,"rarity":"common","statTotal":330,"attack":72,"types":["ground"]},
   {"id":450,"rarity":"epic","statTotal":525,"attack":112,"types":["ground"]},
   {"id":451,"rarity":"common","statTotal":330,"attack":50,"types":["poison","bug"]},

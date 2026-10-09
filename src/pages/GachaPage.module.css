@@ -78,22 +78,24 @@
   min-height: 280px;
 }
 
+.shake {
+  display: block;
+}
+
 .ball {
+  display: block;
   width: 120px;
-  aspect-ratio: 1;
-  background: linear-gradient(
-    to bottom,
-    var(--color-primary) 0 46%,
-    var(--color-text) 46% 54%,
-    var(--color-surface) 54% 100%
-  );
-  border: 5px solid var(--color-text);
-  border-radius: var(--radius-full);
+  height: 120px;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .ball {
+  .shake {
     animation: shake 300ms ease-in-out infinite;
+  }
+
+  /* Destello cuando la bola evoluciona a la siguiente. */
+  .evolve {
+    animation: evolve 450ms ease-out;
   }
 
   /* Destello del color de la rareza al aparecer el Pokémon. */
@@ -108,6 +110,17 @@
   }
   75% {
     transform: rotate(14deg);
+  }
+}
+
+@keyframes evolve {
+  from {
+    filter: brightness(3) drop-shadow(0 0 16px #fff);
+    transform: scale(1.3);
+  }
+  to {
+    filter: none;
+    transform: scale(1);
   }
 }
 

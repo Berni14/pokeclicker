@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Modal } from '../components/Modal/Modal';
+import { PokeBall } from '../components/PokeBall/PokeBall';
 import { PokemonCard } from '../components/PokemonCard/PokemonCard';
 import { MAX_STARS, MAX_STARS_REFUND, RARITY_WEIGHTS } from '../config/gacha';
 import { POKEDEX, pokedexByRarity, pokedexEntry } from '../config/pokedex';
@@ -112,24 +113,51 @@ function resultTitle(outcome) {
   return 'Repetido con 5 estrellas';
 }
 
-const SHAKE_MS = 900; // lo que se agita la Poké Ball antes de abrirse
+const SHAKE_MS = 900; // lo que se agita la última bola antes de abrirse
+const EVOLVE_MS = 700; // lo que dura cada bola antes de evolucionar a la siguiente
+
+// Bolas por las que pasa la tirada: empieza en Poké Ball y sube hasta la de
+// su rareza (común → Poké, rara → Super, …, singular → Honor).
+function ballsUpTo(rarity) {
+  const order = Object.keys(RARITIES);
+  return order
+    .slice(0, order.indexOf(rarity) + 1)
+    .map((key) => RARITIES[key].ball);
+}
 
 // Cada tirada monta un PullResult nuevo (key): la animación empieza de cero.
 function PullResult({ result, state, onPullAgain }) {
   const { id, outcome, price } = result;
-  const [opened, setOpened] = useState(prefersReducedMotion);
+  const balls = ballsUpTo(pokedexEntry(id).rarity);
+  const [stage, setStage] = useState(() =>
+    prefersReducedMotion() ? balls.length : 0,
+  );
+  const opened = stage >= balls.length;
 
   useEffect(() => {
     if (opened) return;
-    const timeout = setTimeout(() => setOpened(true), SHAKE_MS);
+    const isLast = stage === balls.length - 1;
+    const timeout = setTimeout(
+      () => setStage((s) => s + 1),
+      isLast ? SHAKE_MS : EVOLVE_MS,
+    );
     return () => clearTimeout(timeout);
-  }, [opened]);
+  }, [opened, stage, balls.length]);
 
   if (!opened) {
     return (
       <div className={styles.opening} role="status">
-        <span className={styles.ball} aria-hidden="true" />
-        <span className="visually-hidden">Abriendo la Poké Ball…</span>
+        <span className={styles.shake}>
+          {/* key: cada evolución vuelve a montar la bola y repite el destello */}
+          <PokeBall
+            key={stage}
+            type={balls[stage]}
+            className={
+              stage > 0 ? `${styles.ball} ${styles.evolve}` : styles.ball
+            }
+          />
+        </span>
+        <span className="visually-hidden">Abriendo la bola…</span>
       </div>
     );
   }

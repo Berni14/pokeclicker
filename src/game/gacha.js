@@ -1,10 +1,8 @@
 import {
+  BANNERS,
   MAX_STARS,
   MAX_STARS_REFUND,
-  PULL_BASE_PRICE,
   PULL_DISCOUNT_PER_LEVEL,
-  PULL_PRICE_GROWTH,
-  RARITY_WEIGHTS,
 } from '../config/gacha';
 import { TEAM_SIZE } from '../config/economy';
 import { pokedexByRarity, pokedexEntry, POKEDEX } from '../config/pokedex';
@@ -12,23 +10,46 @@ import { XP_PER_MAX_DUPLICATE, XP_PER_PULL } from '../config/trainer';
 import { pickOne, pickWeighted } from '../utils/random';
 import { addXp } from './trainer';
 
-export const pullPrice = (state) =>
+// Tiradas hechas en un gacha.
+export const pullsOf = (state, banner) => state.pulls[banner] ?? 0;
+
+export const totalPulls = (state) =>
+  Object.keys(BANNERS).reduce((sum, key) => sum + pullsOf(state, key), 0);
+
+export const pullPrice = (state, banner) =>
   Math.round(
-    PULL_BASE_PRICE *
-      PULL_PRICE_GROWTH ** state.pulls *
+    BANNERS[banner].basePrice *
+      BANNERS[banner].priceGrowth ** pullsOf(state, banner) *
       (1 - PULL_DISCOUNT_PER_LEVEL * state.upgrades.pullDiscount),
   );
 
-export const canPull = (state) => state.coins >= pullPrice(state);
-
-// La única función del juego con azar: sortea la rareza y después un Pokémon
-// de esa rareza. Devuelve su id.
-export function rollPokemon(generation, rng = Math.random) {
+// Probabilidad de cada rareza del gacha, sin las que no tienen ningún Pokémon
+// en la generación.
+export function bannerWeights(generation, banner) {
   const groups = pokedexByRarity(generation);
-  const weights = Object.fromEntries(
-    Object.entries(RARITY_WEIGHTS).filter(([rarity]) => groups[rarity]),
+  return Object.fromEntries(
+    Object.entries(BANNERS[banner]?.weights ?? {}).filter(
+      ([rarity]) => groups[rarity],
+    ),
   );
-  return pickOne(groups[pickWeighted(weights, rng)], rng).id;
+}
+
+// Pokémon de la generación que pueden salir en un gacha.
+export const bannerPokemon = (generation, banner) =>
+  Object.keys(bannerWeights(generation, banner)).flatMap(
+    (rarity) => pokedexByRarity(generation)[rarity],
+  );
+
+export const canPull = (state, banner) =>
+  bannerPokemon(state.generation, banner).length > 0 &&
+  state.coins >= pullPrice(state, banner);
+
+// La única función del juego con azar: sortea la rareza del gacha y después un
+// Pokémon de esa rareza. Devuelve su id.
+export function rollPokemon(generation, banner, rng = Math.random) {
+  const groups = pokedexByRarity(generation);
+  const rarity = pickWeighted(bannerWeights(generation, banner), rng);
+  return pickOne(groups[rarity], rng).id;
 }
 
 // Qué pasará al recibir ese Pokémon: 'new', 'star' o 'refund' (ya tenía 5★).
@@ -42,11 +63,23 @@ export function pullOutcome(state, id) {
 const inGeneration = (state, id) =>
   POKEDEX[state.generation]?.includes(pokedexEntry(id));
 
-export function applyPull(state, id) {
-  if (!canPull(state) || !inGeneration(state, id)) return state;
+// Solo vale un Pokémon que pueda salir en ese gacha.
+const inBanner = (state, id, banner) =>
+  inGeneration(state, id) &&
+  Object.hasOwn(
+    bannerWeights(state.generation, banner),
+    pokedexEntry(id).rarity,
+  );
 
-  const price = pullPrice(state);
-  let next = { ...state, coins: state.coins - price, pulls: state.pulls + 1 };
+export function applyPull(state, id, banner) {
+  if (!canPull(state, banner) || !inBanner(state, id, banner)) return state;
+
+  const price = pullPrice(state, banner);
+  let next = {
+    ...state,
+    coins: state.coins - price,
+    pulls: { ...state.pulls, [banner]: pullsOf(state, banner) + 1 },
+  };
 
   switch (pullOutcome(state, id)) {
     case 'new':

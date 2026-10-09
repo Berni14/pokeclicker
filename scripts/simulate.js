@@ -21,7 +21,10 @@ import {
   currentGym,
   teamDps,
 } from '../src/game/battle';
-import { pullPrice, rollPokemon } from '../src/game/gacha';
+import { BANNERS } from '../src/config/gacha';
+import { pokedexEntry } from '../src/config/pokedex';
+import { RARITIES } from '../src/config/rarities';
+import { canPull, pullPrice, rollPokemon, totalPulls } from '../src/game/gacha';
 import { itemStatus } from '../src/game/items';
 import { isMaxLevel, levelUpCost, pokemonLevel } from '../src/game/levels';
 import { pokemonProduction, teamProduction } from '../src/game/production';
@@ -63,12 +66,15 @@ function play(seed) {
     }
 
     for (let k = 0; k < 20; k++) {
-      const options = [
-        {
-          cost: pullPrice(state),
-          action: { type: 'PULL', id: rollPokemon(1, rng) },
-        },
-      ];
+      const options = [];
+      for (const banner of Object.keys(BANNERS)) {
+        if (canPull({ ...state, coins: Infinity }, banner)) {
+          options.push({
+            cost: pullPrice(state, banner),
+            action: { type: 'PULL', banner, id: rollPokemon(1, banner, rng) },
+          });
+        }
+      }
       for (const key of Object.keys(UPGRADES)) {
         if (upgradeStatus(state, key) === 'available') {
           options.push({
@@ -141,8 +147,29 @@ test('simulación de una región', () => {
   );
   console.log(
     `Al final: nivel ${avg(runs.map((r) => r.state.trainer.level)).toFixed(1)}, ` +
-      `${Math.round(avg(runs.map((r) => r.state.pulls)))} tiradas, ` +
+      `${Math.round(avg(runs.map((r) => totalPulls(r.state))))} tiradas, ` +
       `${Math.round(avg(runs.map((r) => Object.keys(r.state.collection).length)))} Pokémon, ` +
-      `${Math.round(avg(runs.map((r) => teamProduction(r.state))))} monedas/s\n`,
+      `${Math.round(avg(runs.map((r) => teamProduction(r.state))))} monedas/s`,
+  );
+  const rarities = (r) =>
+    Object.keys(r.state.collection).map((id) => pokedexEntry(id).rarity);
+  console.log(
+    'Tiradas por gacha: ' +
+      Object.entries(BANNERS)
+        .map(
+          ([key, { label }]) =>
+            `${label} ${Math.round(avg(runs.map((r) => r.state.pulls[key])))}`,
+        )
+        .join(' · '),
+  );
+  console.log(
+    'Pokémon por rareza: ' +
+      Object.entries(RARITIES)
+        .map(
+          ([key, { label }]) =>
+            `${label} ${avg(runs.map((r) => rarities(r).filter((x) => x === key).length)).toFixed(1)}`,
+        )
+        .join(' · ') +
+      '\n',
   );
 }, 300_000);

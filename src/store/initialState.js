@@ -13,7 +13,7 @@ export const initialState = {
   },
   items: [], // objetos permanentes comprados
   boosts: {}, // { [potenciador]: segundos que le quedan }
-  pulls: 0,
+  pulls: { basic: 0, epic: 0, legendary: 0 }, // tiradas de cada gacha
   collection: {}, // { [id]: estrellas }
   levels: {}, // { [id]: nivel }; si no está, nivel 1
   team: [], // hasta 6 ids

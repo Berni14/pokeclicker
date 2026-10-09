@@ -19,10 +19,11 @@ describe('gameReducer', () => {
   it('PULL aplica la tirada que llega en la acción', () => {
     const next = gameReducer(makeState({ coins: 25 }), {
       type: 'PULL',
-      id: 150,
+      id: 25,
+      banner: 'basic',
     });
-    expect(next.collection).toEqual({ 150: 1 });
-    expect(next.team).toEqual([150]);
+    expect(next.collection).toEqual({ 25: 1 });
+    expect(next.team).toEqual([25]);
     expect(next.coins).toBe(0);
   });
 

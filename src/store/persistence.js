@@ -5,7 +5,7 @@ import {
   MAX_POKEMON_LEVEL,
   TEAM_SIZE,
 } from '../config/economy';
-import { MAX_STARS } from '../config/gacha';
+import { BANNERS, MAX_STARS } from '../config/gacha';
 import { GYMS } from '../config/gyms';
 import { BOOST_MAX_SECONDS, BOOSTS, ITEMS } from '../config/items';
 import { POKEDEX, pokedexEntry } from '../config/pokedex';
@@ -118,6 +118,18 @@ function cleanBoosts(boosts) {
   return clean;
 }
 
+// Tiradas de cada gacha. Las partidas de antes de los tres gachas guardan un
+// solo número: eran todas del básico.
+function cleanPulls(pulls) {
+  const saved = isInt(pulls) ? { basic: pulls } : (pulls ?? {});
+  return Object.fromEntries(
+    Object.keys(BANNERS).map((key) => {
+      const n = saved[key];
+      return [key, isInt(n) && n >= 0 ? n : 0];
+    }),
+  );
+}
+
 function cleanMedals(medals) {
   const clean = {};
   for (const [generation, numbers] of Object.entries(medals ?? {})) {
@@ -150,7 +162,7 @@ export function sanitizeSave(save) {
     upgrades: cleanUpgrades(save.upgrades),
     items: cleanItems(save.items),
     boosts: cleanBoosts(save.boosts),
-    pulls: isInt(save.pulls) && save.pulls >= 0 ? save.pulls : 0,
+    pulls: cleanPulls(save.pulls),
     collection,
     levels: cleanLevels(save.levels, collection),
     team: cleanTeam(save.team, collection),

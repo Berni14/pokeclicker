@@ -71,7 +71,7 @@ Scripts en `package.json`:
 
 - [ ] Las monedas nunca bajan de 0.
 - [ ] No se puede tirar, comprar una mejora ni equipar sin cumplir las condiciones (dinero, nivel de entrenador, hueco en el equipo).
-- [ ] El precio de la tirada y el de cada mejora suben según las fórmulas de `config/`.
+- [ ] El precio de cada gacha (solo con sus tiradas) y el de cada mejora suben según las fórmulas de `config/`.
 - [ ] Ningún Pokémon pasa de 5 estrellas; el equipo nunca tiene más de 6 ni repetidos.
 - [ ] La producción por segundo se calcula igual en el tick y en lo que muestra la interfaz.
 - [ ] El azar solo está en `rollPokemon`, que recibe el `rng`; el resto de `game/` es determinista.
@@ -110,6 +110,8 @@ Scripts en `package.json`:
 
 - [ ] Al hacer click en el botón principal, las monedas suben lo que deben.
 - [ ] La primera tirada llega tras unos pocos clicks (~25).
+- [ ] Cada gacha solo da sus dos rarezas; tirar de uno no cambia el precio de los otros.
+- [ ] Una partida guardada de antes de los tres gachas carga con sus tiradas en el básico.
 - [ ] Al tirar, se restan las monedas, el precio sube y sale el resultado con su rareza.
 - [ ] Un Pokémon nuevo se equipa solo si hay hueco; un repetido sube una estrella; con 5★ se convierte en monedas.
 - [ ] La producción pasiva suma cada segundo y solo cuentan los 6 equipados.
@@ -157,12 +159,13 @@ Scripts en `package.json`:
 - [ ] Las mejoras de combate y los niveles se notan: sin ellos el gimnasio 8 no se puede ganar.
 - [ ] Apuntar aquí los cambios de números en `config/` y por qué.
 
-| Fecha      | Qué número cambia                                        | De → a                     | Por qué                                                                                                                                                                                                                                                                 |
-| ---------- | -------------------------------------------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 08/10/2026 | Umbrales de rareza (`rarities.js`)                       | 300/450 → 400/500          | Con 300/450 salían 59 épicas y 19 comunes; con 400/500, 69 comunes, 49 raras y 28 épicas                                                                                                                                                                                |
-| 08/10/2026 | Ninguno (revisión de la fase 6)                          | —                          | `npm run simulate` (5 semillas): Brock ~2 min, Giovanni ~2 h, 5/5 partidas completas. El equipo llega a su tope enseguida en los primeros gimnasios (2 s de 30 contra Brock) pero no en los últimos (43 s de 45 contra Giovanni): su ataque sí importa donde hace falta |
-| 09/10/2026 | Vida de los gimnasios (`gyms.js`); sin `TEAM_DAMAGE_CAP` | 700…16.000 → 4.500…100.000 | Se quita el tope del equipo y se añaden niveles por Pokémon y Poder del equipo. Sin cambiar la vida, la región se pasaba en 19 min. Con la nueva, `npm run simulate`: Brock ~2 min, Giovanni ~1 h 55 min, 5/5 partidas; el equipo hace >90 % del daño y llega a Nv ~34  |
-| 09/10/2026 | Objetos nuevos (`items.js`)                              | —                          | Objetos permanentes (click y producción ×2 y ×3) y potenciadores. `npm run simulate` comprando objetos (sin potenciadores): Giovanni pasa de ~1 h 55 min a ~1 h 41 min y la producción final de ~500 a ~960 monedas/s. Los primeros gimnasios no cambian                |
+| Fecha      | Qué número cambia                                              | De → a                     | Por qué                                                                                                                                                                                                                                                                                                        |
+| ---------- | -------------------------------------------------------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 08/10/2026 | Umbrales de rareza (`rarities.js`)                             | 300/450 → 400/500          | Con 300/450 salían 59 épicas y 19 comunes; con 400/500, 69 comunes, 49 raras y 28 épicas                                                                                                                                                                                                                       |
+| 08/10/2026 | Ninguno (revisión de la fase 6)                                | —                          | `npm run simulate` (5 semillas): Brock ~2 min, Giovanni ~2 h, 5/5 partidas completas. El equipo llega a su tope enseguida en los primeros gimnasios (2 s de 30 contra Brock) pero no en los últimos (43 s de 45 contra Giovanni): su ataque sí importa donde hace falta                                        |
+| 09/10/2026 | Vida de los gimnasios (`gyms.js`); sin `TEAM_DAMAGE_CAP`       | 700…16.000 → 4.500…100.000 | Se quita el tope del equipo y se añaden niveles por Pokémon y Poder del equipo. Sin cambiar la vida, la región se pasaba en 19 min. Con la nueva, `npm run simulate`: Brock ~2 min, Giovanni ~1 h 55 min, 5/5 partidas; el equipo hace >90 % del daño y llega a Nv ~34                                         |
+| 09/10/2026 | Objetos nuevos (`items.js`)                                    | —                          | Objetos permanentes (click y producción ×2 y ×3) y potenciadores. `npm run simulate` comprando objetos (sin potenciadores): Giovanni pasa de ~1 h 55 min a ~1 h 41 min y la producción final de ~500 a ~960 monedas/s. Los primeros gimnasios no cambian                                                       |
+| 09/10/2026 | Tres gachas (`gacha.js`): `BANNERS` en vez de `RARITY_WEIGHTS` | 1 gacha → 3                | Básico 25 (+7 %), Épico 1.000 (+10 %), Legendario 25.000 (+15 %). `npm run simulate`: Brock ~3 min, Giovanni ~1 h 52 min (antes ~1 h 41 min), 5/5 partidas; 103 tiradas al básico, 34 al épico y 1 al legendario. El jugador simulado compra siempre lo más barato y por eso casi no ahorra para el legendario |
 
 ---
 
@@ -172,7 +175,7 @@ Prioridad alta (lógica pura, fáciles de probar con Vitest):
 
 - [ ] `models/pokemon.test.js` → `toPokemon()` con una respuesta real de ejemplo y con sprites vacíos.
 - [ ] `config/pokedex.test.js` → 151 entradas sin huecos y el reparto de rarezas esperado.
-- [ ] `game/gacha.test.js` → precio, nuevo / estrella / devolución, auto-equipar, `rng` fijo y proporciones de rareza.
+- [ ] `game/gacha.test.js` → precio de cada gacha, solo sus rarezas, nuevo / estrella / devolución, auto-equipar, `rng` fijo y proporciones de rareza de cada gacha.
 - [ ] `game/team.test.js` → límite de 6, sin repetidos, sustituir, equipo automático por dinero y por daño (ventaja de tipo, sin gimnasio, ya era el mejor).
 - [ ] `game/shop.test.js` → bloqueada, máximo, coste creciente, sin dinero.
 - [ ] `game/battle.test.js` → duración, daño, ventaja de tipo, nivel y Poder del equipo, el equipo gana solo sin pasarse de la vida, solo el gimnasio actual.

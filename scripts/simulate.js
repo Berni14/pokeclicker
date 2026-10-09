@@ -11,7 +11,8 @@
 //   del equipo); los potenciadores no, porque dependen de cuánto juegues;
 // - equipa a los 6 que más producen;
 // - reta al gimnasio en cuanto puede ganarlo;
-// - al ganar los 8, viaja a la siguiente región llevándose al que más produce.
+// - al ganar los 8, viaja a la siguiente región llevándose al que más produce
+//   con 1★ y Nv 1 (como llega).
 import { test } from 'vitest';
 import { EXPECTED_CLICKS_PER_SECOND } from '../src/config/gyms';
 import { ITEMS } from '../src/config/items';
@@ -22,6 +23,7 @@ import {
   currentGym,
   teamDps,
 } from '../src/game/battle';
+import { productionOf } from '../src/config/economy';
 import { BANNERS } from '../src/config/gacha';
 import { pokedexEntry } from '../src/config/pokedex';
 import { RARITIES } from '../src/config/rarities';
@@ -62,7 +64,13 @@ function play(seed) {
     if (!gym) {
       region().state = state;
       if (!canChangeGeneration(state)) break;
-      dispatch({ type: 'CHANGE_GENERATION', keepId: bestByProduction()[0] });
+      const [keepId] = Object.keys(state.collection)
+        .map(Number)
+        .sort(
+          (a, b) =>
+            productionOf(pokedexEntry(b), 1) - productionOf(pokedexEntry(a), 1),
+        );
+      dispatch({ type: 'CHANGE_GENERATION', keepId });
       regions.push({ generation: state.generation, gyms: [], start: t });
       continue;
     }
